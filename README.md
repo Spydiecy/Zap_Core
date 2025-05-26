@@ -4,7 +4,6 @@ https://astra-ashen-six.vercel.app/
 
 ![Astra Landing Page](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-LW61UbVGHx08UdwYCJrymJnjhEBcP1.png)
 [![Twitter Follow](https://img.shields.io/twitter/follow/Astra_ai_okx?style=social)](https://x.com/Astra_ai_okx)
-[![Live Demo](https://astra-ashen-six.vercel.app/)
 [![Solana](https://img.shields.io/badge/Built%20on-Solana-9945FF?style=flat&logo=solana)](https://solana.com)
 [![OKX](https://img.shields.io/badge/Powered%20by-OKX%20API-000000?style=flat)](https://www.okx.com)
 
