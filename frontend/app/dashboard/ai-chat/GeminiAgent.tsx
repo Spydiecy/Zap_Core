@@ -92,7 +92,7 @@ if any general query  is asked then pick the above mentioned conditions and find
 IMPORTANT FOR TRANSACTION HISTORY: Always use "SOL" as token_name for transaction history requests, and do not include any fake transaction data in your response.
 
 IMPORTANT FOR TOKEN BALANCE: Always use "SOL" as token_name for balance requests, and do not include any fake balance data in your response.
-
+if general question then give answer according to you
 User Query:
 `;
 
@@ -100,7 +100,7 @@ export async function geminiAgent(userQuery: string): Promise<any> {
   const prompt = GEMINI_PROMPT_TEMPLATE + userQuery;
 
   const response: any = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash",
     contents: prompt,
   });
 

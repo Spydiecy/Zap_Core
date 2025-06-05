@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
+import { useWallet } from "@/contexts/WalletContext"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -17,6 +18,7 @@ import {
   Eye,
   X,
   BarChart3,
+  Loader2,
 } from "lucide-react"
 
 // Enhanced chain configuration
@@ -29,6 +31,14 @@ const TIME_PERIODS = [
   { label: "90D", value: "90d" },
   { label: "1Y", value: "1y" },
 ]
+
+// Real Solana address for sample data when wallet is not connected
+const SAMPLE_SOLANA_ADDRESS = "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD"
+
+// Get dynamic address - use connected wallet address or fall back to sample address
+const getDynamicAddress = (walletAddress?: string | null): string => {
+  return walletAddress || SAMPLE_SOLANA_ADDRESS
+}
 
 // Rate limiting manager
 class RateLimitManager {
@@ -93,7 +103,10 @@ class RateLimitManager {
 const rateLimitManager = new RateLimitManager()
 
 // Filter function to remove tokens with zero value or zero price
-function filterValidTokens(tokens: any[], criteria = { minValue: 0.01, minPrice: 0, minBalance: 0, showZeroBalance: false }): any[] {
+function filterValidTokens(
+  tokens: any[],
+  criteria = { minValue: 0.01, minPrice: 0, minBalance: 0, showZeroBalance: false },
+): any[] {
   if (!Array.isArray(tokens)) return []
 
   return tokens.filter((token) => {
@@ -131,6 +144,7 @@ function filterValidTransactions(transactions: any[]): any[] {
 }
 
 export default function PortfolioPage() {
+  const { connected, publicKey } = useWallet()
   const [activeModal, setActiveModal] = useState<null | string>(null)
   const [loading, setLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState("")
@@ -159,6 +173,9 @@ export default function PortfolioPage() {
     filteredTokens: "0",
     totalTokens: "0",
   })
+
+  // Get dynamic address based on wallet connection
+  const currentAddress = getDynamicAddress(publicKey)
 
   // Toggle chain selection for multi-select
   const toggleChain = (chainId: string) => {
@@ -222,12 +239,18 @@ export default function PortfolioPage() {
     })
   }
 
-  // Fetch all portfolio data with sequential loading
+  // Fetch all portfolio data with sequential loading using dynamic address
   const fetchPortfolioData = async () => {
     setLoading(true)
     setLoadingProgress(0)
 
     try {
+      console.log(
+        "Fetching portfolio data for address:",
+        currentAddress,
+        connected ? "(Connected wallet)" : "(Sample data)",
+      )
+
       // Step 1: Fetch transaction history
       setLoadingStep("Loading transaction history...")
       setLoadingProgress(25)
@@ -236,7 +259,7 @@ export default function PortfolioPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+          address: currentAddress,
           chains: "501",
           limit: "50",
         }),
@@ -253,7 +276,7 @@ export default function PortfolioPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+          address: currentAddress,
           chains: "501",
           excludeRiskToken: "0",
         }),
@@ -270,7 +293,7 @@ export default function PortfolioPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+          address: currentAddress,
           chains: "501",
           excludeRiskToken: "0",
         }),
@@ -287,7 +310,7 @@ export default function PortfolioPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+          address: currentAddress,
           tokenContractAddresses: [
             {
               chainIndex: "501",
@@ -331,6 +354,12 @@ export default function PortfolioPage() {
       allTransactions: history, // Also include raw data
       exportDate: new Date().toISOString(),
       selectedChains,
+      walletInfo: {
+        connected,
+        address: currentAddress,
+        isConnectedWallet: connected,
+        isSampleData: !connected,
+      },
       filterInfo: {
         totalTokens: tokenBalances.length,
         filteredTokens: filteredTokenBalances.length,
@@ -353,7 +382,7 @@ export default function PortfolioPage() {
   // Filter data based on search term (using filtered data)
   const filteredData = () => {
     let data: any[] = []
-    
+
     if (selectedTable === "balances") {
       data = filteredTokenBalances.filter(
         (asset) =>
@@ -381,6 +410,27 @@ export default function PortfolioPage() {
     return data
   }
 
+  // Watch for wallet connection changes and refresh data
+  useEffect(() => {
+    const refreshDataOnWalletChange = async () => {
+      try {
+        console.log("Wallet connection status changed. Connected:", connected, "PublicKey:", publicKey)
+
+        // Add a small delay to ensure wallet context has fully updated
+        setTimeout(async () => {
+          await fetchPortfolioData()
+        }, 1000)
+      } catch (error) {
+        console.error("Failed to refresh data on wallet change:", error)
+      }
+    }
+
+    // Only trigger refresh if we've already loaded data once (avoid double loading on initial mount)
+    if (tokenBalances.length > 0 || history.length > 0) {
+      refreshDataOnWalletChange()
+    }
+  }, [connected, publicKey]) // Watch for changes in wallet connection status
+
   useEffect(() => {
     // Add initial delay to prevent immediate API calls
     const timer = setTimeout(() => {
@@ -402,7 +452,14 @@ export default function PortfolioPage() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text mb-2">
             Portfolio
           </h1>
-          <p className="text-white/60">Track and manage your Solana assets</p>
+          <p className="text-white/60">
+            Track and manage your Solana assets
+            {connected ? (
+              <span className="ml-2 text-green-400">• Connected Wallet</span>
+            ) : (
+              <span className="ml-2 text-orange-400">• Sample Data</span>
+            )}
+          </p>
         </div>
         <div className="flex gap-3">
           <div className="relative">
@@ -457,6 +514,33 @@ export default function PortfolioPage() {
         </div>
       </div>
 
+      {/* Wallet Status Card */}
+      <Card className="bg-black/20 border-white/10">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${connected ? "bg-green-400" : "bg-orange-400"}`}></div>
+              <div>
+                <p className="text-white font-medium">{connected ? "Connected Wallet" : "Sample Data Mode"}</p>
+                <p className="text-white/60 text-sm font-mono">
+                  {connected
+                    ? `${currentAddress.slice(0, 8)}...${currentAddress.slice(-8)} (Your Wallet)`
+                    : `${SAMPLE_SOLANA_ADDRESS.slice(0, 8)}...${SAMPLE_SOLANA_ADDRESS.slice(-8)} (Demo Address)`}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-white/60 text-sm">{connected ? "Real-time data" : "Sample portfolio data"}</p>
+              <p className="text-white/40 text-xs">
+                {connected
+                  ? "Connect your wallet to see your actual portfolio"
+                  : "Showing demo data from a sample address"}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Loading Progress */}
       {loading && (
         <Card className="bg-black/20 border-white/10">
@@ -473,8 +557,9 @@ export default function PortfolioPage() {
                 ></div>
               </div>
               <div className="flex items-center gap-2 text-white/60 text-sm">
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Processing API requests with rate limiting...
+                <span className="text-white/40">({connected ? "Connected wallet data" : "Sample data"})</span>
               </div>
             </div>
           </CardContent>
@@ -594,13 +679,14 @@ export default function PortfolioPage() {
             {selectedTable === "balances" && `Active Portfolio Breakdown (${filteredTokenBalances.length} tokens)`}
             {selectedTable === "history" && `Active Transaction History (${filteredHistory.length} transactions)`}
             {selectedTable === "specific" && "Specific Token Balance"}
+            {!connected && <span className="ml-2 text-sm text-orange-400 font-normal">• Sample Data</span>}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             {loading ? (
               <div className="text-center text-white/60 py-12">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                 <p className="mb-2">{loadingStep}</p>
                 <div className="w-48 mx-auto bg-white/10 rounded-full h-2">
                   <div
@@ -628,6 +714,15 @@ export default function PortfolioPage() {
               Portfolio API Data
             </h2>
             <div className="space-y-4">
+              <div className="bg-black/50 p-4 rounded-lg border border-white/10">
+                <h3 className="font-semibold mb-2 text-purple-400">Wallet Information</h3>
+                <div className="text-xs text-white/80">
+                  <p>Connected: {connected ? "Yes" : "No"}</p>
+                  <p>Address: {currentAddress}</p>
+                  <p>Data Type: {connected ? "Real wallet data" : "Sample data"}</p>
+                  <p>Last Updated: {new Date().toLocaleString()}</p>
+                </div>
+              </div>
               <div className="bg-black/50 p-4 rounded-lg border border-white/10">
                 <h3 className="font-semibold mb-2 text-purple-400">Portfolio Statistics</h3>
                 <pre className="text-xs overflow-x-auto text-white/80">{JSON.stringify(portfolioStats, null, 2)}</pre>
@@ -658,7 +753,7 @@ export default function PortfolioPage() {
                   <p>
                     Filter Criteria: Balance {">"} 0, Price {">"} 0, Value ≥ $0.01
                   </p>
-                  <p>Last Updated: {new Date().toLocaleString()}</p>
+                  <p>Address Source: {connected ? "Connected Wallet" : "Sample Address"}</p>
                 </div>
               </div>
             </div>

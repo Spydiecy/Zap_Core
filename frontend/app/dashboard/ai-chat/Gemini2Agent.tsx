@@ -2,7 +2,7 @@
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.NEXT_PUBLIC_GEMINI_KEY,
+  apiKey: process.env.NEXT_PUBLIC_GEMINI_KEY2,
 });
 
 const IMPORTANT_INFO_PROMPT = `
@@ -61,7 +61,7 @@ export async function extractImportantInfoFromData(data: any): Promise<string> {
 
   try {
     const response:any = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       contents: prompt,
     });
 
