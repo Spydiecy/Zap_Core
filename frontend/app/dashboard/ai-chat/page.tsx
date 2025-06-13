@@ -6,6 +6,7 @@ import { Send, Bot, User, Zap, RefreshCw, ChevronUp, ChevronDown, Minus, Plus, A
 import { geminiAgent } from "./GeminiAgent"
 import { extractImportantInfoFromData } from "./Gemini2Agent"
 import { useWallet } from "@/contexts/WalletContext"
+import { useWalletAddress } from "@/components/wallet/WalletProtection"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -332,7 +333,7 @@ async function callMarketDataApi(type: string, tokenName: string, address: strin
   let notReq = false
   if (type == "total_value") {
     const body = {
-      address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD", //dummy address
+      address: address, // Use actual wallet address
       chains: "501",
       excludeRiskToken: "0",
     }
@@ -345,9 +346,8 @@ async function callMarketDataApi(type: string, tokenName: string, address: strin
     return m
   }
   if (type == "total_token_balance") {
-    //dummy address
     const body = {
-      address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+      address: address, // Use actual wallet address
       chains: "501",
       excludeRiskToken: "0",
     }
@@ -364,7 +364,7 @@ async function callMarketDataApi(type: string, tokenName: string, address: strin
   if (type == "token_balance") {
     // Handle token balance requests for AI chat
     const body = {
-      address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+      address: address, // Use actual wallet address
       chains: "501",
       excludeRiskToken: "0",
     }
@@ -379,7 +379,7 @@ async function callMarketDataApi(type: string, tokenName: string, address: strin
   }
   if (type == "specific_token_balance") {
     const body = {
-      address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD", //dummy address
+      address: address, // Use actual wallet address
       tokenContractAddresses: getTokenContractAddress(tokenName),
       excludeRiskToken: "0",
     }
@@ -394,7 +394,7 @@ async function callMarketDataApi(type: string, tokenName: string, address: strin
   }
   if (type == "transaction_history") {
     const body = {
-      address: "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD",
+      address: address, // Use actual wallet address
       chains: chainIndexMap[tokenName],
       limit: "20",
     }
@@ -935,7 +935,9 @@ const suggestions = [
 
 export default function AiChatPage() {
   const { publicKey }: any = useWallet()
+  const walletAddress = useWalletAddress()
   console.log("Public Key is::::", publicKey)
+  console.log("Wallet Address is::::", walletAddress)
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -965,7 +967,7 @@ export default function AiChatPage() {
           const marketData: any = await callMarketDataApi(
             geminiResponse.type,
             geminiResponse.token_name,
-            publicKey,
+            walletAddress || publicKey, // Use wallet address
             geminiResponse.transaction_hash,
           )
 

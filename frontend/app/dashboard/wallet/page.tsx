@@ -1,15 +1,23 @@
 "use client"
 
 import { useState } from "react"
+import { useWallet } from "@/contexts/WalletContext"
+import { useWalletAddress } from "@/components/wallet/WalletProtection"
 import { Button } from "@/components/ui/button"
 import { Copy, ExternalLink, QrCode, Send, Download, Plus, History, Wallet } from "lucide-react"
 
+// Sample address for demo when wallet is not connected
+const SAMPLE_SOLANA_ADDRESS = "yYu74v9PbemzH7xTF1AyvYmQBgLQTNpp9mQQmJY5UW7"
+
 export default function WalletPage() {
-  const [walletAddress, setWalletAddress] = useState("yYu74v9PbemzH7xTF1AyvYmQBgLQTNpp9mQQmJY5UW7")
-  const [connected, setConnected] = useState(true)
+  const { connected, publicKey } = useWallet()
+  const walletAddress = useWalletAddress()
+  
+  // Use real wallet address or fallback to sample
+  const currentAddress = walletAddress || publicKey || SAMPLE_SOLANA_ADDRESS
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(walletAddress)
+    navigator.clipboard.writeText(currentAddress)
     // In a real implementation, you would show a toast notification here
   }
 
@@ -43,7 +51,7 @@ export default function WalletPage() {
               <div className="mb-4 sm:mb-0">
                 <h2 className="text-xl font-bold mb-2 bg-gradient-to-r from-white to-white/90 text-transparent bg-clip-text">Solana Wallet</h2>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-white/60">{formatAddress(walletAddress)}</p>
+                  <p className="text-sm text-white/60">{formatAddress(currentAddress)}</p>
                   <button 
                     onClick={handleCopyAddress}
                     className="p-1 hover:bg-white/10 rounded-md transition-all"
@@ -51,7 +59,7 @@ export default function WalletPage() {
                     <Copy className="h-4 w-4 text-white/80" />
                   </button>
                   <a 
-                    href={`https://explorer.solana.com/address/${walletAddress}`} 
+                    href={`https://explorer.solana.com/address/${currentAddress}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="p-1 hover:bg-white/10 rounded-md transition-all"

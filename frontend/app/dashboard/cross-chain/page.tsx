@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
+import { useWallet } from "@/contexts/WalletContext"
+import { useWalletAddress } from "@/components/wallet/WalletProtection"
 import {
   Info,
   ChevronDown,
@@ -224,6 +226,9 @@ class RequestQueueManager {
 }
 
 export default function  CrossChainSwapPage(){
+  const { publicKey } = useWallet()
+  const walletAddress = useWalletAddress()
+  
   // Chain and token state
   const [fromChain, setFromChain] = useState(chainList[0]) // Solana
   const [toChain, setToChain] = useState(chainList[1]) // Ethereum
@@ -285,12 +290,176 @@ export default function  CrossChainSwapPage(){
     availableBridges: [],
   })
 
-  // Demo wallet addresses
-  const solanaWallet = "DemHwXRcTyc76MuRwXwyhDdVpYLwoDz1T2rVpzaajMsR"
-  const evmWallet = "0x22497668Fb12BA21E6A132de7168D0Ecc69cDF7d"
+  // Token balance state
+  const [tokenBalances, setTokenBalances] = useState<Record<string, { balance: string; price: string }>>({})
+  const [loadingBalances, setLoadingBalances] = useState(false)
+  const [balanceError, setBalanceError] = useState<string | null>(null)
+
+  // Recipient address state for manual input
+  const [recipientAddress, setRecipientAddress] = useState("")
+
+  // Use real wallet addresses for sending only
+  const solanaWallet = walletAddress || publicKey || ""
 
   const getCurrentWallet = (chain: (typeof chainList)[0]) => {
-    return chain.index === "501" ? solanaWallet : evmWallet
+    // Only return wallet address for sending (fromChain)
+    return chain.index === "501" ? solanaWallet : solanaWallet // Use connected wallet for both
+  }
+
+  // Get recipient address (always require manual input)
+  const getRecipientAddress = () => {
+    return recipientAddress.trim()
+  }
+
+  // Function to validate recipient address format
+  const validateRecipientAddress = (address: string, chain: (typeof chainList)[0]): boolean => {
+    if (!address.trim()) return false
+    
+    if (chain.index === "501") {
+      // Solana address validation (base58, 32-44 characters)
+      return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
+    } else {
+      // EVM address validation (starts with 0x, 42 characters total)
+      return /^0x[a-fA-F0-9]{40}$/.test(address)
+    }
+  }
+
+  // Function to fetch real wallet balances for Solana
+  const fetchTokenBalances = async () => {
+    if (!walletAddress && !publicKey) {
+      console.log("No wallet connected, using demo balances")
+      return
+    }
+
+    setLoadingBalances(true)
+    setBalanceError(null)
+
+    try {
+      const userWalletAddress = walletAddress || publicKey
+      console.log("Fetching token balances for:", userWalletAddress)
+
+      const response = await fetch("/api/portfolio/total_token_balances", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: userWalletAddress,
+          chains: "501",
+          excludeRiskToken: "0",
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch balances: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Balance response:", data)
+
+      if (data.success && data.data && data.data[0]?.tokenAssets) {
+        const balances: Record<string, { balance: string; price: string }> = {}
+        
+        data.data[0].tokenAssets.forEach((token: any) => {
+          const balance = token.balance || "0"
+          const price = token.tokenPrice || "0"
+          
+          // Map token addresses to balances
+          balances[token.tokenContractAddress] = {
+            balance: balance,
+            price: price,
+          }
+          
+          // Also map by symbol for easier lookup
+          if (token.symbol) {
+            balances[token.symbol] = {
+              balance: balance,
+              price: price,
+            }
+          }
+        })
+
+        setTokenBalances(balances)
+        console.log("Updated token balances:", balances)
+      } else {
+        throw new Error("Invalid balance data received")
+      }
+    } catch (error: any) {
+      console.error("Error fetching token balances:", error)
+      setBalanceError(error.message)
+    } finally {
+      setLoadingBalances(false)
+    }
+  }
+
+  // Function to get balance for a specific token (only show balances for sending wallet)
+  const getTokenBalance = (token: Token | null, chain: (typeof chainList)[0], isFromToken: boolean = true): { balance: string; price: string; usdValue: string } => {
+    if (!token) {
+      return { balance: "0.00", price: "0.00", usdValue: "0.00" }
+    }
+
+    // Only show balance for sending tokens (fromToken), not receiving tokens
+    if (!isFromToken) {
+      return { balance: "—", price: "—", usdValue: "—" }
+    }
+
+    // Only use real balances for Solana tokens when wallet is connected
+    if (chain.index === "501" && (walletAddress || publicKey)) {
+      const balanceData = tokenBalances[token.address] || tokenBalances[token.symbol] || { balance: "0", price: "0" }
+      const balance = Number(balanceData.balance) / Math.pow(10, token.decimals)
+      const price = Number(balanceData.price)
+      const usdValue = (balance * price).toFixed(2)
+
+      return {
+        balance: balance.toFixed(6),
+        price: price.toFixed(2),
+        usdValue: usdValue,
+      }
+    }
+
+    // Demo balances only for sending tokens and only for Solana
+    if (chain.index === "501") {
+      const demoBalances: Record<string, string> = {
+        SOL: "12.45",
+        USDC: "350.21",
+        USDT: "125.50",
+      }
+      const demoBalance = demoBalances[token.symbol] || "0.00"
+      const demoPrice = token.symbol === "SOL" ? "97.35" : "1.00"
+      const usdValue = (Number(demoBalance) * Number(demoPrice)).toFixed(2)
+      
+      return {
+        balance: demoBalance,
+        price: demoPrice,
+        usdValue: usdValue,
+      }
+    }
+
+    // No balance shown for non-Solana chains
+    return { balance: "—", price: "—", usdValue: "—" }
+  }
+
+  // Function to set max amount for from token
+  const setMaxAmount = () => {
+    const tokenBalance = getTokenBalance(fromToken, fromChain, true)
+    const maxBalance = tokenBalance.balance
+    
+    // Skip if balance is not available
+    if (maxBalance === "—" || maxBalance === "0.00") {
+      return
+    }
+    
+    // For native tokens, reserve amount for transaction fees
+    let adjustedMax = Number(maxBalance)
+    if (fromToken?.symbol === "SOL" && adjustedMax > 0.01) {
+      adjustedMax = adjustedMax - 0.01 // Reserve 0.01 SOL for fees
+    } else if (fromToken?.symbol === "ETH" && adjustedMax > 0.005) {
+      adjustedMax = adjustedMax - 0.005 // Reserve 0.005 ETH for fees
+    }
+    
+    setFromAmount(Math.max(0, adjustedMax).toFixed(6))
+    setSwapResult(null)
+    setToAmount("")
   }
 
   // Update loading progress
@@ -569,6 +738,13 @@ export default function  CrossChainSwapPage(){
     validateTokenPair()
   }, [fromToken, toToken, fromChain, toChain, supportedPairs, supportedBridges])
 
+  // Fetch balances when wallet connects or tokens change
+  useEffect(() => {
+    if ((walletAddress || publicKey) && fromChain.index === "501") {
+      fetchTokenBalances()
+    }
+  }, [walletAddress, publicKey, fromToken, toToken])
+
   const handleSwapChains = () => {
     const tempChain = fromChain
     const tempToken = fromToken
@@ -606,6 +782,16 @@ export default function  CrossChainSwapPage(){
       return
     }
 
+    // Validate recipient address (always required)
+    if (!recipientAddress.trim()) {
+      setError("Please enter a recipient address")
+      return
+    }
+    if (!validateRecipientAddress(recipientAddress, toChain)) {
+      setError(`Invalid recipient address format for ${toChain.name}`)
+      return
+    }
+
     // Validate that at least one chain is Solana
     if (fromChain.index !== "501" && toChain.index !== "501") {
       setError("At least one chain must be Solana for cross-chain swaps")
@@ -636,7 +822,7 @@ export default function  CrossChainSwapPage(){
         amount: formattedAmount,
         slippage: slippage,
         userWalletAddress: getCurrentWallet(fromChain),
-        receiveAddress: getCurrentWallet(toChain),
+        receiveAddress: getRecipientAddress(),
         sort: routeSort,
         feePercent: feePercent,
         priceImpactProtectionPercentage: "0.25", // 25% max price impact
@@ -985,11 +1171,7 @@ export default function  CrossChainSwapPage(){
                     variant="outline"
                     size="sm"
                     className="border-white/20 hover:bg-white/10 text-white text-xs h-7"
-                    onClick={() => {
-                      setFromAmount("1.0")
-                      setSwapResult(null)
-                      setToAmount("")
-                    }}
+                    onClick={setMaxAmount}
                   >
                     MAX
                   </Button>
@@ -1004,7 +1186,10 @@ export default function  CrossChainSwapPage(){
                 </div>
               </div>
               <div className="text-sm text-white/60 mt-1">
-                Balance: 12.45 {fromToken?.symbol || "TOKEN"} • Wallet: {getCurrentWallet(fromChain).slice(0, 8)}...
+                {(() => {
+                  const tokenBalance = getTokenBalance(fromToken, fromChain, true)
+                  return `Balance: ${loadingBalances && fromChain.index === "501" ? "Loading..." : tokenBalance.balance} ${fromToken?.symbol || "TOKEN"} ${tokenBalance.usdValue !== "—" ? `• $${tokenBalance.usdValue}` : ""} • Wallet: ${getCurrentWallet(fromChain).slice(0, 8)}...`
+                })()}
               </div>
             </div>
 
@@ -1051,7 +1236,7 @@ export default function  CrossChainSwapPage(){
                 />
               </div>
               <div className="text-sm text-white/60 mt-1">
-                Balance: 350.21 {toToken?.symbol || "TOKEN"} • Wallet: {getCurrentWallet(toChain).slice(0, 8)}...
+                No balance shown for receiving tokens • Recipient: {recipientAddress ? `${recipientAddress.slice(0, 8)}...${recipientAddress.slice(-6)}` : "Not set"}
               </div>
             </div>
           </div>
@@ -1133,6 +1318,46 @@ export default function  CrossChainSwapPage(){
                     <span className="text-xs text-white/60">%</span>
                   </div>
                 </div>
+
+                {/* Recipient Address Section */}
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-white/60">Recipient Address</span>
+                      <button className="text-white/40 hover:text-white/60">
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="text-xs text-orange-400 font-medium">
+                      REQUIRED
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={recipientAddress}
+                      onChange={(e) => setRecipientAddress(e.target.value)}
+                      className="w-full px-3 py-2 bg-black/50 border border-white/20 rounded text-white text-sm"
+                      placeholder={`Enter ${toChain.name} address (${toChain.index === "501" ? "Base58" : "0x..."})`}
+                    />
+                    {recipientAddress && !validateRecipientAddress(recipientAddress, toChain) && (
+                      <div className="text-xs text-red-400 flex items-center gap-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Invalid {toChain.name} address format
+                      </div>
+                    )}
+                    {recipientAddress && validateRecipientAddress(recipientAddress, toChain) && (
+                      <div className="text-xs text-green-400 flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        Valid {toChain.name} address
+                      </div>
+                    )}
+                    <div className="text-xs text-white/40">
+                      Tokens will be sent to this address on {toChain.name}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1142,7 +1367,13 @@ export default function  CrossChainSwapPage(){
             size="lg"
             onClick={handleBuildTransaction}
             disabled={
-              loading || !fromAmount || Number.parseFloat(fromAmount) <= 0 || !pairValidation.isValid || isLoading
+              loading || 
+              !fromAmount || 
+              Number.parseFloat(fromAmount) <= 0 || 
+              !pairValidation.isValid || 
+              isLoading ||
+              !recipientAddress.trim() ||
+              !validateRecipientAddress(recipientAddress, toChain)
             }
           >
             <ArrowRightLeft className="h-5 w-5" />
@@ -1370,6 +1601,35 @@ export default function  CrossChainSwapPage(){
                   <div>
                     <span className="text-white/60">Bridge:</span>
                     <div className="text-white font-medium">{quote.router.bridgeName}</div>
+                  </div>
+                </div>
+
+                {/* Recipient Address Display */}
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+                  <div className="text-blue-400 font-medium mb-2 flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Recipient Address
+                  </div>
+                  <div className="text-sm text-blue-200">
+                    <div className="flex items-center justify-between">
+                      <span>Destination Address:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs">
+                          {getRecipientAddress().slice(0, 12)}...{getRecipientAddress().slice(-8)}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 hover:bg-white/10"
+                          onClick={() => copyToClipboard(getRecipientAddress())}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-xs text-blue-300 mt-1">
+                      Tokens will be sent to this {toChain.name} address
+                    </div>
                   </div>
                 </div>
 

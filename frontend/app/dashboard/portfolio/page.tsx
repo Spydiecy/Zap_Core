@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useWallet } from "@/contexts/WalletContext"
+import { useWalletAddress } from "@/components/wallet/WalletProtection"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -145,6 +146,7 @@ function filterValidTransactions(transactions: any[]): any[] {
 
 export default function PortfolioPage() {
   const { connected, publicKey } = useWallet()
+  const walletAddress = useWalletAddress()
   const [activeModal, setActiveModal] = useState<null | string>(null)
   const [loading, setLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState("")
@@ -175,7 +177,7 @@ export default function PortfolioPage() {
   })
 
   // Get dynamic address based on wallet connection
-  const currentAddress = getDynamicAddress(publicKey)
+  const currentAddress = getDynamicAddress(walletAddress || publicKey)
 
   // Toggle chain selection for multi-select
   const toggleChain = (chainId: string) => {

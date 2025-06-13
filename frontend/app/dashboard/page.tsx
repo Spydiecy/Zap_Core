@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useWallet } from "@/contexts/WalletContext"
+import { useWalletAddress } from "@/components/wallet/WalletProtection"
 import { Button } from "@/components/ui/button"
 import {
   ArrowRight,
@@ -76,9 +77,10 @@ const quickActions = [
 ]
 
 // Real Solana address for data fetching
+// Sample Solana address for demo purposes
 const SOLANA_ADDRESS = "52C9T2T7JRojtxumYnYZhyUmrN7kqzvCLc4Ksvjk7TxD"
 
-// Get dynamic address - use connected wallet address or fall back to dummy address
+// Get dynamic address - use connected wallet address or fall back to sample address
 const getDynamicAddress = (walletAddress?: string | null): string => {
   return walletAddress || SOLANA_ADDRESS
 }
@@ -554,6 +556,7 @@ function DashboardCard({
 
 export default function DashboardPage() {
   const { connected, publicKey } = useWallet()
+  const walletAddress = useWalletAddress()
   const [isHovering, setIsHovering] = useState<string | null>(null)
   const [selectedChain, setSelectedChain] = useState(chainOptions[0])
   const [showChainDropdown, setShowChainDropdown] = useState(false)

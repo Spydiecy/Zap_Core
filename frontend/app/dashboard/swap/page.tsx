@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowDown, Settings, Clock, Zap, Info, ChevronDown, Check, ExternalLink, Copy, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useWallet } from "@/contexts/WalletContext"
+import { useWalletAddress } from "@/components/wallet/WalletProtection"
 
 // Token interface for API response
 interface Token {
@@ -44,6 +46,10 @@ interface ExecuteResult {
 }
 
 export default function SolanaSwapPage() {
+  // Wallet context
+  const { connected, publicKey } = useWallet()
+  const walletAddress = useWalletAddress()
+
   // State for tokens
   const [availableTokens, setAvailableTokens] = useState<Token[]>([])
   const [loadingTokens, setLoadingTokens] = useState(true)
@@ -53,6 +59,11 @@ export default function SolanaSwapPage() {
   const [isRequestInProgress, setIsRequestInProgress] = useState(false)
   const [lastRequestTime, setLastRequestTime] = useState(0)
   const [retryCount, setRetryCount] = useState(0)
+
+  // State for wallet balances
+  const [tokenBalances, setTokenBalances] = useState<Record<string, { balance: string; price: string }>>({})
+  const [loadingBalances, setLoadingBalances] = useState(false)
+  const [balanceError, setBalanceError] = useState<string | null>(null)
 
   // Default tokens (fallback)
   const defaultTokens: Token[] = [
@@ -75,8 +86,126 @@ export default function SolanaSwapPage() {
   const [showFromTokens, setShowFromTokens] = useState(false)
   const [showToTokens, setShowToTokens] = useState(false)
 
-  // Demo Solana wallet address
-  const userWalletAddress = "DemHwXRcTyc76MuRwXwyhDdVpYLwoDz1T2rVpzaajMsR"
+  // Use real wallet address instead of demo address
+  const userWalletAddress = walletAddress || publicKey
+
+  // Function to fetch real wallet balances
+  const fetchTokenBalances = async () => {
+    if (!userWalletAddress || !connected) {
+      console.log("No wallet connected, using demo balances")
+      return
+    }
+
+    setLoadingBalances(true)
+    setBalanceError(null)
+
+    try {
+      console.log("Fetching token balances for:", userWalletAddress)
+
+      const response = await fetch("/api/portfolio/total_token_balances", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: userWalletAddress,
+          chains: "501",
+          excludeRiskToken: "0",
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch balances: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Balance response:", data)
+
+      if (data.success && data.data && data.data[0]?.tokenAssets) {
+        const balances: Record<string, { balance: string; price: string }> = {}
+        
+        data.data[0].tokenAssets.forEach((token: any) => {
+          const balance = token.balance || "0"
+          const price = token.tokenPrice || "0"
+          
+          // Map token addresses to balances
+          balances[token.tokenContractAddress] = {
+            balance: balance,
+            price: price,
+          }
+          
+          // Also map by symbol for easier lookup
+          if (token.symbol) {
+            balances[token.symbol] = {
+              balance: balance,
+              price: price,
+            }
+          }
+        })
+
+        setTokenBalances(balances)
+        console.log("Updated token balances:", balances)
+      } else {
+        throw new Error("Invalid balance data received")
+      }
+    } catch (error: any) {
+      console.error("Error fetching token balances:", error)
+      setBalanceError(error.message)
+    } finally {
+      setLoadingBalances(false)
+    }
+  }
+
+  // Function to get balance for a specific token
+  const getTokenBalance = (token: Token): { balance: string; price: string; usdValue: string } => {
+    if (!connected || !userWalletAddress) {
+      // Return demo balances when not connected
+      const demoBalances: Record<string, string> = {
+        SOL: "12.45",
+        USDC: "350.21",
+        USDT: "125.50",
+      }
+      const demoBalance = demoBalances[token.symbol] || "0.00"
+      const demoPrice = token.symbol === "SOL" ? "97.35" : token.symbol === "USDC" ? "1.00" : "1.00"
+      const usdValue = (Number(demoBalance) * Number(demoPrice)).toFixed(2)
+      
+      return {
+        balance: demoBalance,
+        price: demoPrice,
+        usdValue: usdValue,
+      }
+    }
+
+    // Use real balance data
+    const balanceData = tokenBalances[token.address] || tokenBalances[token.symbol] || { balance: "0", price: "0" }
+    const balance = Number(balanceData.balance) / Math.pow(10, token.decimals)
+    const price = Number(balanceData.price)
+    const usdValue = (balance * price).toFixed(2)
+
+    return {
+      balance: balance.toFixed(6),
+      price: price.toFixed(2),
+      usdValue: usdValue,
+    }
+  }
+
+  // Function to set max amount for from token
+  const setMaxAmount = () => {
+    const tokenBalance = getTokenBalance(fromToken)
+    const maxBalance = tokenBalance.balance
+    
+    // For SOL, reserve a small amount for transaction fees (0.01 SOL)
+    let adjustedMax = Number(maxBalance)
+    if (fromToken.symbol === "SOL" && adjustedMax > 0.01) {
+      adjustedMax = adjustedMax - 0.01
+    }
+    
+    setFromAmount(Math.max(0, adjustedMax).toFixed(6))
+    setSwapResult(null)
+    setQuoteResult(null)
+    setExecuteResult(null)
+    setToAmount("")
+  }
 
   // Replace the fetchSupportedTokens function with this improved version:
   const fetchSupportedTokens = async (isRetry = false) => {
@@ -177,6 +306,23 @@ export default function SolanaSwapPage() {
 
     return () => clearTimeout(initialDelay)
   }, []) // Remove any dependencies to prevent multiple calls
+
+  // Fetch balances when wallet connects or when tokens change
+  useEffect(() => {
+    if (connected && userWalletAddress) {
+      fetchTokenBalances()
+    }
+  }, [connected, userWalletAddress, fromToken, toToken])
+
+  // Refresh balances when tokens are updated
+  useEffect(() => {
+    if (connected && userWalletAddress && availableTokens.length > 0) {
+      const timer = setTimeout(() => {
+        fetchTokenBalances()
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [availableTokens])
 
   const handleSwapTokens = () => {
     const tempToken = fromToken
@@ -521,13 +667,7 @@ export default function SolanaSwapPage() {
                 variant="outline"
                 size="sm"
                 className="border-white/20 hover:bg-white/10 text-white text-xs h-7"
-                onClick={() => {
-                  setFromAmount("1.0")
-                  setSwapResult(null)
-                  setQuoteResult(null)
-                  setExecuteResult(null)
-                  setToAmount("")
-                }}
+                onClick={setMaxAmount}
               >
                 MAX
               </Button>
@@ -541,7 +681,10 @@ export default function SolanaSwapPage() {
             </div>
           </div>
           <div className="text-sm text-white/60 mt-1">
-            Balance: 12.45 {fromToken.symbol} • ${fromToken.symbol === "SOL" ? "97.35" : "1.00"}
+            {(() => {
+              const tokenBalance = getTokenBalance(fromToken)
+              return `Balance: ${loadingBalances ? "Loading..." : tokenBalance.balance} ${fromToken.symbol} • $${tokenBalance.usdValue}`
+            })()}
           </div>
         </div>
 
@@ -579,7 +722,10 @@ export default function SolanaSwapPage() {
             />
           </div>
           <div className="text-sm text-white/60 mt-1">
-            Balance: 350.21 {toToken.symbol} • ${toToken.symbol === "USDC" ? "350.21" : "1.00"}
+            {(() => {
+              const tokenBalance = getTokenBalance(toToken)
+              return `Balance: ${loadingBalances ? "Loading..." : tokenBalance.balance} ${toToken.symbol} • $${tokenBalance.usdValue}`
+            })()}
           </div>
         </div>
       </div>
