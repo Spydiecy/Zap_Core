@@ -339,15 +339,15 @@ function SolanaCandlestickChart({ data, title }: { data: any; title: string }) {
   const yMax = maxPrice + padding
 
   return (
-    <Card className="w-full bg-black/40 border-white/20 backdrop-blur-sm">
+    <Card className="w-full bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-foreground dark:text-white flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
           {title}
         </CardTitle>
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-white">${formatPrice(currentPrice)}</span>
-          <span className={`flex items-center gap-1 text-sm ${isPositive ? "text-green-400" : "text-red-400"}`}>
+          <span className="text-2xl font-bold text-foreground dark:text-white">${formatPrice(currentPrice)}</span>
+          <span className={`flex items-center gap-1 text-sm ${isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
             {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             {isPositive ? "+" : ""}
             {formatPrice(priceChange)}
@@ -385,7 +385,7 @@ function SolanaCandlestickChart({ data, title }: { data: any; title: string }) {
                     y1={40 + (percent / 100) * 120}
                     x2="100%"
                     y2={40 + (percent / 100) * 120}
-                    stroke="rgba(255,255,255,0.1)"
+                    stroke="hsl(var(--border))"
                     strokeWidth={0.5}
                   />
                 ))}
@@ -398,7 +398,7 @@ function SolanaCandlestickChart({ data, title }: { data: any; title: string }) {
                       key={percent}
                       x="35"
                       y={45 + (percent / 100) * 120}
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fontSize="8"
                       textAnchor="end"
                     >
@@ -483,7 +483,7 @@ Volume: ${item.volume.toLocaleString()}`}
                       key={filteredIndex}
                       x={x}
                       y="175"
-                      fill="white"
+                      fill="hsl(var(--foreground))"
                       fontSize="8"
                       textAnchor="middle"
                     >
@@ -517,11 +517,11 @@ function DashboardCard({
         className="absolute inset-0 bg-gradient-to-r rounded-xl blur-sm opacity-20 group-hover:opacity-30 transition-opacity"
         style={{ backgroundImage: `linear-gradient(to right, ${gradientFrom}, ${gradientTo})` }}
       ></div>
-      <div className="relative h-full backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl p-6 overflow-hidden group-hover:border-white/20 transition-all group-hover:shadow-xl">
+      <div className="relative h-full backdrop-blur-sm bg-background/80 dark:bg-black/20 border border-border dark:border-white/10 rounded-xl p-6 overflow-hidden group-hover:border-border dark:group-hover:border-white/20 transition-all group-hover:shadow-xl">
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm text-white/60">{title}</p>
-            <p className="text-2xl font-bold mt-1 text-white">
+            <p className="text-sm text-muted-foreground dark:text-white/60">{title}</p>
+            <p className="text-2xl font-bold mt-1 text-foreground dark:text-white">
               {loading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -534,15 +534,15 @@ function DashboardCard({
             <div className="flex items-center mt-1">
               <span
                 className={`text-xs ${
-                  trend === "up" ? "text-emerald-400" : trend === "down" ? "text-rose-400" : "text-gray-400"
+                  trend === "up" ? "text-emerald-600 dark:text-emerald-400" : trend === "down" ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground"
                 }`}
               >
                 {change}
               </span>
             </div>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 backdrop-blur-sm border border-white/5">
-            <Icon className="h-5 w-5 text-white/80" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 dark:bg-white/5 backdrop-blur-sm border border-border dark:border-white/5">
+            <Icon className="h-5 w-5 text-muted-foreground dark:text-white/80" />
           </div>
         </div>
         <div
@@ -688,8 +688,9 @@ export default function DashboardPage() {
           "Current Price",
           updateLoadingStep,
         )
+        console.log("Current price API response:", currentPriceRes)
       } catch (error) {
-        console.warn("Current price failed, using fallback:", error)
+        console.error("Current price failed with error:", error)
         currentPriceRes = { data: [{ price: "0" }] }
       }
 
@@ -749,20 +750,32 @@ export default function DashboardPage() {
       try {
         const price = currentPriceRes?.data?.[0]?.price || "0"
         console.log("Raw current price:", price)
-        processedCurrentPrice = String(price)
-
-        // If current price is 0, try to get it from token assets (SOL token)
-        if (Number(processedCurrentPrice) === 0 && processedTokens.length > 0) {
-          const solToken = processedTokens.find(
-            (token) => token.symbol === "SOL" || token.tokenAddress === "So11111111111111111111111111111111111111112",
+        
+        if (!price || price === "0") {
+          console.log("Price is 0 or null, checking token assets for SOL price")
+          // Try to get price from token assets first
+          const solToken = tokenBalancesRes?.data?.[0]?.tokenAssets?.find(
+            (token: any) => token.symbol === "SOL" || token.tokenAddress === "So11111111111111111111111111111111111111112",
           )
           if (solToken && solToken.tokenPrice) {
             processedCurrentPrice = String(solToken.tokenPrice)
             console.log("Got SOL price from token assets:", processedCurrentPrice)
+          } else {
+            // If still no price, try candlestick data
+            const candlestickPrice = candlestickDataRes?.data?.[0]?.[4] // Close price from latest candlestick
+            if (candlestickPrice) {
+              processedCurrentPrice = String(candlestickPrice)
+              console.log("Got SOL price from candlestick data:", processedCurrentPrice)
+            } else {
+              processedCurrentPrice = "0"
+              console.warn("Could not get SOL price from any source")
+            }
           }
+        } else {
+          processedCurrentPrice = String(price)
         }
       } catch (error) {
-        console.warn("Error processing current price:", error)
+        console.error("Error processing current price:", error)
         processedCurrentPrice = "0"
       }
 
@@ -881,16 +894,16 @@ export default function DashboardPage() {
     <div className="space-y-10">
       {/* Loading Progress */}
       {loading && (
-        <Card className="bg-black/40 border-white/20 backdrop-blur-sm">
+        <Card className="bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
-                <span className="text-white font-medium">Loading Dashboard Data</span>
-                <span className="text-white/60 text-sm">({Math.round(progress)}%)</span>
+                <Loader2 className="h-5 w-5 animate-spin text-purple-600 dark:text-purple-400" />
+                <span className="text-foreground dark:text-white font-medium">Loading Dashboard Data</span>
+                <span className="text-muted-foreground dark:text-white/60 text-sm">({Math.round(progress)}%)</span>
               </div>
 
-              <div className="w-full bg-white/10 rounded-full h-2">
+              <div className="w-full bg-muted dark:bg-white/10 rounded-full h-2">
                 <div
                   className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
@@ -899,21 +912,21 @@ export default function DashboardPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {loadingSteps.map((step, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2 rounded bg-white/5">
+                  <div key={idx} className="flex items-center gap-2 p-2 rounded bg-muted/50 dark:bg-white/5">
                     <div
                       className={`w-2 h-2 rounded-full ${
                         step.status === "completed"
-                          ? "bg-green-400"
+                          ? "bg-green-500 dark:bg-green-400"
                           : step.status === "loading"
-                            ? "bg-yellow-400 animate-pulse"
+                            ? "bg-yellow-500 dark:bg-yellow-400 animate-pulse"
                             : step.status === "error"
-                              ? "bg-red-400"
-                              : "bg-gray-400"
+                              ? "bg-red-500 dark:bg-red-400"
+                              : "bg-muted-foreground dark:bg-gray-400"
                       }`}
                     ></div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-white text-xs font-medium">{step.name}</div>
-                      <div className="text-white/60 text-xs truncate">{step.message}</div>
+                      <div className="text-foreground dark:text-white text-xs font-medium">{step.name}</div>
+                      <div className="text-muted-foreground dark:text-white/60 text-xs truncate">{step.message}</div>
                     </div>
                   </div>
                 ))}
@@ -927,17 +940,17 @@ export default function DashboardPage() {
       <div className="relative">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-white/80 text-transparent bg-clip-text mb-2">
               Welcome back
             </h1>
-            <p className="text-white/60">Your Solana DeFi portfolio with real-time data</p>
+            <p className="text-muted-foreground dark:text-white/60">Your Solana DeFi portfolio with real-time data</p>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="relative">
               <Button
                 variant="outline"
-                className="border-white/20 hover:bg-white/10 text-white gap-2"
+                className="border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white gap-2"
                 onClick={() => setShowChainDropdown(!showChainDropdown)}
                 disabled={loading}
               >
@@ -948,12 +961,12 @@ export default function DashboardPage() {
               </Button>
 
               {showChainDropdown && (
-                <div className="absolute top-full mt-2 right-0 bg-black/90 border border-white/20 rounded-lg p-2 min-w-[200px] z-50 backdrop-blur-sm">
+                <div className="absolute top-full mt-2 right-0 bg-background/95 dark:bg-black/90 border border-border dark:border-white/20 rounded-lg p-2 min-w-[200px] z-50 backdrop-blur-sm">
                   <div className="max-h-60 overflow-y-auto">
                     {chainOptions.map((chain) => (
                       <button
                         key={chain.value}
-                        className="w-full flex items-center justify-between p-2 hover:bg-white/10 rounded text-left text-white"
+                        className="w-full flex items-center justify-between p-2 hover:bg-accent dark:hover:bg-white/10 rounded text-left text-foreground dark:text-white"
                         onClick={() => {
                           setSelectedChain(chain)
                           setShowChainDropdown(false)
@@ -961,7 +974,7 @@ export default function DashboardPage() {
                       >
                         <span>{chain.name}</span>
                         {selectedChain.value === chain.value && (
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></div>
                         )}
                       </button>
                     ))}
@@ -973,7 +986,7 @@ export default function DashboardPage() {
             <Button
               variant="outline"
               size="icon"
-              className="border-white/20 hover:bg-white/10 text-white"
+              className="border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white"
               onClick={handleRefresh}
               disabled={loading}
             >
@@ -1041,9 +1054,9 @@ export default function DashboardPage() {
 
       {/* Error Display */}
       {error && (
-        <Card className="bg-red-900/20 border-red-500/30">
+        <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-500/30">
           <CardContent className="p-4">
-            <div className="text-red-400 text-sm">
+            <div className="text-red-700 dark:text-red-400 text-sm">
               <strong>Error:</strong> {error}
             </div>
           </CardContent>
@@ -1057,16 +1070,16 @@ export default function DashboardPage() {
           <SolanaCandlestickChart data={candlestickChart} title="SOL Candlestick Chart" />
           
           {/* Market Stats Card */}
-          <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl h-full">
+          <Card className="bg-background/80 dark:bg-black/20 border-border dark:border-white/10 hover:border-border dark:hover:border-white/20 transition-all hover:shadow-xl h-full">
             <CardHeader>
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-white/80 text-transparent bg-clip-text">
                 Market Stats
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Current SOL Price</span>
-                <span className="text-white font-bold">
+                <span className="text-muted-foreground dark:text-white/60">Current SOL Price</span>
+                <span className="text-foreground dark:text-white font-bold">
                   {loading
                     ? "Loading..."
                     : Number(currentPrice) > 0
@@ -1075,30 +1088,30 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Portfolio Value</span>
-                <span className="text-white font-bold">
+                <span className="text-muted-foreground dark:text-white/60">Portfolio Value</span>
+                <span className="text-foreground dark:text-white font-bold">
                   {loading ? "Loading..." : Number(portfolioValue) > 0 ? formatCurrency(portfolioValue) : "$0.00"}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Active Tokens</span>
-                <span className="text-white font-bold">{loading ? "Loading..." : dashboardStats.totalTokens}</span>
+                <span className="text-muted-foreground dark:text-white/60">Active Tokens</span>
+                <span className="text-foreground dark:text-white font-bold">{loading ? "Loading..." : dashboardStats.totalTokens}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Transactions</span>
-                <span className="text-white font-bold">
+                <span className="text-muted-foreground dark:text-white/60">Transactions</span>
+                <span className="text-foreground dark:text-white font-bold">
                   {loading ? "Loading..." : dashboardStats.totalTransactions}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Address</span>
-                <span className="text-white font-mono text-xs">
+                <span className="text-muted-foreground dark:text-white/60">Address</span>
+                <span className="text-foreground dark:text-white font-mono text-xs">
                   {connected ? `${currentAddress.slice(0, 8)}... (Connected)` : `${SOLANA_ADDRESS.slice(0, 8)}... (Demo)`}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Chart Type</span>
-                <span className="text-white font-bold">
+                <span className="text-muted-foreground dark:text-white/60">Chart Type</span>
+                <span className="text-foreground dark:text-white font-bold">
                   {candlestickChart ? "OHLC Candlestick" : "No Data"}
                 </span>
               </div>
@@ -1111,14 +1124,14 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
         {/* Recent Transactions */}
         <div className="col-span-2">
-          <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl h-full">
+          <Card className="bg-background/80 dark:bg-black/20 border-border dark:border-white/10 hover:border-border dark:hover:border-white/20 transition-all hover:shadow-xl h-full">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+                <CardTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-white/80 text-transparent bg-clip-text">
                   Recent Transactions ({transactions.length})
                 </CardTitle>
                 <Link href="/dashboard/portfolio">
-                  <Button variant="ghost" size="sm" className="gap-1 text-white/80 hover:text-white hover:bg-white/10">
+                  <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground dark:text-white/80 hover:text-foreground dark:hover:text-white hover:bg-accent dark:hover:bg-white/10">
                     View All <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -1127,38 +1140,38 @@ export default function DashboardPage() {
             <CardContent>
               <div className="space-y-4">
                 {loading ? (
-                  <div className="text-white/60 text-center py-8">
+                  <div className="text-muted-foreground dark:text-white/60 text-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
                     Loading transactions...
                   </div>
                 ) : transactions.length === 0 ? (
-                  <div className="text-white/60 text-center py-8">No non-zero transactions found.</div>
+                  <div className="text-muted-foreground dark:text-white/60 text-center py-8">No non-zero transactions found.</div>
                 ) : (
                   transactions.slice(0, 5).map((tx, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between items-center p-4 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/5"
+                      className="flex justify-between items-center p-4 hover:bg-accent/50 dark:hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-border dark:hover:border-white/5"
                     >
                       <div className="flex items-center gap-4">
                         <div
                           className={`p-2.5 rounded-full ${
                             tx.amount && Number(tx.amount) > 0
-                              ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                              : "bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                              ? "bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500 dark:border-emerald-500/20"
+                              : "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-500 dark:border-rose-500/20"
                           }`}
                         >
                           {tx.amount && Number(tx.amount) > 0 ? "+" : "-"}
                         </div>
                         <div>
-                          <p className="font-medium text-white/90">{tx.symbol || "SOL"}</p>
-                          <p className="text-sm text-white/60">
+                          <p className="font-medium text-foreground dark:text-white/90">{tx.symbol || "SOL"}</p>
+                          <p className="text-sm text-muted-foreground dark:text-white/60">
                             {tx.txTime ? new Date(Number(tx.txTime) * 1000).toLocaleString() : "Recent"}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-white/90">{Number(tx.amount || 0).toFixed(6)}</p>
-                        <p className="text-sm text-white/60">
+                        <p className="font-medium text-foreground dark:text-white/90">{Number(tx.amount || 0).toFixed(6)}</p>
+                        <p className="text-sm text-muted-foreground dark:text-white/60">
                           {tx.txHash ? `${tx.txHash.slice(0, 8)}...${tx.txHash.slice(-6)}` : "Transaction"}
                         </p>
                       </div>
@@ -1172,9 +1185,9 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div>
-          <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl h-full">
+          <Card className="bg-background/80 dark:bg-black/20 border-border dark:border-white/10 hover:border-border dark:hover:border-white/20 transition-all hover:shadow-xl h-full">
             <CardHeader>
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+              <CardTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-white/80 text-transparent bg-clip-text">
                 Quick Actions
               </CardTitle>
             </CardHeader>
@@ -1195,26 +1208,26 @@ export default function DashboardPage() {
                         }}
                       ></div>
                       <div className="relative z-10 flex flex-col items-center">
-                        <action.icon className={`h-8 w-8 mb-3 text-white group-hover:scale-110 transition-transform`} />
-                        <span className="font-medium text-white text-sm">{action.label}</span>
+                        <action.icon className={`h-8 w-8 mb-3 text-foreground dark:text-white group-hover:scale-110 transition-transform`} />
+                        <span className="font-medium text-foreground dark:text-white text-sm">{action.label}</span>
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
 
-              <div className="p-4 rounded-lg bg-gradient-to-r from-violet-500/20 to-blue-500/20 border border-white/10">
+              <div className="p-4 rounded-lg bg-gradient-to-r from-violet-500/20 to-blue-500/20 border border-border dark:border-white/10">
                 <div className="flex items-center mb-2">
-                  <Sparkles className="h-5 w-5 mr-2 text-purple-400" />
-                  <h3 className="font-medium text-white">Portfolio Summary</h3>
+                  <Sparkles className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
+                  <h3 className="font-medium text-foreground dark:text-white">Portfolio Summary</h3>
                 </div>
-                <p className="text-sm text-white/70 mb-3">
+                <p className="text-sm text-muted-foreground dark:text-white/70 mb-3">
                   {loading
                     ? "Loading portfolio data..."
                     : `${dashboardStats.tokenHoldings} active tokens worth ${formatCurrency(portfolioValue)}. SOL price: ${Number(currentPrice) > 0 ? `$${Number(currentPrice).toFixed(2)}` : "Loading..."}`}
                 </p>
                 <Link href="/dashboard/ai-chat">
-                  <Button size="sm" variant="outline" className="w-full border-white/20 hover:bg-white/10 text-white">
+                  <Button size="sm" variant="outline" className="w-full border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white">
                     Get AI Analysis
                   </Button>
                 </Link>
@@ -1225,17 +1238,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Token Holdings */}
-      <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl">
+      <Card className="bg-background/80 dark:bg-black/20 border-border dark:border-white/10 hover:border-border dark:hover:border-white/20 transition-all hover:shadow-xl">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-white/80 text-transparent bg-clip-text">
               Active Token Holdings ({tokenAssets.length})
             </CardTitle>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm" className="border-white/20 hover:bg-white/10 text-white">
+              <Button variant="outline" size="sm" className="border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white">
                 Value
               </Button>
-              <Button variant="outline" size="sm" className="border-white/20 bg-white/10 text-white">
+              <Button variant="outline" size="sm" className="border-border dark:border-white/20 bg-accent dark:bg-white/10 text-foreground dark:text-white">
                 Balance
               </Button>
             </div>
@@ -1244,20 +1257,20 @@ export default function DashboardPage() {
         <CardContent>
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="text-white/60 text-center py-8">
+              <div className="text-muted-foreground dark:text-white/60 text-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
                 Loading token balances...
               </div>
             ) : tokenAssets.length === 0 ? (
-              <div className="text-white/60 text-center py-8">No active token holdings found.</div>
+              <div className="text-muted-foreground dark:text-white/60 text-center py-8">No active token holdings found.</div>
             ) : (
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left pb-3 text-white/60">Token</th>
-                    <th className="text-right pb-3 text-white/60">Balance</th>
-                    <th className="text-right pb-3 text-white/60">Price</th>
-                    <th className="text-right pb-3 text-white/60">Value</th>
+                  <tr className="border-b border-border dark:border-white/10">
+                    <th className="text-left pb-3 text-muted-foreground dark:text-white/60">Token</th>
+                    <th className="text-right pb-3 text-muted-foreground dark:text-white/60">Balance</th>
+                    <th className="text-right pb-3 text-muted-foreground dark:text-white/60">Price</th>
+                    <th className="text-right pb-3 text-muted-foreground dark:text-white/60">Value</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1267,22 +1280,22 @@ export default function DashboardPage() {
                     const value = balance * price
 
                     return (
-                      <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <tr key={idx} className="border-b border-border/50 dark:border-white/5 hover:bg-accent/50 dark:hover:bg-white/5 transition-colors">
                         <td className="py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
                               {asset.symbol?.slice(0, 2) || "TK"}
                             </div>
-                            <span className="font-medium text-white">{asset.symbol || "Unknown"}</span>
+                            <span className="font-medium text-foreground dark:text-white">{asset.symbol || "Unknown"}</span>
                           </div>
                         </td>
-                        <td className="text-right py-4 text-white">
+                        <td className="text-right py-4 text-foreground dark:text-white">
                           {balance.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                         </td>
-                        <td className="text-right py-4 text-white">
+                        <td className="text-right py-4 text-foreground dark:text-white">
                           ${price.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                         </td>
-                        <td className="text-right py-4 text-white font-medium">
+                        <td className="text-right py-4 text-foreground dark:text-white font-medium">
                           ${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </td>
                       </tr>

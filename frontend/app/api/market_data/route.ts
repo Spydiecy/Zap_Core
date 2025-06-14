@@ -10,6 +10,11 @@ const api_config:any = {
   passphrase: process.env.PASSPHRASE,
 };
 
+// Validate API credentials
+if (!api_config.api_key || !api_config.secret_key || !api_config.passphrase) {
+  console.error("Missing required OKX API credentials. Please check environment variables.");
+}
+
 function preHash(timestamp: string, method: string, request_path: string, query: string, body: string) {
   // For GET: query is "?..." and body is ""
   // For POST: query is "" and body is JSON string

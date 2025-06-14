@@ -35,17 +35,17 @@ interface GeminiResponse {
 function TransactionHistoryDisplay({ transactions, title }: { transactions: any[]; title: string }) {
   if (!transactions || transactions.length === 0) {
     return (
-      <Card className="w-full bg-black/40 border-white/20 backdrop-blur-sm">
+      <Card className="w-full bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground dark:text-white flex items-center gap-2">
             <Activity className="h-5 w-5" />
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Activity className="h-12 w-12 mx-auto mb-4 text-white/40" />
-            <p className="text-white/60">No recent transactions found</p>
+            <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground dark:text-white/40" />
+            <p className="text-muted-foreground dark:text-white/60">No recent transactions found</p>
           </div>
         </CardContent>
       </Card>
@@ -65,13 +65,13 @@ function TransactionHistoryDisplay({ transactions, title }: { transactions: any[
     .slice(0, 5)
 
   return (
-    <Card className="w-full bg-black/40 border-white/20 backdrop-blur-sm">
+    <Card className="w-full bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-foreground dark:text-white flex items-center gap-2">
           <Activity className="h-5 w-5" />
           {title}
         </CardTitle>
-        <p className="text-white/60 text-sm">Last {validTransactions.length} transactions</p>
+        <p className="text-muted-foreground dark:text-white/60 text-sm">Last {validTransactions.length} transactions</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -80,41 +80,41 @@ function TransactionHistoryDisplay({ transactions, title }: { transactions: any[
             const isPositive = amount > 0
             
             return (
-              <div key={idx} className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+              <div key={idx} className="p-4 rounded-lg bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
                       className={`p-2 rounded-full ${
                         isPositive
-                          ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                          : "bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500 dark:border-emerald-500/20"
+                          : "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-500 dark:border-rose-500/20"
                       }`}
                     >
                       {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                     </div>
                     <div>
-                      <p className="font-medium text-white font-mono text-sm">
+                      <p className="font-medium text-foreground dark:text-white font-mono text-sm">
                         {tx.txHash?.slice(0, 10)}...{tx.txHash?.slice(-8)}
                       </p>
-                      <p className="text-xs text-white/60 flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground dark:text-white/60 flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {tx.txTime ? new Date(Number(tx.txTime) * 1000).toLocaleString() : "Unknown time"}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`font-medium ${isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                    <p className={`font-medium ${isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                       {isPositive ? "+" : ""}{Math.abs(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}
                     </p>
                     <div className="flex items-center gap-2 justify-end">
-                      <span className="px-2 py-1 bg-white/10 rounded text-xs text-white">
+                      <span className="px-2 py-1 bg-muted dark:bg-white/10 rounded text-xs text-foreground dark:text-white">
                         {tx.symbol || "Unknown"}
                       </span>
                       <span
                         className={`px-2 py-1 rounded text-xs ${
                           tx.txStatus === "success"
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
+                            : "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30"
                         }`}
                       >
                         {tx.txStatus || "Unknown"}
@@ -135,17 +135,17 @@ function TransactionHistoryDisplay({ transactions, title }: { transactions: any[
 function TokenBalanceDisplay({ balances, title }: { balances: any[]; title: string }) {
   if (!balances || balances.length === 0) {
     return (
-      <Card className="w-full bg-black/40 border-white/20 backdrop-blur-sm">
+      <Card className="w-full bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground dark:text-white flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <BarChart3 className="h-12 w-12 mx-auto mb-4 text-white/40" />
-            <p className="text-white/60">No token balances found</p>
+            <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground dark:text-white/40" />
+            <p className="text-muted-foreground dark:text-white/60">No token balances found</p>
           </div>
         </CardContent>
       </Card>
@@ -179,14 +179,14 @@ function TokenBalanceDisplay({ balances, title }: { balances: any[]; title: stri
   }, 0)
 
   return (
-    <Card className="w-full bg-black/40 border-white/20 backdrop-blur-sm">
+    <Card className="w-full bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-foreground dark:text-white flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
           {title}
         </CardTitle>
-        <p className="text-white/60 text-sm">
-          Total Portfolio Value: <span className="text-emerald-400 font-semibold">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+        <p className="text-muted-foreground dark:text-white/60 text-sm">
+          Total Portfolio Value: <span className="text-emerald-600 dark:text-emerald-400 font-semibold">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
         </p>
       </CardHeader>
       <CardContent>
@@ -213,17 +213,17 @@ function TokenBalanceDisplay({ balances, title }: { balances: any[]; title: stri
             }
             
             return (
-              <div key={idx} className="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+              <div key={idx} className="p-4 rounded-lg bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${getTokenGradient(symbol)} flex items-center justify-center border border-white/20`}>
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${getTokenGradient(symbol)} flex items-center justify-center border border-border dark:border-white/20`}>
                       <span className="text-white text-sm font-bold">
                         {symbol.slice(0, 2)}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-white">{symbol}</p>
-                      <p className="text-xs text-white/60">
+                      <p className="font-medium text-foreground dark:text-white">{symbol}</p>
+                      <p className="text-xs text-muted-foreground dark:text-white/60">
                         {token.tokenContractAddress ? 
                           `${token.tokenContractAddress.slice(0, 6)}...${token.tokenContractAddress.slice(-4)}` : 
                           "Native Token"
@@ -232,14 +232,14 @@ function TokenBalanceDisplay({ balances, title }: { balances: any[]; title: stri
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-white">
+                    <p className="font-medium text-foreground dark:text-white">
                       {balance.toLocaleString(undefined, { maximumFractionDigits: 6 })} {symbol}
                     </p>
                     <div className="flex items-center gap-2 justify-end">
-                      <span className="text-xs text-white/60">
+                      <span className="text-xs text-muted-foreground dark:text-white/60">
                         ${price.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                       </span>
-                      <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-xs font-medium">
+                      <span className="px-2 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 rounded text-xs font-medium">
                         ${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </span>
                     </div>
@@ -564,15 +564,15 @@ function HistoricalPriceChart({ data, title }: { data: any; title: string }) {
   const isPositive = priceChange >= 0
 
   return (
-    <Card className="w-full bg-black/40 border-white/20 backdrop-blur-sm">
+    <Card className="w-full bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-foreground dark:text-white flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
           {title}
         </CardTitle>
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-white">${formatPrice(currentPrice)}</span>
-          <span className={`flex items-center gap-1 text-sm ${isPositive ? "text-green-400" : "text-red-400"}`}>
+          <span className="text-2xl font-bold text-foreground dark:text-white">${formatPrice(currentPrice)}</span>
+          <span className={`flex items-center gap-1 text-sm ${isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
             {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             {isPositive ? "+" : ""}
             {formatPrice(priceChange)}
@@ -593,12 +593,12 @@ function HistoricalPriceChart({ data, title }: { data: any; title: string }) {
             <LineChart data={chartData}>
               <XAxis
                 dataKey="time"
-                tick={{ fill: "white", fontSize: 12 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.2)" }}
-                tickLine={{ stroke: "rgba(255,255,255,0.2)" }}
+                tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={{ stroke: "hsl(var(--border))" }}
               />
               <YAxis
-                tick={{ fill: "white", fontSize: 12 }}
+                tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
                 axisLine={{ stroke: "rgba(255,255,255,0.2)" }}
                 tickLine={{ stroke: "rgba(255,255,255,0.2)" }}
                 domain={["dataMin - 0.01", "dataMax + 0.01"]}
@@ -1101,40 +1101,40 @@ export default function AiChatPage() {
   })
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-black p-4 rounded-xl text-white">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-background dark:bg-black p-4 rounded-xl text-foreground dark:text-white">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground dark:from-white dark:to-white/80 text-transparent bg-clip-text">
             AI Assistant
           </h1>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/60 hover:text-white hover:bg-white/10"
+              className="text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-accent dark:hover:bg-white/10"
               onClick={() => setIsExpanded(!isExpanded)}
               title={isExpanded ? "Collapse content" : "Expand content"}
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
-            <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-muted/50 dark:bg-white/5 rounded-lg p-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                className="h-6 w-6 p-0 text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-accent dark:hover:bg-white/10"
                 onClick={() => setContentZoom(Math.max(80, contentZoom - 10))}
                 disabled={contentZoom <= 80}
                 title="Zoom out"
               >
                 <Minus className="h-3 w-3" />
               </Button>
-              <span className="text-xs text-white/60 px-2 min-w-[3rem] text-center">
+              <span className="text-xs text-muted-foreground dark:text-white/60 px-2 min-w-[3rem] text-center">
                 {contentZoom}%
               </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10"
+                className="h-6 w-6 p-0 text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-accent dark:hover:bg-white/10"
                 onClick={() => setContentZoom(Math.min(120, contentZoom + 10))}
                 disabled={contentZoom >= 120}
                 title="Zoom in"
@@ -1147,14 +1147,14 @@ export default function AiChatPage() {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1 border-white/20 hover:bg-white/10 text-white"
+          className="gap-1 border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white"
           onClick={handleReset}
         >
           <RefreshCw className="h-4 w-4" /> New Chat
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl mb-4 hover:border-white/20 transition-all hover:shadow-xl">
+      <div className="flex-1 overflow-y-auto backdrop-blur-sm bg-background/80 dark:bg-black/20 border border-border dark:border-white/10 rounded-xl mb-4 hover:border-border dark:hover:border-white/20 transition-all hover:shadow-xl">
         <div 
           className={`p-6 transition-all duration-300 ${isExpanded ? 'block' : 'hidden'}`}
           style={getZoomStyles()}
@@ -1188,22 +1188,22 @@ export default function AiChatPage() {
                   <div
                     className={`rounded-full h-9 w-9 flex items-center justify-center ${
                       message.role === "user"
-                        ? "bg-white/10 ml-2 border border-white/10"
-                        : "bg-white/10 mr-2 border border-white/10"
+                        ? "bg-muted/50 dark:bg-white/10 ml-2 border border-border dark:border-white/10"
+                        : "bg-muted/50 dark:bg-white/10 mr-2 border border-border dark:border-white/10"
                     }`}
                   >
                     {message.role === "user" ? (
-                      <User className="h-4 w-4 text-white/80" />
+                      <User className="h-4 w-4 text-muted-foreground dark:text-white/80" />
                     ) : (
-                      <Bot className="h-4 w-4 text-white/80" />
+                      <Bot className="h-4 w-4 text-muted-foreground dark:text-white/80" />
                     )}
                   </div>
                   <div
                     className={`py-3 px-4 rounded-2xl ${
-                      message.role === "user" ? "bg-white/5 border border-white/10" : "bg-black/30 border border-white/10"
+                      message.role === "user" ? "bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10" : "bg-muted dark:bg-black/30 border border-border dark:border-white/10"
                     } whitespace-pre-wrap`}
                   >
-                    <p className="text-white/90">{message.content}</p>
+                    <p className="text-foreground dark:text-white/90">{message.content}</p>
                   </div>
                 </div>
               )}
@@ -1212,14 +1212,14 @@ export default function AiChatPage() {
           {loading && (
             <div className="flex justify-start mb-4">
               <div className="flex flex-row">
-                <div className="rounded-full h-9 w-9 flex items-center justify-center bg-white/10 mr-2 border border-white/10">
-                  <Bot className="h-4 w-4 text-white/80" />
+                <div className="rounded-full h-9 w-9 flex items-center justify-center bg-muted/50 dark:bg-white/10 mr-2 border border-border dark:border-white/10">
+                  <Bot className="h-4 w-4 text-muted-foreground dark:text-white/80" />
                 </div>
-                <div className="py-3 px-4 rounded-2xl bg-black/30 border border-white/10">
+                <div className="py-3 px-4 rounded-2xl bg-muted dark:bg-black/30 border border-border dark:border-white/10">
                   <div className="flex space-x-2">
-                    <div className="h-2 w-2 bg-white/40 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="h-2 w-2 bg-white/40 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="h-2 w-2 bg-white/40 rounded-full animate-bounce"></div>
+                    <div className="h-2 w-2 bg-muted-foreground dark:bg-white/40 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="h-2 w-2 bg-muted-foreground dark:bg-white/40 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="h-2 w-2 bg-muted-foreground dark:bg-white/40 rounded-full animate-bounce"></div>
                   </div>
                 </div>
               </div>
@@ -1227,29 +1227,29 @@ export default function AiChatPage() {
           )}
         </div>
         {!isExpanded && (
-          <div className="p-6 text-center text-white/40">
-            <Bot className="h-8 w-8 mx-auto mb-2 text-white/20" />
+          <div className="p-6 text-center text-muted-foreground dark:text-white/40">
+            <Bot className="h-8 w-8 mx-auto mb-2 text-muted-foreground dark:text-white/20" />
             <p className="text-sm">Chat content collapsed. Click the expand button to show messages.</p>
           </div>
         )}
       </div>
 
       <div className="relative">
-        <div className="backdrop-blur-md bg-black/30 border border-white/10 rounded-xl overflow-hidden">
+        <div className="backdrop-blur-md bg-background/80 dark:bg-black/30 border border-border dark:border-white/10 rounded-xl overflow-hidden">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
             placeholder="Ask Astra AI about DeFi strategies, market analysis, or trading tips..."
-            className="w-full py-4 px-4 bg-transparent border-none pr-24 focus:outline-none text-white placeholder:text-white/40"
+            className="w-full py-4 px-4 bg-transparent border-none pr-24 focus:outline-none text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/40"
             disabled={loading}
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
             <Button
               size="sm"
               variant="ghost"
-              className="h-8 w-8 p-0 rounded-full text-white/60 hover:bg-white/10 hover:text-white/80"
+              className="h-8 w-8 p-0 rounded-full text-muted-foreground dark:text-white/60 hover:bg-accent dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white/80"
               onClick={() => setInput("")}
               aria-label="Clear input"
               disabled={loading || !input.trim()}
@@ -1258,7 +1258,7 @@ export default function AiChatPage() {
             </Button>
             <Button
               size="sm"
-              className="h-8 px-3 bg-white/10 hover:bg-white/15 border border-white/10 text-white hover:border-white/20"
+              className="h-8 px-3 bg-muted dark:bg-white/10 hover:bg-accent dark:hover:bg-white/15 border border-border dark:border-white/10 text-foreground dark:text-white hover:border-border dark:hover:border-white/20"
               onClick={handleSendMessage}
               disabled={!input.trim() || loading}
             >
@@ -1273,7 +1273,7 @@ export default function AiChatPage() {
           <button
             key={index}
             onClick={() => setInput(suggestion)}
-            className="backdrop-blur-sm bg-white/5 text-sm py-2 px-4 rounded-full hover:bg-white/10 transition-colors border border-white/10 text-white/80 hover:text-white hover:border-white/20"
+            className="backdrop-blur-sm bg-muted/50 dark:bg-white/5 text-sm py-2 px-4 rounded-full hover:bg-muted dark:hover:bg-white/10 transition-colors border border-border dark:border-white/10 text-muted-foreground dark:text-white/80 hover:text-foreground dark:hover:text-white hover:border-border dark:hover:border-white/20"
             disabled={loading}
           >
             {suggestion}

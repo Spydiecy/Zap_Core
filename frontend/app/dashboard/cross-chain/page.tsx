@@ -907,43 +907,63 @@ export default function  CrossChainSwapPage(){
     onSelect,
     show,
     onToggle,
+    dropDirection = "down",
   }: {
     chains: typeof chainList
     selectedChain: (typeof chainList)[0]
     onSelect: (chain: (typeof chainList)[0]) => void
     show: boolean
     onToggle: () => void
+    dropDirection?: "up" | "down"
   }) => (
     <div className="relative">
       <Button
+        className="bg-card/50 hover:bg-muted text-foreground gap-2 font-medium border-border h-9 relative z-20"
         variant="outline"
-        size="sm"
-        className="border-white/20 hover:bg-white/10 text-white text-xs h-8 gap-2"
         onClick={onToggle}
-        disabled={isLoading}
       >
-        <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${selectedChain.color}`}></div>
+        <div
+          className={`w-5 h-5 rounded-full bg-gradient-to-r ${selectedChain.color} flex items-center justify-center text-background text-xs font-bold`}
+        >
+          {selectedChain.name.slice(0, 2)}
+        </div>
         {selectedChain.name}
-        <ChevronDown className="h-3 w-3" />
+        <ChevronDown className={`h-4 w-4 transition-transform ${dropDirection === "up" ? "rotate-180" : ""}`} />
       </Button>
 
       {show && (
-        <div className="absolute top-full mt-2 right-0 bg-black/90 border border-white/20 rounded-lg p-2 min-w-[180px] z-50 backdrop-blur-sm">
-          <div className="max-h-48 overflow-y-auto">
+        <div 
+          className={`absolute ${
+            dropDirection === "up" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
+          } right-0 bg-card border border-border rounded-lg p-2 min-w-[200px] z-[100] backdrop-blur-sm max-h-[240px] overflow-y-auto shadow-lg`}
+          style={{ 
+            position: 'absolute',
+            [dropDirection === "up" ? "bottom" : "top"]: "100%",
+            right: 0,
+            marginTop: dropDirection === "down" ? "8px" : undefined,
+            marginBottom: dropDirection === "up" ? "8px" : undefined
+          }}
+        >
+          <div className="space-y-1">
             {chains.map((chain) => (
               <button
-                key={chain.index}
-                className="w-full flex items-center gap-3 p-2 hover:bg-white/10 rounded text-left text-white text-sm"
+                key={chain.id}
+                className="w-full flex items-center gap-3 p-2 hover:bg-muted/50 rounded text-left text-foreground transition-colors"
                 onClick={() => {
                   onSelect(chain)
                   onToggle()
-                  setSwapResult(null)
-                  setToAmount("")
                 }}
               >
-                <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${chain.color}`}></div>
-                <span>{chain.name}</span>
-                {selectedChain.index === chain.index && <Check className="h-3 w-3 ml-auto text-green-400" />}
+                <div
+                  className={`w-5 h-5 rounded-full bg-gradient-to-r ${chain.color} flex items-center justify-center text-background text-xs font-bold`}
+                >
+                  {chain.name.slice(0, 2)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium">{chain.name}</div>
+                  <div className="text-xs text-muted-foreground">Chain ID: {chain.id}</div>
+                </div>
+                {selectedChain.id === chain.id && <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
               </button>
             ))}
           </div>
@@ -959,6 +979,7 @@ export default function  CrossChainSwapPage(){
     show,
     onToggle,
     loading,
+    dropDirection = "down",
   }: {
     tokens: Token[]
     selectedToken: Token | null
@@ -966,28 +987,41 @@ export default function  CrossChainSwapPage(){
     show: boolean
     onToggle: () => void
     loading: boolean
+    dropDirection?: "up" | "down"
   }) => (
-    <div className="relative">
+    <div className="relative isolate">
       <Button
-        className="bg-white/10 hover:bg-white/20 text-white gap-2 font-medium border-none h-9"
+        className="bg-card/50 hover:bg-muted text-foreground gap-2 font-medium border-border h-9 relative z-20"
         variant="outline"
         onClick={onToggle}
         disabled={loading}
       >
-        {selectedToken ? <TokenIcon token={selectedToken} /> : <div className="w-5 h-5 rounded-full bg-gray-500" />}
+        {selectedToken ? <TokenIcon token={selectedToken} /> : <div className="w-5 h-5 rounded-full bg-muted" />}
         {selectedToken?.symbol || "Select"}
-        <ChevronDown className="h-4 w-4" />
+        <ChevronDown className={`h-4 w-4 transition-transform ${dropDirection === "up" ? "rotate-180" : ""}`} />
       </Button>
 
       {show && (
-        <div className="absolute top-full mt-2 right-0 bg-black/90 border border-white/20 rounded-lg p-2 min-w-[250px] z-50 backdrop-blur-sm max-h-80 overflow-y-auto">
+        <div 
+          className={`absolute ${
+            dropDirection === "up" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
+          } right-0 bg-card border border-border rounded-lg p-2 min-w-[250px] z-[9999] backdrop-blur-sm max-h-[240px] overflow-y-auto shadow-lg`}
+          style={{ 
+            position: 'absolute',
+            [dropDirection === "up" ? "bottom" : "top"]: "100%",
+            right: dropDirection === "up" ? "-20px" : "0",
+            marginTop: dropDirection === "down" ? "8px" : undefined,
+            marginBottom: dropDirection === "up" ? "8px" : undefined,
+            transform: dropDirection === "up" ? "translateY(-8px)" : undefined
+          }}
+        >
           {loading ? (
-            <div className="text-center py-6 text-white/60">
+            <div className="text-center py-6 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3" />
               <div className="text-sm">Loading tokens...</div>
             </div>
           ) : tokens.length === 0 ? (
-            <div className="text-center py-4 text-white/60">
+            <div className="text-center py-4 text-muted-foreground">
               <div className="text-sm">No tokens available</div>
             </div>
           ) : (
@@ -995,7 +1029,7 @@ export default function  CrossChainSwapPage(){
               {tokens.map((token) => (
                 <button
                   key={token.address}
-                  className="w-full flex items-center gap-3 p-2 hover:bg-white/10 rounded text-left text-white transition-colors"
+                  className="w-full flex items-center gap-3 p-2 hover:bg-muted/50 rounded text-left text-foreground transition-colors"
                   onClick={() => {
                     onSelect(token)
                     onToggle()
@@ -1006,13 +1040,13 @@ export default function  CrossChainSwapPage(){
                   <TokenIcon token={token} />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium">{token.symbol}</div>
-                    <div className="text-xs text-white/60 truncate">{token.name}</div>
-                    <div className="text-xs text-white/40 font-mono truncate">
+                    <div className="text-xs text-muted-foreground truncate">{token.name}</div>
+                    <div className="text-xs text-muted-foreground/60 font-mono truncate">
                       {token.address.slice(0, 8)}...{token.address.slice(-6)}
                     </div>
                   </div>
                   {selectedToken?.address === token.address && (
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" />
                   )}
                 </button>
               ))}
@@ -1028,15 +1062,15 @@ export default function  CrossChainSwapPage(){
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 text-transparent bg-clip-text mb-1">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 text-transparent bg-clip-text mb-1">
             Cross-Chain Swap
           </h1>
-          <p className="text-white/60">
+          <p className="text-muted-foreground dark:text-white/60">
             Bridge tokens across different blockchains • {supportedPairs.length} pairs • {supportedBridges.length}{" "}
             bridges
           </p>
           {rateLimitInfo.requestCount > 0 && (
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-muted-foreground/60 dark:text-white/40 mt-1">
               API Requests made: {rateLimitInfo.requestCount} • Rate limit protection active
             </p>
           )}
@@ -1045,7 +1079,7 @@ export default function  CrossChainSwapPage(){
           <Button
             variant="outline"
             size="sm"
-            className="border-white/20 hover:bg-white/10 text-white gap-2"
+            className="border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white gap-2"
             onClick={() => setShowSupportedPairs(!showSupportedPairs)}
             disabled={supportedPairs.length === 0}
           >
@@ -1055,7 +1089,7 @@ export default function  CrossChainSwapPage(){
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full border-white/20 hover:bg-white/10 text-white"
+            className="rounded-full border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white"
             onClick={handleRefreshData}
             disabled={isLoading || rateLimitInfo.isRateLimited}
           >
@@ -1070,13 +1104,13 @@ export default function  CrossChainSwapPage(){
 
       {/* Rate Limit Warning */}
       {rateLimitInfo.isRateLimited && (
-        <Card className="mb-6 bg-amber-900/20 border-amber-500/30">
+        <Card className="mb-6 bg-amber-100 dark:bg-amber-900/20 border-amber-300 dark:border-amber-500/30">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-amber-400" />
+              <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               <div>
-                <div className="text-amber-400 font-medium">Rate Limit Active</div>
-                <div className="text-sm text-amber-200">
+                <div className="text-amber-800 dark:text-amber-400 font-medium">Rate Limit Active</div>
+                <div className="text-sm text-amber-700 dark:text-amber-200">
                   Please wait {getRateLimitCountdown()} seconds before making more requests
                 </div>
               </div>
@@ -1087,19 +1121,19 @@ export default function  CrossChainSwapPage(){
 
       {/* Enhanced Loading Progress */}
       {isLoading && (
-        <Card className="mb-6 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-500/30">
+        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-purple-200 dark:border-purple-500/30">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-purple-600 dark:text-purple-400" />
               <div className="flex-1">
-                <div className="text-white font-medium mb-2">{loadingState.currentStep}</div>
-                <div className="w-full bg-white/10 rounded-full h-3">
+                <div className="text-foreground dark:text-white font-medium mb-2">{loadingState.currentStep}</div>
+                <div className="w-full bg-muted dark:bg-white/10 rounded-full h-3">
                   <div
                     className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${loadingState.progress}%` }}
                   ></div>
                 </div>
-                <div className="flex justify-between text-xs text-white/60 mt-2">
+                <div className="flex justify-between text-xs text-muted-foreground dark:text-white/60 mt-2">
                   <span>
                     Step {loadingState.currentStepIndex} of {loadingState.totalSteps}
                   </span>
@@ -1107,7 +1141,7 @@ export default function  CrossChainSwapPage(){
                 </div>
               </div>
             </div>
-            <div className="mt-4 text-xs text-white/40">
+            <div className="mt-4 text-xs text-muted-foreground/60 dark:text-white/40">
               ⏳ Using 5-second delays between requests to prevent rate limiting
             </div>
           </CardContent>
@@ -1120,17 +1154,17 @@ export default function  CrossChainSwapPage(){
           {/* Pair Validation Status */}
           {fromToken && toToken && (
             <Card
-              className={`mb-4 ${pairValidation.isValid ? "bg-green-900/20 border-green-500/30" : "bg-amber-900/20 border-amber-500/30"}`}
+              className={`mb-4 ${pairValidation.isValid ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-500/30" : "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-500/30"}`}
             >
               <CardContent className="p-4">
                 <div
-                  className={`flex items-center gap-2 text-sm ${pairValidation.isValid ? "text-green-400" : "text-amber-400"}`}
+                  className={`flex items-center gap-2 text-sm ${pairValidation.isValid ? "text-green-700 dark:text-green-400" : "text-amber-700 dark:text-amber-400"}`}
                 >
                   {pairValidation.isValid ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
                   <span>{pairValidation.message}</span>
                 </div>
                 {pairValidation.availableBridges.length > 0 && (
-                  <div className="mt-2 text-xs text-white/60">
+                  <div className="mt-2 text-xs text-muted-foreground dark:text-white/60">
                     Available bridges: {pairValidation.availableBridges.map((b) => b.bridgeName).join(", ")}
                   </div>
                 )}
@@ -1139,42 +1173,26 @@ export default function  CrossChainSwapPage(){
           )}
 
           {/* Swap Interface */}
-          <div className="backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl overflow-hidden hover:border-white/20 transition-all hover:shadow-xl">
+          <div className="backdrop-blur-sm bg-card/50 border border-border rounded-xl overflow-hidden hover:border-border/80 transition-all hover:shadow-xl">
             <div className="p-6">
+              {/* From Token */}
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-white/60">From</span>
+                <span className="text-sm text-muted-foreground">From</span>
                 <ChainSelector
                   chains={chainList}
                   selectedChain={fromChain}
                   onSelect={(chain) => {
                     setFromChain(chain)
-                    setFromToken(null) // Reset token selection
+                    setFromToken(null)
                   }}
                   show={showFromChains}
                   onToggle={() => setShowFromChains(!showFromChains)}
+                  dropDirection="down"
                 />
               </div>
-              <div className="flex justify-between items-center mb-2">
-                <input
-                  type="text"
-                  value={fromAmount}
-                  onChange={(e) => {
-                    setFromAmount(e.target.value)
-                    setSwapResult(null)
-                    setToAmount("")
-                  }}
-                  className="text-2xl font-medium bg-transparent outline-none w-[60%] text-white"
-                  placeholder="0.0"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-white/20 hover:bg-white/10 text-white text-xs h-7"
-                    onClick={setMaxAmount}
-                  >
-                    MAX
-                  </Button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1">
                   <TokenSelector
                     tokens={fromTokens}
                     selectedToken={fromToken}
@@ -1182,77 +1200,85 @@ export default function  CrossChainSwapPage(){
                     show={showFromTokens}
                     onToggle={() => setShowFromTokens(!showFromTokens)}
                     loading={loadingState.fromTokens}
+                    dropDirection="down"
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="0.0"
+                    value={fromAmount}
+                    onChange={(e) => setFromAmount(e.target.value)}
+                    className="w-full bg-card/50 border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </div>
-              <div className="text-sm text-white/60 mt-1">
-                {(() => {
-                  const tokenBalance = getTokenBalance(fromToken, fromChain, true)
-                  return `Balance: ${loadingBalances && fromChain.index === "501" ? "Loading..." : tokenBalance.balance} ${fromToken?.symbol || "TOKEN"} ${tokenBalance.usdValue !== "—" ? `• $${tokenBalance.usdValue}` : ""} • Wallet: ${getCurrentWallet(fromChain).slice(0, 8)}...`
-                })()}
+
+              {/* Swap Direction Button */}
+              <div className="flex justify-center -my-3 relative z-10">
+                <Button
+                  onClick={handleSwapChains}
+                  size="icon"
+                  className="rounded-full h-10 w-10 bg-card hover:bg-muted border border-border"
+                  disabled={isLoading}
+                >
+                  <ArrowRightLeft className="h-5 w-5 text-foreground" />
+                </Button>
               </div>
-            </div>
 
-            <div className="flex justify-center -mt-2 -mb-2 z-10 relative">
-              <Button
-                onClick={handleSwapChains}
-                size="icon"
-                className="rounded-full h-10 w-10 shadow-md bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-white/20 hover:border-white/30"
-                disabled={isLoading}
-              >
-                <ArrowRightLeft className="h-5 w-5 text-white" />
-              </Button>
-            </div>
-
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-white/60">To</span>
+              {/* To Token */}
+              <div className="flex justify-between items-center mb-2 mt-6">
+                <span className="text-sm text-muted-foreground">To</span>
                 <ChainSelector
                   chains={chainList}
                   selectedChain={toChain}
                   onSelect={(chain) => {
                     setToChain(chain)
-                    setToToken(null) // Reset token selection
+                    setToToken(null)
                   }}
                   show={showToChains}
                   onToggle={() => setShowToChains(!showToChains)}
+                  dropDirection="up"
                 />
               </div>
-              <div className="flex justify-between items-center mb-2">
-                <input
-                  type="text"
-                  value={toAmount}
-                  className="text-2xl font-medium bg-transparent outline-none w-[60%] text-white"
-                  placeholder="0.0"
-                  readOnly
-                />
-                <TokenSelector
-                  tokens={toTokens}
-                  selectedToken={toToken}
-                  onSelect={setToToken}
-                  show={showToTokens}
-                  onToggle={() => setShowToTokens(!showToTokens)}
-                  loading={loadingState.toTokens}
-                />
-              </div>
-              <div className="text-sm text-white/60 mt-1">
-                No balance shown for receiving tokens • Recipient: {recipientAddress ? `${recipientAddress.slice(0, 8)}...${recipientAddress.slice(-6)}` : "Not set"}
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <TokenSelector
+                    tokens={toTokens}
+                    selectedToken={toToken}
+                    onSelect={setToToken}
+                    show={showToTokens}
+                    onToggle={() => setShowToTokens(!showToTokens)}
+                    loading={loadingState.toTokens}
+                    dropDirection="up"
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="0.0"
+                    value={toAmount}
+                    readOnly
+                    className="w-full bg-card/50 border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring cursor-not-allowed"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Bridge Settings */}
           <div className="mt-6 space-y-4">
-            <div className="backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-all hover:shadow-xl">
+            <div className="backdrop-blur-sm bg-background/50 dark:bg-black/20 border border-border dark:border-white/10 rounded-xl p-5 hover:border-border/80 dark:hover:border-white/20 transition-all hover:shadow-xl">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-white/80 font-medium">Bridge Settings</span>
+                <span className="text-sm text-foreground dark:text-white/80 font-medium">Bridge Settings</span>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm text-white/60">Slippage Tolerance</span>
-                    <button className="text-white/40 hover:text-white/60">
+                    <span className="text-sm text-muted-foreground dark:text-white/60">Slippage Tolerance</span>
+                    <button className="text-muted-foreground/40 dark:text-white/40 hover:text-muted-foreground/60 dark:hover:text-white/60">
                       <Info className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -1262,8 +1288,8 @@ export default function  CrossChainSwapPage(){
                         key={value}
                         variant="outline"
                         size="sm"
-                        className={`h-7 px-2.5 py-1 border-white/20 text-white text-xs ${
-                          slippage === value ? "bg-purple-500/20 border-purple-500/40" : "hover:bg-white/10"
+                        className={`h-7 px-2.5 py-1 border-border dark:border-white/20 text-foreground dark:text-white text-xs ${
+                          slippage === value ? "bg-accent dark:bg-purple-500/20 border-accent dark:border-purple-500/40" : "hover:bg-accent/50 dark:hover:bg-white/10"
                         }`}
                         onClick={() => setSlippage(value)}
                       >
@@ -1274,12 +1300,12 @@ export default function  CrossChainSwapPage(){
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/60">Route Optimization</span>
+                  <span className="text-sm text-muted-foreground dark:text-white/60">Route Optimization</span>
                   <div className="relative">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-white/20 hover:bg-white/10 text-white text-xs h-7 gap-2"
+                      className="border-border dark:border-white/20 hover:bg-background/10 text-foreground dark:text-white text-xs h-7 gap-2"
                       onClick={() => setShowRouteOptions(!showRouteOptions)}
                     >
                       {routeOptions.find((r) => r.value === routeSort)?.label}
@@ -1290,14 +1316,14 @@ export default function  CrossChainSwapPage(){
                         {routeOptions.map((option) => (
                           <button
                             key={option.value}
-                            className="w-full text-left p-2 hover:bg-white/10 rounded text-white text-sm"
+                            className="w-full text-left p-2 hover:bg-background/10 rounded text-foreground text-sm"
                             onClick={() => {
                               setRouteSort(option.value)
                               setShowRouteOptions(false)
                             }}
                           >
                             <div className="font-medium">{option.label}</div>
-                            <div className="text-xs text-white/60">{option.description}</div>
+                            <div className="text-xs text-foreground/60">{option.description}</div>
                           </button>
                         ))}
                       </div>
@@ -1306,25 +1332,25 @@ export default function  CrossChainSwapPage(){
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white/60">Bridge Fee</span>
+                  <span className="text-sm text-muted-foreground dark:text-white/60">Bridge Fee</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       value={feePercent}
                       onChange={(e) => setFeePercent(e.target.value)}
-                      className="w-16 px-2 py-1 bg-black/50 border border-white/20 rounded text-white text-xs text-right"
+                      className="w-16 px-2 py-1 bg-background dark:bg-black/50 border border-border dark:border-white/20 rounded text-foreground text-xs text-right"
                       placeholder="0.1"
                     />
-                    <span className="text-xs text-white/60">%</span>
+                    <span className="text-xs text-foreground/60">%</span>
                   </div>
                 </div>
 
                 {/* Recipient Address Section */}
-                <div className="space-y-3 pt-2 border-t border-white/10">
+                <div className="space-y-3 pt-2 border-t border-border dark:border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-white/60">Recipient Address</span>
-                      <button className="text-white/40 hover:text-white/60">
+                      <span className="text-sm text-foreground dark:text-white/60">Recipient Address</span>
+                      <button className="text-muted-foreground/40 dark:text-white/40 hover:text-muted-foreground/60 dark:hover:text-white/60">
                         <Info className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -1338,7 +1364,7 @@ export default function  CrossChainSwapPage(){
                       type="text"
                       value={recipientAddress}
                       onChange={(e) => setRecipientAddress(e.target.value)}
-                      className="w-full px-3 py-2 bg-black/50 border border-white/20 rounded text-white text-sm"
+                      className="w-full px-3 py-2 bg-background dark:bg-black/50 border border-border dark:border-white/20 rounded text-foreground text-sm"
                       placeholder={`Enter ${toChain.name} address (${toChain.index === "501" ? "Base58" : "0x..."})`}
                     />
                     {recipientAddress && !validateRecipientAddress(recipientAddress, toChain) && (
@@ -1353,7 +1379,7 @@ export default function  CrossChainSwapPage(){
                         Valid {toChain.name} address
                       </div>
                     )}
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-foreground/40">
                       Tokens will be sent to this address on {toChain.name}
                     </div>
                   </div>
@@ -1362,30 +1388,66 @@ export default function  CrossChainSwapPage(){
             </div>
           </div>
 
-          <Button
-            className="w-full mt-6 py-6 text-lg gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-500/50 text-white shadow-lg backdrop-blur-sm"
-            size="lg"
-            onClick={handleBuildTransaction}
-            disabled={
-              loading || 
-              !fromAmount || 
-              Number.parseFloat(fromAmount) <= 0 || 
-              !pairValidation.isValid || 
-              isLoading ||
-              !recipientAddress.trim() ||
-              !validateRecipientAddress(recipientAddress, toChain)
-            }
-          >
-            <ArrowRightLeft className="h-5 w-5" />
-            {loading ? "Building Transaction..." : "Build Cross-Chain Transaction"}
-          </Button>
+          {/* Route Selector */}
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Select Route</span>
+            </div>
+            <div className="space-y-2">
+              {routeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                    routeSort === option.value
+                      ? "bg-accent border-accent text-accent-foreground"
+                      : "bg-card/50 border-border hover:bg-muted/50"
+                  }`}
+                  onClick={() => setRouteSort(option.value)}
+                >
+                  <div className="flex-1 text-left">
+                    <div className="font-medium text-foreground">{option.label}</div>
+                    <div className="text-sm text-muted-foreground">{option.description}</div>
+                  </div>
+                  {routeSort === option.value && <Check className="h-4 w-4 text-accent-foreground" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Swap Button */}
+          <div className="p-4 border-t border-border">
+            <Button
+              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-medium h-12"
+              disabled={!fromToken || !toToken || !fromAmount || isLoading || rateLimitInfo.isRateLimited}
+              onClick={handleBuildTransaction}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Building Transaction...
+                </>
+              ) : rateLimitInfo.isRateLimited ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Rate Limited ({getRateLimitCountdown()}s)
+                </>
+              ) : !fromToken || !toToken ? (
+                "Select Tokens"
+              ) : !fromAmount ? (
+                "Enter Amount"
+              ) : (
+                "Build Transaction"
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Sidebar - Current Chain Pairs */}
         <div className="space-y-4">
-          <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl">
+          <Card className="bg-background dark:bg-black/20 border-border dark:border-white/10 hover:border-border/80 dark:hover:border-white/20 transition-all hover:shadow-xl">
             <CardHeader>
-              <CardTitle className="text-lg text-white flex items-center gap-2">
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <Link className="h-5 w-5" />
                 Current Route Pairs
               </CardTitle>
@@ -1393,10 +1455,10 @@ export default function  CrossChainSwapPage(){
             <CardContent>
               <div className="space-y-3">
                 {getCurrentChainPairs().length === 0 ? (
-                  <div className="text-center py-6 text-white/60">
+                  <div className="text-center py-6 text-foreground/60">
                     <AlertTriangle className="h-8 w-8 mx-auto mb-3 text-amber-400" />
                     <div className="text-sm">No supported pairs for this route</div>
-                    <div className="text-xs text-white/40 mt-1">
+                    <div className="text-xs text-foreground/40 mt-1">
                       {fromChain.name} → {toChain.name}
                     </div>
                   </div>
@@ -1409,16 +1471,16 @@ export default function  CrossChainSwapPage(){
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-foreground text-xs font-bold">
                             {pair.fromTokenSymbol.slice(0, 1)}
                           </div>
-                          <ArrowRightLeft className="h-3 w-3 text-white/60" />
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
+                          <ArrowRightLeft className="h-3 w-3 text-foreground/60" />
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-foreground text-xs font-bold">
                             {pair.toTokenSymbol.slice(0, 1)}
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-white font-medium text-sm">
+                          <div className="text-foreground font-medium text-sm">
                             {pair.fromTokenSymbol} → {pair.toTokenSymbol}
                           </div>
                         </div>
@@ -1431,9 +1493,9 @@ export default function  CrossChainSwapPage(){
           </Card>
 
           {/* Available Bridges */}
-          <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl">
+          <Card className="bg-background dark:bg-black/20 border-border dark:border-white/10 hover:border-border/80 dark:hover:border-white/20 transition-all hover:shadow-xl">
             <CardHeader>
-              <CardTitle className="text-lg text-white flex items-center gap-2">
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <Shield className="h-5 w-5" />
                 Available Bridges
               </CardTitle>
@@ -1441,9 +1503,9 @@ export default function  CrossChainSwapPage(){
             <CardContent>
               <div className="space-y-3">
                 {pairValidation.availableBridges.length === 0 ? (
-                  <div className="text-center py-4 text-white/60">
+                  <div className="text-center py-4 text-foreground/60">
                     <div className="text-sm">No bridges available</div>
-                    <div className="text-xs text-white/40 mt-1">Select a valid token pair</div>
+                    <div className="text-xs text-foreground/40 mt-1">Select a valid token pair</div>
                   </div>
                 ) : (
                   pairValidation.availableBridges.map((bridge, index) => (
@@ -1454,12 +1516,12 @@ export default function  CrossChainSwapPage(){
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white text-xs font-bold">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-foreground text-xs font-bold">
                             {bridge.bridgeName.slice(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-white font-medium text-sm">{bridge.bridgeName}</div>
-                            <div className="text-xs text-white/60">
+                            <div className="text-foreground font-medium text-sm">{bridge.bridgeName}</div>
+                            <div className="text-xs text-foreground/60">
                               {bridge.requireOtherNativeFee ? "Requires native fee" : "No native fee"}
                             </div>
                           </div>
@@ -1481,19 +1543,19 @@ export default function  CrossChainSwapPage(){
           <div className="bg-black/90 rounded-xl shadow-2xl border border-white/20 relative max-w-6xl w-full mx-4 max-h-[80vh] overflow-hidden">
             <div className="p-6 border-b border-white/10">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 text-transparent bg-clip-text">
                   Supported Token Pairs
                 </h2>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowSupportedPairs(false)}
-                  className="text-white/70 hover:text-white hover:bg-white/10"
+                  className="text-foreground/70 hover:text-foreground hover:bg-foreground/10"
                 >
                   <Copy className="h-5 w-5 rotate-45" />
                 </Button>
               </div>
-              <p className="text-white/60 mt-2">
+              <p className="text-foreground/60 mt-2">
                 {supportedPairs.length} supported token pairs across {getChainCombinations().length} chain routes
               </p>
             </div>
@@ -1512,18 +1574,18 @@ export default function  CrossChainSwapPage(){
                           <div
                             className={`w-8 h-8 rounded-full bg-gradient-to-r ${combination.from.color} flex items-center justify-center`}
                           >
-                            <span className="text-white text-xs font-bold">{combination.from.name.slice(0, 2)}</span>
+                            <span className="text-foreground text-xs font-bold">{combination.from.name.slice(0, 2)}</span>
                           </div>
-                          <ArrowRightLeft className="h-4 w-4 text-white/60" />
+                          <ArrowRightLeft className="h-4 w-4 text-foreground/60" />
                           <div
                             className={`w-8 h-8 rounded-full bg-gradient-to-r ${combination.to.color} flex items-center justify-center`}
                           >
-                            <span className="text-white text-xs font-bold">{combination.to.name.slice(0, 2)}</span>
+                            <span className="text-foreground text-xs font-bold">{combination.to.name.slice(0, 2)}</span>
                           </div>
                         </div>
                         <div className="text-xs text-purple-400 font-medium">{combination.pairs.length} pairs</div>
                       </div>
-                      <div className="text-white font-medium">
+                      <div className="text-foreground font-medium">
                         {combination.from.name} → {combination.to.name}
                       </div>
                     </CardHeader>
@@ -1532,15 +1594,15 @@ export default function  CrossChainSwapPage(){
                         {combination.pairs.slice(0, 3).map((pair: TokenPair) => (
                           <div
                             key={pair.pairId}
-                            className="flex items-center justify-between p-2 bg-white/5 rounded text-sm"
+                            className="flex items-center justify-between p-2 bg-background rounded text-sm"
                           >
-                            <span className="text-white/80">
+                            <span className="text-foreground/80">
                               {pair.fromTokenSymbol} → {pair.toTokenSymbol}
                             </span>
                           </div>
                         ))}
                         {combination.pairs.length > 3 && (
-                          <div className="text-xs text-white/60 text-center py-1">
+                          <div className="text-xs text-foreground/60 text-center py-1">
                             +{combination.pairs.length - 3} more pairs
                           </div>
                         )}
@@ -1566,149 +1628,81 @@ export default function  CrossChainSwapPage(){
       )}
 
       {/* Swap Result */}
-      {swapResult && !error && (
-        <Card className="mt-4 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-purple-500/30">
-          <CardHeader>
-            <CardTitle className="text-white text-lg flex items-center gap-2">
-              <ArrowRightLeft className="h-5 w-5" />
-              Cross-Chain Transaction Ready
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {swapResult.data.map((quote, index) => (
-              <div key={index} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-white/60">You Send:</span>
-                    <div className="text-white font-medium">
-                      {fromToken && formatDisplayAmount(quote.fromTokenAmount, fromToken.decimals)} {fromToken?.symbol}
-                    </div>
-                    <div className="text-xs text-white/60">on {fromChain.name}</div>
-                  </div>
-                  <div>
-                    <span className="text-white/60">You Receive:</span>
-                    <div className="text-white font-medium">
-                      {toToken && formatDisplayAmount(quote.toTokenAmount, toToken.decimals)} {toToken?.symbol}
-                    </div>
-                    <div className="text-xs text-white/60">on {toChain.name}</div>
-                  </div>
-                  <div>
-                    <span className="text-white/60">Minimum Received:</span>
-                    <div className="text-white font-medium">
-                      {toToken && formatDisplayAmount(quote.minmumReceive, toToken.decimals)} {toToken?.symbol}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-white/60">Bridge:</span>
-                    <div className="text-white font-medium">{quote.router.bridgeName}</div>
-                  </div>
+      {swapResult && (
+        <Card className={`mt-4 ${swapResult.success ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"}`}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              {swapResult.success ? (
+                <CheckCircle className="h-5 w-5 text-emerald-500" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-rose-500" />
+              )}
+              <div>
+                <div className={`font-medium ${swapResult.success ? "text-emerald-700" : "text-rose-700"}`}>
+                  {swapResult.success ? "Transaction Built Successfully" : "Transaction Build Failed"}
                 </div>
-
-                {/* Recipient Address Display */}
-                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
-                  <div className="text-blue-400 font-medium mb-2 flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Recipient Address
-                  </div>
-                  <div className="text-sm text-blue-200">
-                    <div className="flex items-center justify-between">
-                      <span>Destination Address:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs">
-                          {getRecipientAddress().slice(0, 12)}...{getRecipientAddress().slice(-8)}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 hover:bg-white/10"
-                          onClick={() => copyToClipboard(getRecipientAddress())}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="text-xs text-blue-300 mt-1">
-                      Tokens will be sent to this {toChain.name} address
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 rounded-lg p-3">
-                  <div className="text-white/80 font-medium mb-2">Bridge Information</div>
-                  <div className="text-sm space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Bridge ID:</span>
-                      <span className="text-white">{quote.router.bridgeId}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Bridge Name:</span>
-                      <span className="text-white">{quote.router.bridgeName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Cross-chain Fee:</span>
-                      <span className="text-white">{quote.router.crossChainFee}</span>
-                    </div>
-                    {quote.router.otherNativeFee !== "0" && (
-                      <div className="flex justify-between">
-                        <span className="text-white/60">Native Fee:</span>
-                        <span className="text-white">{quote.router.otherNativeFee}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-white/5 rounded-lg p-3">
-                  <div className="text-white/80 font-medium mb-2">Transaction Details</div>
-                  <div className="text-sm space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/60">To Contract:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-white font-mono text-xs">
-                          {quote.tx.to.slice(0, 8)}...{quote.tx.to.slice(-8)}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 hover:bg-white/10"
-                          onClick={() => copyToClipboard(quote.tx.to)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Gas Limit:</span>
-                      <span className="text-white">{quote.tx.gasLimit}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Gas Price:</span>
-                      <span className="text-white">{quote.tx.gasPrice}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Value:</span>
-                      <span className="text-white">{quote.tx.value}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-                  <div className="text-amber-400 font-medium mb-2 flex items-center gap-2">
-                    <Info className="h-4 w-4" />
-                    Ready for Execution
-                  </div>
-                  <div className="text-sm text-amber-200">
-                    Transaction data is ready. Use your wallet to sign and execute this cross-chain swap. The bridge
-                    will handle the token transfer between {fromChain.name} and {toChain.name}.
-                  </div>
+                <div className={`text-sm ${swapResult.success ? "text-emerald-600" : "text-rose-600"}`}>
+                  {swapResult.msg}
                 </div>
               </div>
-            ))}
+            </div>
+
+            {swapResult.success && swapResult.data[0] && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">You Pay</span>
+                  <span className="text-foreground font-medium">
+                    {formatDisplayAmount(swapResult.data[0].fromTokenAmount, fromToken?.decimals || 18)} {fromToken?.symbol}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">You Receive (Estimated)</span>
+                  <span className="text-foreground font-medium">
+                    {formatDisplayAmount(swapResult.data[0].toTokenAmount, toToken?.decimals || 18)} {toToken?.symbol}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Minimum Received</span>
+                  <span className="text-foreground font-medium">
+                    {formatDisplayAmount(swapResult.data[0].minmumReceive, toToken?.decimals || 18)} {toToken?.symbol}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Bridge</span>
+                  <span className="text-foreground font-medium">{swapResult.data[0].router.bridgeName}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Bridge Fee</span>
+                  <span className="text-foreground font-medium">
+                    {formatDisplayAmount(swapResult.data[0].router.crossChainFee, 18)} {fromToken?.symbol}
+                  </span>
+                </div>
+                {swapResult.data[0].router.otherNativeFee !== "0" && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Native Fee</span>
+                    <span className="text-foreground font-medium">
+                      {formatDisplayAmount(swapResult.data[0].router.otherNativeFee, 18)} {fromToken?.symbol}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Gas Limit</span>
+                  <span className="text-foreground font-medium">{swapResult.data[0].tx.gasLimit}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Gas Price</span>
+                  <span className="text-foreground font-medium">
+                    {formatDisplayAmount(swapResult.data[0].tx.gasPrice, 9)} GWEI
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       <div className="mt-5 text-center">
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-foreground/40">
           Powered by OKX Cross-Chain Bridge Aggregator. Secure multi-chain token transfers.
         </p>
       </div>
@@ -1720,7 +1714,7 @@ function TokenIcon({ token }: { token: Token }) {
   // If token has a logo URL, use it
   if (token.logoUrl && token.hasLogo) {
     return (
-      <div className="w-5 h-5 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">
+      <div className="w-5 h-5 rounded-full overflow-hidden bg-background flex items-center justify-center">
         <img
           src={token.logoUrl || "/placeholder.svg"}
           alt={token.symbol}
@@ -1729,7 +1723,7 @@ function TokenIcon({ token }: { token: Token }) {
             // Fallback to gradient if image fails to load
             const target = e.target as HTMLImageElement
             target.style.display = "none"
-            target.parentElement!.innerHTML = `<div class="w-5 h-5 rounded-full ${getTokenGradient(token.symbol)} flex items-center justify-center text-white text-xs font-bold">${token.symbol.slice(0, 2)}</div>`
+            target.parentElement!.innerHTML = `<div class="w-5 h-5 rounded-full ${getTokenGradient(token.symbol)} flex items-center justify-center text-foreground text-xs font-bold">${token.symbol.slice(0, 2)}</div>`
           }}
         />
       </div>
@@ -1739,7 +1733,7 @@ function TokenIcon({ token }: { token: Token }) {
   // Fallback to gradient background with token symbol
   return (
     <div
-      className={`w-5 h-5 rounded-full ${getTokenGradient(token.symbol)} flex items-center justify-center text-white text-xs font-bold`}
+      className={`w-5 h-5 rounded-full ${getTokenGradient(token.symbol)} flex items-center justify-center text-foreground text-xs font-bold`}
     >
       {token.symbol.slice(0, 2)}
     </div>

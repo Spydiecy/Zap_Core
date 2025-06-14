@@ -451,15 +451,15 @@ export default function PortfolioPage() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text mb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 text-transparent bg-clip-text mb-2">
             Portfolio
           </h1>
-          <p className="text-white/60">
+          <p className="text-muted-foreground">
             Track and manage your Solana assets
             {connected ? (
-              <span className="ml-2 text-green-400">• Connected Wallet</span>
+              <span className="ml-2 text-emerald-500">• Connected Wallet</span>
             ) : (
-              <span className="ml-2 text-orange-400">• Sample Data</span>
+              <span className="ml-2 text-amber-500">• Sample Data</span>
             )}
           </p>
         </div>
@@ -468,7 +468,7 @@ export default function PortfolioPage() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 border-white/20 hover:bg-white/10 text-white"
+              className="gap-2"
               onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
               disabled={loading}
             >
@@ -477,11 +477,11 @@ export default function PortfolioPage() {
               <ChevronDown className="h-4 w-4" />
             </Button>
             {showPeriodDropdown && (
-              <div className="absolute top-full mt-2 right-0 bg-black/90 border border-white/20 rounded-lg p-2 min-w-[120px] z-50 backdrop-blur-sm">
+              <div className="absolute top-full mt-2 right-0 bg-card border border-border rounded-lg p-2 min-w-[120px] z-50 backdrop-blur-sm">
                 {TIME_PERIODS.map((period) => (
                   <button
                     key={period.value}
-                    className="w-full text-left p-2 hover:bg-white/10 rounded text-white text-sm"
+                    className="w-full text-left p-2 hover:bg-muted/50 rounded text-foreground text-sm"
                     onClick={() => {
                       setSelectedPeriod(period.value)
                       setShowPeriodDropdown(false)
@@ -496,7 +496,7 @@ export default function PortfolioPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 border-white/20 hover:bg-white/10 text-white"
+            className="gap-2"
             onClick={handleExport}
             disabled={loading}
           >
@@ -506,7 +506,7 @@ export default function PortfolioPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 border-white/20 hover:bg-white/10 text-white"
+            className="gap-2"
             onClick={handleRefresh}
             disabled={refreshing || loading}
           >
@@ -516,52 +516,25 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* Wallet Status Card */}
-      <Card className="bg-black/20 border-white/10">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${connected ? "bg-green-400" : "bg-orange-400"}`}></div>
-              <div>
-                <p className="text-white font-medium">{connected ? "Connected Wallet" : "Sample Data Mode"}</p>
-                <p className="text-white/60 text-sm font-mono">
-                  {connected
-                    ? `${currentAddress.slice(0, 8)}...${currentAddress.slice(-8)} (Your Wallet)`
-                    : `${SAMPLE_SOLANA_ADDRESS.slice(0, 8)}...${SAMPLE_SOLANA_ADDRESS.slice(-8)} (Demo Address)`}
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white/60 text-sm">{connected ? "Real-time data" : "Sample portfolio data"}</p>
-              <p className="text-white/40 text-xs">
-                {connected
-                  ? "Connect your wallet to see your actual portfolio"
-                  : "Showing demo data from a sample address"}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Loading Progress */}
       {loading && (
-        <Card className="bg-black/20 border-white/10">
+        <Card className="bg-card/50 border-border">
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-white/80">{loadingStep}</span>
-                <span className="text-white/60">{loadingProgress}%</span>
+                <span className="text-foreground/80">{loadingStep}</span>
+                <span className="text-muted-foreground">{loadingProgress}%</span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
+              <div className="w-full bg-muted rounded-full h-2">
                 <div
                   className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${loadingProgress}%` }}
                 ></div>
               </div>
-              <div className="flex items-center gap-2 text-white/60 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Processing API requests with rate limiting...
-                <span className="text-white/40">({connected ? "Connected wallet data" : "Sample data"})</span>
+                <span className="text-muted-foreground/60">({connected ? "Connected wallet data" : "Sample data"})</span>
               </div>
             </div>
           </CardContent>
@@ -609,12 +582,12 @@ export default function PortfolioPage() {
       </div>
 
       {/* Controls */}
-      <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all relative overflow-visible">
+      <Card className="bg-card/50 border-border hover:border-border/80 transition-all relative overflow-visible">
         <CardContent className="p-6 overflow-visible">
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div className="flex gap-4 items-center">
               <select
-                className="bg-black/50 border border-white/20 rounded-lg px-4 py-2 text-white backdrop-blur-sm hover:border-white/30 transition-colors"
+                className="bg-card/50 border border-border rounded-lg px-4 py-2 text-foreground backdrop-blur-sm hover:border-border/80 transition-colors"
                 value={selectedTable}
                 onChange={(e) => setSelectedTable(e.target.value as any)}
                 disabled={loading}
@@ -627,7 +600,7 @@ export default function PortfolioPage() {
                 onClick={() => setActiveModal("details")}
                 variant="outline"
                 size="sm"
-                className="border-white/20 hover:bg-white/10 text-white gap-2"
+                className="border-border dark:border-white/20 hover:bg-accent dark:hover:bg-white/10 text-foreground dark:text-white gap-2"
                 disabled={loading}
               >
                 <Eye className="h-4 w-4" />
@@ -636,19 +609,19 @@ export default function PortfolioPage() {
             </div>
             <div className="flex gap-3 items-center">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/40 dark:text-white/40" />
                 <input
                   type="text"
                   placeholder="Search tokens, addresses, or transactions..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   disabled={loading}
-                  className="bg-black/50 border border-white/20 rounded-lg pl-10 pr-4 py-2 text-white placeholder:text-white/40 backdrop-blur-sm hover:border-white/30 transition-colors disabled:opacity-50 w-80"
+                  className="bg-card/50 border border-border rounded-lg pl-10 pr-4 py-2 text-foreground backdrop-blur-sm hover:border-border/80 transition-colors disabled:opacity-50 w-80"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Coins className="h-4 w-4 text-white/60" />
-                <span className="text-sm text-white/70">Chain:</span>
+                <Coins className="h-4 w-4 text-muted-foreground dark:text-white/60" />
+                <span className="text-sm text-muted-foreground dark:text-white/70">Chain:</span>
                 <div className="flex gap-2">
                   {AVAILABLE_CHAINS.map((chain) => {
                     const isSelected = selectedChains.includes(chain.id)
@@ -659,8 +632,8 @@ export default function PortfolioPage() {
                         disabled={loading}
                         className={`px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                           isSelected
-                            ? "bg-white/15 text-white border border-white/20"
-                            : "bg-white/5 text-white/60 hover:bg-white/10 border border-transparent"
+                            ? "bg-accent dark:bg-white/15 text-foreground dark:text-white border border-border dark:border-white/20"
+                            : "bg-card/50 dark:bg-white/5 text-muted-foreground dark:text-white/60 hover:bg-accent/50 dark:hover:bg-white/10 border border-transparent"
                         } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
                         {chain.label}
@@ -675,22 +648,22 @@ export default function PortfolioPage() {
       </Card>
 
       {/* Main Data Table */}
-      <Card className="bg-black/20 border-white/10 hover:border-white/20 transition-all hover:shadow-xl relative z-10">
+      <Card className="bg-background/50 dark:bg-black/20 border-border dark:border-white/10 hover:border-border/80 dark:hover:border-white/20 transition-all hover:shadow-xl relative z-10">
         <CardHeader>
-          <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+          <CardTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 dark:from-white dark:to-white/80 text-transparent bg-clip-text">
             {selectedTable === "balances" && `Active Portfolio Breakdown (${filteredTokenBalances.length} tokens)`}
             {selectedTable === "history" && `Active Transaction History (${filteredHistory.length} transactions)`}
             {selectedTable === "specific" && "Specific Token Balance"}
-            {!connected && <span className="ml-2 text-sm text-orange-400 font-normal">• Sample Data</span>}
+            {!connected && <span className="ml-2 text-sm text-orange-600 dark:text-orange-400 font-normal">• Sample Data</span>}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="text-center text-white/60 py-12">
+              <div className="text-center text-muted-foreground dark:text-white/60 py-12">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                 <p className="mb-2">{loadingStep}</p>
-                <div className="w-48 mx-auto bg-white/10 rounded-full h-2">
+                <div className="w-48 mx-auto bg-accent/50 dark:bg-white/10 rounded-full h-2">
                   <div
                     className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${loadingProgress}%` }}
@@ -753,7 +726,7 @@ export default function PortfolioPage() {
                   <p>Total Transactions: {history.length}</p>
                   <p>Active Transactions (filtered): {filteredHistory.length}</p>
                   <p>
-                    Filter Criteria: Balance {">"} 0, Price {">"} 0, Value ≥ $0.01
+                    Filter Criteria: Balance {">"} 0, Price {">"} 0, Value {"<"} $0.01
                   </p>
                   <p>Address Source: {connected ? "Connected Wallet" : "Sample Address"}</p>
                 </div>
@@ -789,17 +762,17 @@ function PortfolioCard({
         className="absolute inset-0 bg-gradient-to-r rounded-xl blur-sm opacity-20 group-hover:opacity-30 transition-opacity"
         style={{ backgroundImage: `linear-gradient(to right, ${gradientFrom}, ${gradientTo})` }}
       ></div>
-      <div className="relative h-full backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl p-6 overflow-hidden group-hover:border-white/20 transition-all group-hover:shadow-xl">
+      <div className="relative h-full backdrop-blur-sm bg-card border border-border rounded-xl p-6 overflow-hidden group-hover:border-border/80 transition-all group-hover:shadow-xl">
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm text-white/60">{title}</p>
-            <p className="text-2xl font-bold mt-1 text-white">{value}</p>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold mt-1 text-foreground">{value}</p>
             <div className="flex items-center mt-1">
-              <span className="text-xs text-white/80">{change}</span>
+              <span className="text-xs text-muted-foreground/80">{change}</span>
             </div>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 backdrop-blur-sm border border-white/5">
-            <Icon className="h-5 w-5 text-white/80" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 backdrop-blur-sm border border-border/50">
+            <Icon className="h-5 w-5 text-foreground/80" />
           </div>
         </div>
         <div
@@ -815,9 +788,9 @@ function TokenBalancesTable({ assets }: { assets: any[] }) {
   if (!assets.length)
     return (
       <div className="text-center py-12">
-        <Coins className="h-12 w-12 mx-auto mb-4 text-white/40" />
-        <p className="text-white/60">No active token balances found.</p>
-        <p className="text-white/40 text-sm mt-2">
+        <Coins className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+        <p className="text-muted-foreground">No active token balances found.</p>
+        <p className="text-muted-foreground/60 text-sm mt-2">
           All tokens have been filtered out (zero balance, zero price, or value {"<"} $0.01)
         </p>
       </div>
@@ -826,12 +799,12 @@ function TokenBalancesTable({ assets }: { assets: any[] }) {
   return (
     <table className="w-full">
       <thead>
-        <tr className="border-b border-white/10">
-          <th className="text-left pb-4 text-white/60 font-medium">Asset</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Chain</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Price</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Holdings</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Value</th>
+        <tr className="border-b border-border/40">
+          <th className="text-left pb-4 text-muted-foreground font-medium">Asset</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Chain</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Price</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Holdings</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Value</th>
         </tr>
       </thead>
       <tbody>
@@ -842,36 +815,36 @@ function TokenBalancesTable({ assets }: { assets: any[] }) {
           const tokenValue = balance * price
 
           return (
-            <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+            <tr key={idx} className="border-b border-border/20 hover:bg-muted/50 transition-colors group">
               <td className="py-4">
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-8 h-8 rounded-full bg-gradient-to-r ${chainInfo.color} flex items-center justify-center`}
                   >
-                    <span className="text-white text-xs font-bold">{asset.symbol?.slice(0, 2) || "TK"}</span>
+                    <span className="text-background text-xs font-bold">{asset.symbol?.slice(0, 2) || "TK"}</span>
                   </div>
                   <div>
-                    <p className="font-medium text-white group-hover:text-white/90">{asset.symbol || "Unknown"}</p>
-                    <p className="text-xs text-white/60">{asset.tokenContractAddress?.slice(0, 10)}...</p>
+                    <p className="font-medium text-foreground group-hover:text-foreground/90">{asset.symbol || "Unknown"}</p>
+                    <p className="text-xs text-muted-foreground">{asset.tokenContractAddress?.slice(0, 10)}...</p>
                   </div>
                 </div>
               </td>
               <td className="text-right py-4">
                 <span
-                  className={`px-2 py-1 bg-gradient-to-r ${chainInfo.color} bg-opacity-20 rounded text-xs text-white`}
+                  className={`px-2 py-1 bg-gradient-to-r ${chainInfo.color} bg-opacity-20 rounded text-xs text-background`}
                 >
                   {chainInfo.label}
                 </span>
               </td>
-              <td className="text-right py-4 text-white font-medium">
+              <td className="text-right py-4 text-foreground font-medium">
                 ${price.toLocaleString(undefined, { maximumFractionDigits: 6 })}
               </td>
-              <td className="text-right py-4 text-white">
+              <td className="text-right py-4 text-foreground">
                 {balance.toLocaleString(undefined, { maximumFractionDigits: 6 })}
               </td>
-              <td className="text-right py-4 text-white font-bold">
+              <td className="text-right py-4 text-foreground font-bold">
                 ${tokenValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                {tokenValue >= 1000 && <span className="ml-1 text-xs text-green-400">●</span>}
+                {tokenValue >= 1000 && <span className="ml-1 text-xs text-emerald-500">●</span>}
               </td>
             </tr>
           )
@@ -885,28 +858,28 @@ function HistoryTable({ transactions }: { transactions: any[] }) {
   if (!transactions.length)
     return (
       <div className="text-center py-12">
-        <Activity className="h-12 w-12 mx-auto mb-4 text-white/40" />
-        <p className="text-white/60">No active transaction history found.</p>
-        <p className="text-white/40 text-sm mt-2">All zero-amount transactions have been filtered out</p>
+        <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+        <p className="text-muted-foreground">No active transaction history found.</p>
+        <p className="text-muted-foreground/60 text-sm mt-2">All zero-amount transactions have been filtered out</p>
       </div>
     )
 
   return (
     <table className="w-full">
       <thead>
-        <tr className="border-b border-white/10">
-          <th className="text-left pb-4 text-white/60 font-medium">Transaction</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Amount</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Token</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Status</th>
-          <th className="text-right pb-4 text-white/60 font-medium">Time</th>
+        <tr className="border-b border-border/40">
+          <th className="text-left pb-4 text-muted-foreground font-medium">Transaction</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Amount</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Token</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Status</th>
+          <th className="text-right pb-4 text-muted-foreground font-medium">Time</th>
         </tr>
       </thead>
       <tbody>
         {transactions.map((tx, idx) => {
           const amount = Number(tx.amount || 0)
           return (
-            <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+            <tr key={idx} className="border-b border-border/20 hover:bg-muted/50 transition-colors group">
               <td className="py-4">
                 <div className="flex items-center gap-3">
                   <div
@@ -919,31 +892,31 @@ function HistoryTable({ transactions }: { transactions: any[] }) {
                     {amount > 0 ? "+" : "-"}
                   </div>
                   <div>
-                    <p className="font-medium text-white font-mono text-sm">
+                    <p className="font-medium text-foreground font-mono text-sm">
                       {tx.txHash?.slice(0, 10)}...{tx.txHash?.slice(-8)}
                     </p>
-                    <p className="text-xs text-white/60">Transaction Hash</p>
+                    <p className="text-xs text-muted-foreground">Transaction Hash</p>
                   </div>
                 </div>
               </td>
-              <td className="text-right py-4 text-white font-medium">
+              <td className="text-right py-4 text-foreground font-medium">
                 {Math.abs(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}
               </td>
               <td className="text-right py-4">
-                <span className="px-2 py-1 bg-white/10 rounded text-xs text-white">{tx.symbol || "Unknown"}</span>
+                <span className="px-2 py-1 bg-muted rounded text-xs text-foreground">{tx.symbol || "Unknown"}</span>
               </td>
               <td className="text-right py-4">
                 <span
                   className={`px-2 py-1 rounded text-xs ${
                     tx.txStatus === "success"
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                      : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                      ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                      : "bg-rose-500/20 text-rose-500 border border-rose-500/30"
                   }`}
                 >
                   {tx.txStatus || "Unknown"}
                 </span>
               </td>
-              <td className="text-right py-4 text-white/80 text-sm">
+              <td className="text-right py-4 text-muted-foreground text-sm">
                 {tx.txTime ? new Date(Number(tx.txTime) * 1000).toLocaleString() : "Unknown"}
               </td>
             </tr>
@@ -956,11 +929,11 @@ function HistoryTable({ transactions }: { transactions: any[] }) {
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="bg-black/90 rounded-xl shadow-2xl border border-white/20 relative max-w-6xl w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="bg-card rounded-xl shadow-2xl border border-border relative max-w-6xl w-full mx-4">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/70 hover:text-white text-xl z-10 p-2 hover:bg-white/10 rounded-full transition-colors"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-xl z-10 p-2 hover:bg-muted/50 rounded-full transition-colors"
         >
           <X className="h-5 w-5" />
         </button>

@@ -532,9 +532,9 @@ export default function SolanaSwapPage() {
     show: boolean
     onToggle: () => void
   }) => (
-    <div className="relative">
+    <div className="relative z-[9999]">
       <Button
-        className="bg-white/10 hover:bg-white/20 text-white gap-2 font-medium border-none h-9"
+        className="bg-accent/20 hover:bg-accent/30 gap-2 font-medium border-none h-9"
         variant="outline"
         onClick={onToggle}
       >
@@ -544,66 +544,73 @@ export default function SolanaSwapPage() {
       </Button>
 
       {show && (
-        <div className="absolute top-full mt-2 right-0 bg-black/90 border border-white/20 rounded-lg p-2 min-w-[250px] z-50 backdrop-blur-sm max-h-80 overflow-y-auto">
-          {loadingTokens ? (
-            <div className="text-center py-6 text-white/60">
-              <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-3" />
-              <div className="text-sm">Loading tokens...</div>
-              <div className="text-xs text-white/40 mt-1">
-                {isRequestInProgress ? "Fetching from OKX API..." : "Please wait..."}
+        <>
+          {/* Backdrop to close dropdown when clicking outside */}
+          <div 
+            className="fixed inset-0 z-[9998]" 
+            onClick={onToggle}
+          />
+          <div className="absolute top-full mt-2 right-0 bg-popover border border-border backdrop-blur-sm rounded-lg p-2 min-w-[250px] z-[9999] max-h-80 overflow-y-auto shadow-2xl">
+            {loadingTokens ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-3" />
+                <div className="text-sm">Loading tokens...</div>
+                <div className="text-xs text-muted-foreground/60 mt-1">
+                  {isRequestInProgress ? "Fetching from OKX API..." : "Please wait..."}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {tokens.map((token) => (
-                <button
-                  key={token.address}
-                  className="w-full flex items-center gap-3 p-2 hover:bg-white/10 rounded text-left text-white transition-colors"
-                  onClick={() => {
-                    onSelect(token)
-                    onToggle()
-                    // Clear results when token changes
-                    setSwapResult(null)
-                    setQuoteResult(null)
-                    setExecuteResult(null)
-                    setToAmount("")
-                  }}
-                >
-                  <TokenIcon token={token} />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium">{token.symbol}</div>
-                    <div className="text-xs text-white/60 truncate">{token.name}</div>
-                    <div className="text-xs text-white/40 font-mono truncate">
-                      {token.address.slice(0, 8)}...{token.address.slice(-6)}
+            ) : (
+              <div className="space-y-1">
+                {tokens.map((token) => (
+                  <button
+                    key={token.address}
+                    className="w-full flex items-center gap-3 p-2 hover:bg-accent/20 rounded text-left text-foreground transition-colors"
+                    onClick={() => {
+                      onSelect(token)
+                      onToggle()
+                      // Clear results when token changes
+                      setSwapResult(null)
+                      setQuoteResult(null)
+                      setExecuteResult(null)
+                      setToAmount("")
+                    }}
+                  >
+                    <TokenIcon token={token} />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium">{token.symbol}</div>
+                      <div className="text-xs text-muted-foreground truncate">{token.name}</div>
+                      <div className="text-xs text-muted-foreground/60 font-mono truncate">
+                        {token.address.slice(0, 8)}...{token.address.slice(-6)}
+                      </div>
                     </div>
-                  </div>
-                  {selectedToken.address === token.address && (
-                    <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {tokensError && (
-            <div className="text-center py-4 border-t border-white/10 mt-2">
-              <div className="text-red-400 text-xs mb-3">{tokensError}</div>
-              <div className="flex gap-2 justify-center">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-white/20 hover:bg-white/10 text-white text-xs"
-                  onClick={handleRetryTokens}
-                  disabled={isRequestInProgress}
-                >
-                  <RefreshCw className={`h-3 w-3 mr-1 ${isRequestInProgress ? "animate-spin" : ""}`} />
-                  {isRequestInProgress ? "Retrying..." : "Retry"}
-                </Button>
-                {retryCount > 0 && <div className="text-xs text-white/40 self-center">Attempt {retryCount}</div>}
+                    {selectedToken.address === token.address && (
+                      <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+
+            {tokensError && (
+              <div className="text-center py-4 border-t border-border mt-2">
+                <div className="text-destructive text-xs mb-3">{tokensError}</div>
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={handleRetryTokens}
+                    disabled={isRequestInProgress}
+                  >
+                    <RefreshCw className={`h-3 w-3 mr-1 ${isRequestInProgress ? "animate-spin" : ""}`} />
+                    {isRequestInProgress ? "Retrying..." : "Retry"}
+                  </Button>
+                  {retryCount > 0 && <div className="text-xs text-muted-foreground/60 self-center">Attempt {retryCount}</div>}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   )
@@ -615,7 +622,7 @@ export default function SolanaSwapPage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-600 text-transparent bg-clip-text mb-1">
             Solana Swap
           </h1>
-          <p className="text-white/60">
+          <p className="text-muted-foreground">
             {loadingTokens
               ? "Loading supported tokens..."
               : `Trade tokens on Solana with best rates • ${availableTokens.length} tokens available`}
@@ -625,25 +632,25 @@ export default function SolanaSwapPage() {
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full border-white/20 hover:bg-white/10 text-white"
+            className="rounded-full"
             onClick={handleRetryTokens}
             disabled={loadingTokens || isRequestInProgress}
           >
             <RefreshCw className={`h-4 w-4 ${loadingTokens ? "animate-spin" : ""}`} />
           </Button>
-          <Button variant="outline" size="icon" className="rounded-full border-white/20 hover:bg-white/10 text-white">
+          <Button variant="outline" size="icon" className="rounded-full">
             <Clock className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="icon" className="rounded-full border-white/20 hover:bg-white/10 text-white">
+          <Button variant="outline" size="icon" className="rounded-full">
             <Settings className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      <div className="backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl overflow-hidden hover:border-white/20 transition-all hover:shadow-xl">
+      <div className="backdrop-blur-sm bg-background/40 dark:bg-black/20 border border-border rounded-xl hover:border-border/80 dark:hover:border-white/20 transition-all hover:shadow-xl">
         <div className="p-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-white/60">From</span>
+            <span className="text-sm text-muted-foreground">From</span>
             <div className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full border border-purple-500/30">
               <span className="text-xs text-purple-300 font-medium">Solana</span>
             </div>
@@ -659,14 +666,14 @@ export default function SolanaSwapPage() {
                 setExecuteResult(null)
                 setToAmount("")
               }}
-              className="text-2xl font-medium bg-transparent outline-none w-[60%] text-white"
+              className="text-2xl font-medium bg-transparent outline-none w-[60%] text-foreground"
               placeholder="0.0"
             />
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-white/20 hover:bg-white/10 text-white text-xs h-7"
+                className="text-xs h-7"
                 onClick={setMaxAmount}
               >
                 MAX
@@ -680,7 +687,7 @@ export default function SolanaSwapPage() {
               />
             </div>
           </div>
-          <div className="text-sm text-white/60 mt-1">
+          <div className="text-sm text-muted-foreground mt-1">
             {(() => {
               const tokenBalance = getTokenBalance(fromToken)
               return `Balance: ${loadingBalances ? "Loading..." : tokenBalance.balance} ${fromToken.symbol} • $${tokenBalance.usdValue}`
@@ -692,15 +699,15 @@ export default function SolanaSwapPage() {
           <Button
             onClick={handleSwapTokens}
             size="icon"
-            className="rounded-full h-10 w-10 shadow-md bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-white/20 hover:border-white/30"
+            className="rounded-full h-10 w-10 shadow-md bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-accent/30 hover:border-accent/50"
           >
-            <ArrowDown className="h-5 w-5 text-white" />
+            <ArrowDown className="h-5 w-5" />
           </Button>
         </div>
 
         <div className="p-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-white/60">To</span>
+            <span className="text-sm text-muted-foreground">To</span>
             <div className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full border border-purple-500/30">
               <span className="text-xs text-purple-300 font-medium">Solana</span>
             </div>
@@ -709,7 +716,7 @@ export default function SolanaSwapPage() {
             <input
               type="text"
               value={toAmount}
-              className="text-2xl font-medium bg-transparent outline-none w-[60%] text-white"
+              className="text-2xl font-medium bg-transparent outline-none w-[60%] text-foreground"
               placeholder="0.0"
               readOnly
             />
@@ -721,7 +728,7 @@ export default function SolanaSwapPage() {
               onToggle={() => setShowToTokens(!showToTokens)}
             />
           </div>
-          <div className="text-sm text-white/60 mt-1">
+          <div className="text-sm text-muted-foreground mt-1">
             {(() => {
               const tokenBalance = getTokenBalance(toToken)
               return `Balance: ${loadingBalances ? "Loading..." : tokenBalance.balance} ${toToken.symbol} • $${tokenBalance.usdValue}`
@@ -731,16 +738,16 @@ export default function SolanaSwapPage() {
       </div>
 
       <div className="mt-6 space-y-4">
-        <div className="backdrop-blur-sm bg-black/20 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-all hover:shadow-xl">
+        <div className="backdrop-blur-sm bg-background/40 dark:bg-black/20 border border-border rounded-xl p-5 hover:border-border/80 dark:hover:border-white/20 transition-all hover:shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-white/80 font-medium">Transaction Settings</span>
+            <span className="text-sm text-foreground font-medium">Transaction Settings</span>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
-                <span className="text-sm text-white/60">Slippage Tolerance</span>
-                <button className="text-white/40 hover:text-white/60">
+                <span className="text-sm text-muted-foreground">Slippage Tolerance</span>
+                <button className="text-muted-foreground hover:text-foreground">
                   <Info className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -750,8 +757,8 @@ export default function SolanaSwapPage() {
                     key={value}
                     variant="outline"
                     size="sm"
-                    className={`h-7 px-2.5 py-1 border-white/20 text-white text-xs ${
-                      slippage === value ? "bg-purple-500/20 border-purple-500/40" : "hover:bg-white/10"
+                    className={`h-7 px-2.5 py-1 text-xs ${
+                      slippage === value ? "bg-purple-500/20 border-purple-500/40" : ""
                     }`}
                     onClick={() => setSlippage(value)}
                   >
@@ -762,18 +769,18 @@ export default function SolanaSwapPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/60">Network</span>
-              <span className="text-sm text-white/80 font-medium">Solana Mainnet</span>
+              <span className="text-sm text-muted-foreground">Network</span>
+              <span className="text-sm text-foreground font-medium">Solana Mainnet</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/60">DEX Aggregator</span>
-              <span className="text-sm text-white/80 font-medium">OKX</span>
+              <span className="text-sm text-muted-foreground">DEX Aggregator</span>
+              <span className="text-sm text-foreground font-medium">OKX</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/60">Supported Tokens</span>
-              <span className="text-sm text-white/80 font-medium">{availableTokens.length} tokens</span>
+              <span className="text-sm text-muted-foreground">Supported Tokens</span>
+              <span className="text-sm text-foreground font-medium">{availableTokens.length} tokens</span>
             </div>
           </div>
         </div>
@@ -781,7 +788,7 @@ export default function SolanaSwapPage() {
 
       <div className="grid grid-cols-3 gap-3 mt-6">
         <Button
-          className="py-6 text-sm gap-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-purple-500/30 hover:border-purple-500/50 text-white shadow-lg backdrop-blur-sm"
+          className="py-6 text-sm gap-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border border-purple-500/30 hover:border-purple-500/50 shadow-lg backdrop-blur-sm"
           size="lg"
           onClick={handleGetQuote}
           disabled={quoting || !fromAmount || Number.parseFloat(fromAmount) <= 0}
@@ -790,10 +797,18 @@ export default function SolanaSwapPage() {
           {quoting ? "Getting..." : "Quote"}
         </Button>
 
-       
+        <Button
+          className="py-6 text-sm gap-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-blue-500/30 hover:border-blue-500/50 shadow-lg backdrop-blur-sm"
+          size="lg"
+          onClick={handleGetSwapInstructions}
+          disabled={loading || !fromAmount || Number.parseFloat(fromAmount) <= 0}
+        >
+          <Clock className="h-4 w-4" />
+          {loading ? "Loading..." : "Prepare"}
+        </Button>
 
         <Button
-          className="py-6 text-sm gap-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/30 hover:border-green-500/50 text-white shadow-lg backdrop-blur-sm"
+          className="py-6 text-sm gap-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/30 hover:border-green-500/50 shadow-lg backdrop-blur-sm"
           size="lg"
           onClick={handleExecuteSwap}
           disabled={executing || !fromAmount || Number.parseFloat(fromAmount) <= 0}
@@ -804,9 +819,9 @@ export default function SolanaSwapPage() {
       </div>
 
       {error && (
-        <Card className="mt-4 bg-red-900/20 border-red-500/30">
+        <Card className="mt-4 bg-destructive/10 border-destructive/30">
           <CardContent className="p-4">
-            <div className="text-red-400 text-sm">
+            <div className="text-destructive text-sm">
               <strong>Error:</strong> {error}
             </div>
           </CardContent>
@@ -814,9 +829,9 @@ export default function SolanaSwapPage() {
       )}
 
       {quoteResult && !error && (
-        <Card className="mt-4 bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-500/30">
+        <Card className="mt-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30">
           <CardHeader>
-            <CardTitle className="text-white text-lg flex items-center gap-2">
+            <CardTitle className="text-foreground text-lg flex items-center gap-2">
               <Info className="h-5 w-5" />
               Swap Quote
             </CardTitle>
@@ -826,26 +841,26 @@ export default function SolanaSwapPage() {
               <div key={index} className="space-y-3">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-white/60">You Pay:</span>
-                    <div className="text-white font-medium">
+                    <span className="text-muted-foreground">You Pay:</span>
+                    <div className="text-foreground font-medium">
                       {formatDisplayAmount(quote.fromTokenAmount, fromToken.decimals)} {fromToken.symbol}
                     </div>
                   </div>
                   <div>
-                    <span className="text-white/60">You Receive:</span>
-                    <div className="text-white font-medium">
+                    <span className="text-muted-foreground">You Receive:</span>
+                    <div className="text-foreground font-medium">
                       {formatDisplayAmount(quote.toTokenAmount, toToken.decimals)} {toToken.symbol}
                     </div>
                   </div>
                   <div>
-                    <span className="text-white/60">Rate:</span>
-                    <div className="text-white font-medium">
+                    <span className="text-muted-foreground">Rate:</span>
+                    <div className="text-foreground font-medium">
                       1 {fromToken.symbol} = {(Number(quote.toTokenAmount) / Number(quote.fromTokenAmount)).toFixed(4)}{" "}
                       {toToken.symbol}
                     </div>
                   </div>
                   <div>
-                    <span className="text-white/60">Price Impact:</span>
+                    <span className="text-muted-foreground">Price Impact:</span>
                     <div className="text-green-400 font-medium">{"< 0.1%"}</div>
                   </div>
                 </div>
@@ -856,9 +871,9 @@ export default function SolanaSwapPage() {
       )}
 
       {swapResult && !error && (
-        <Card className="mt-4 bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-blue-500/30">
+        <Card className="mt-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-500/30">
           <CardHeader>
-            <CardTitle className="text-white text-lg flex items-center gap-2">
+            <CardTitle className="text-foreground text-lg flex items-center gap-2">
               <Zap className="h-5 w-5" />
               Swap Instructions Ready
             </CardTitle>
@@ -867,47 +882,47 @@ export default function SolanaSwapPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-white/60">You Pay:</span>
-                  <div className="text-white font-medium">
+                  <span className="text-muted-foreground">You Pay:</span>
+                  <div className="text-foreground font-medium">
                     {formatDisplayAmount(swapResult.data.fromTokenAmount, fromToken.decimals)} {fromToken.symbol}
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/60">You Receive:</span>
-                  <div className="text-white font-medium">
+                  <span className="text-muted-foreground">You Receive:</span>
+                  <div className="text-foreground font-medium">
                     {formatDisplayAmount(swapResult.data.toTokenAmount, toToken.decimals)} {toToken.symbol}
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/60">Minimum Received:</span>
-                  <div className="text-white font-medium">
+                  <span className="text-muted-foreground">Minimum Received:</span>
+                  <div className="text-foreground font-medium">
                     {formatDisplayAmount(swapResult.data.minimumReceived, toToken.decimals)} {toToken.symbol}
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/60">Instructions:</span>
-                  <div className="text-white font-medium">{swapResult.data.instructionLists.length} steps</div>
+                  <span className="text-muted-foreground">Instructions:</span>
+                  <div className="text-foreground font-medium">{swapResult.data.instructionLists.length} steps</div>
                 </div>
               </div>
 
-              <div className="bg-white/5 rounded-lg p-3">
-                <div className="text-white/80 font-medium mb-2">Solana Transaction Details</div>
+              <div className="bg-accent/10 rounded-lg p-3">
+                <div className="text-foreground font-medium mb-2">Solana Transaction Details</div>
                 <div className="text-sm space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-white/60">Instructions:</span>
-                    <span className="text-white">{swapResult.data.instructionLists.length}</span>
+                    <span className="text-muted-foreground">Instructions:</span>
+                    <span className="text-foreground">{swapResult.data.instructionLists.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/60">Lookup Tables:</span>
-                    <span className="text-white">{swapResult.data.addressLookupTableAccount.length}</span>
+                    <span className="text-muted-foreground">Lookup Tables:</span>
+                    <span className="text-foreground">{swapResult.data.addressLookupTableAccount.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/60">From Token Price:</span>
-                    <span className="text-white">${swapResult.data.fromToken.tokenUnitPrice}</span>
+                    <span className="text-muted-foreground">From Token Price:</span>
+                    <span className="text-foreground">${swapResult.data.fromToken.tokenUnitPrice}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/60">To Token Price:</span>
-                    <span className="text-white">${swapResult.data.toToken.tokenUnitPrice}</span>
+                    <span className="text-muted-foreground">To Token Price:</span>
+                    <span className="text-foreground">${swapResult.data.toToken.tokenUnitPrice}</span>
                   </div>
                 </div>
               </div>
@@ -917,9 +932,9 @@ export default function SolanaSwapPage() {
       )}
 
       {executeResult && !error && (
-        <Card className="mt-4 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-green-500/30">
+        <Card className="mt-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30">
           <CardHeader>
-            <CardTitle className="text-white text-lg flex items-center gap-2">
+            <CardTitle className="text-foreground text-lg flex items-center gap-2">
               <Zap className="h-5 w-5 text-green-400" />
               Swap Executed Successfully!
             </CardTitle>
@@ -928,8 +943,8 @@ export default function SolanaSwapPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-white/60">Swapped:</span>
-                  <div className="text-white font-medium">
+                  <span className="text-muted-foreground">Swapped:</span>
+                  <div className="text-foreground font-medium">
                     {formatDisplayAmount(
                       executeResult.swapDetails.fromAmount,
                       executeResult.tokenInfo.fromToken.decimals,
@@ -938,32 +953,32 @@ export default function SolanaSwapPage() {
                   </div>
                 </div>
                 <div>
-                  <span className="text-white/60">For:</span>
-                  <div className="text-white font-medium">{executeResult.swapDetails.toToken}</div>
+                  <span className="text-muted-foreground">For:</span>
+                  <div className="text-foreground font-medium">{executeResult.swapDetails.toToken}</div>
                 </div>
                 <div>
-                  <span className="text-white/60">Instructions Used:</span>
-                  <div className="text-white font-medium">{executeResult.instructionsUsed}</div>
+                  <span className="text-muted-foreground">Instructions Used:</span>
+                  <div className="text-foreground font-medium">{executeResult.instructionsUsed}</div>
                 </div>
                 <div>
-                  <span className="text-white/60">Lookup Tables:</span>
-                  <div className="text-white font-medium">{executeResult.lookupTablesUsed}</div>
+                  <span className="text-muted-foreground">Lookup Tables:</span>
+                  <div className="text-foreground font-medium">{executeResult.lookupTablesUsed}</div>
                 </div>
               </div>
 
-              <div className="bg-white/5 rounded-lg p-3">
-                <div className="text-white/80 font-medium mb-2">Transaction Details</div>
+              <div className="bg-accent/10 rounded-lg p-3">
+                <div className="text-foreground font-medium mb-2">Transaction Details</div>
                 <div className="text-sm space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-white/60">Transaction ID:</span>
+                    <span className="text-muted-foreground">Transaction ID:</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-mono text-xs">
+                      <span className="text-foreground font-mono text-xs">
                         {executeResult.transactionId.slice(0, 8)}...{executeResult.transactionId.slice(-8)}
                       </span>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-6 w-6 p-0 hover:bg-white/10"
+                        className="h-6 w-6 p-0"
                         onClick={() => copyToClipboard(executeResult.transactionId)}
                       >
                         <Copy className="h-3 w-3" />
@@ -989,7 +1004,7 @@ export default function SolanaSwapPage() {
                   <Check className="h-4 w-4" />
                   Transaction Confirmed
                 </div>
-                <div className="text-sm text-green-200">
+                <div className="text-sm text-green-300 dark:text-green-200">
                   Your swap has been successfully executed on Solana. The transaction has been confirmed and is now
                   visible on the blockchain.
                 </div>
@@ -1000,7 +1015,7 @@ export default function SolanaSwapPage() {
       )}
 
       <div className="mt-5 text-center">
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-muted-foreground/60">
           Powered by OKX DEX Aggregator on Solana. Best rates across all Solana DEXs.
         </p>
       </div>
@@ -1012,7 +1027,7 @@ function TokenIcon({ token }: { token: Token }) {
   // If token has a logo URL, use it
   if (token.logoUrl && token.hasLogo) {
     return (
-      <div className="w-5 h-5 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">
+      <div className="w-5 h-5 rounded-full overflow-hidden bg-accent/20 flex items-center justify-center">
         <img
           src={token.logoUrl || "/placeholder.svg"}
           alt={token.symbol}
