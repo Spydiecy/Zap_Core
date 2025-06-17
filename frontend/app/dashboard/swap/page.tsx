@@ -31,6 +31,7 @@ interface ExecuteResult {
   success: boolean
   transactionId: string
   explorerUrl: string
+  timestamp?: string
   tokenInfo: {
     fromToken: { symbol: string; decimals: number; price: string }
     toToken: { symbol: string; decimals: number; price: string }
@@ -350,6 +351,29 @@ export default function SolanaSwapPage() {
     navigator.clipboard.writeText(text)
   }
 
+  // Utility function to format timestamps
+  const formatTimestamp = (timestamp: string | number): string => {
+    try {
+      const date = new Date(timestamp)
+      if (isNaN(date.getTime())) {
+        return "Invalid date"
+      }
+      
+      // Format as "Dec 17, 2025 at 3:45 PM"
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+    } catch (error) {
+      console.error('Error formatting timestamp:', error)
+      return "Invalid date"
+    }
+  }
+
   // Get quote first
   const handleGetQuote = async () => {
     if (!fromAmount || Number.parseFloat(fromAmount) <= 0) {
@@ -388,7 +412,12 @@ export default function SolanaSwapPage() {
       if (data.error) {
         setError(data.error)
       } else if (data.success && data.data && data.data.length > 0) {
-        setQuoteResult(data)
+        // Add timestamp to the quote result
+        const quoteWithTimestamp = {
+          ...data,
+          timestamp: new Date().toISOString()
+        }
+        setQuoteResult(quoteWithTimestamp)
         // Update estimated receive amount
         const estimatedAmount = formatDisplayAmount(data.data[0].toTokenAmount, toToken.decimals)
         setToAmount(estimatedAmount)
@@ -444,7 +473,12 @@ export default function SolanaSwapPage() {
       if (data.error) {
         setError(data.error)
       } else if (data.success && data.data) {
-        setSwapResult(data)
+        // Add timestamp to the swap result
+        const swapWithTimestamp = {
+          ...data,
+          timestamp: new Date().toISOString()
+        }
+        setSwapResult(swapWithTimestamp)
         // Update estimated receive amount if available
         if (data.data.toTokenAmount) {
           const estimatedAmount = formatDisplayAmount(data.data.toTokenAmount, toToken.decimals)
@@ -502,7 +536,12 @@ export default function SolanaSwapPage() {
       if (data.error) {
         setError(data.error)
       } else if (data.success) {
-        setExecuteResult(data)
+        // Add timestamp to the result
+        const resultWithTimestamp = {
+          ...data,
+          timestamp: new Date().toISOString()
+        }
+        setExecuteResult(resultWithTimestamp)
       } else {
         setError(data.msg || "Failed to execute swap")
       }
@@ -834,6 +873,11 @@ export default function SolanaSwapPage() {
             <CardTitle className="text-foreground text-lg flex items-center gap-2">
               <Info className="h-5 w-5" />
               Swap Quote
+              {quoteResult.timestamp && (
+                <span className="text-xs text-muted-foreground ml-auto font-normal">
+                  Generated {formatTimestamp(quoteResult.timestamp)}
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -876,6 +920,11 @@ export default function SolanaSwapPage() {
             <CardTitle className="text-foreground text-lg flex items-center gap-2">
               <Zap className="h-5 w-5" />
               Swap Instructions Ready
+              {swapResult.timestamp && (
+                <span className="text-xs text-muted-foreground ml-auto font-normal">
+                  Created {formatTimestamp(swapResult.timestamp)}
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -902,6 +951,14 @@ export default function SolanaSwapPage() {
                 <div>
                   <span className="text-muted-foreground">Instructions:</span>
                   <div className="text-foreground font-medium">{swapResult.data.instructionLists.length} steps</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Created:</span>
+                  <div className="text-foreground font-medium">{formatTimestamp(swapResult.timestamp)}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>
+                  <div className="text-foreground font-medium">{swapResult.action}</div>
                 </div>
               </div>
 
@@ -937,6 +994,11 @@ export default function SolanaSwapPage() {
             <CardTitle className="text-foreground text-lg flex items-center gap-2">
               <Zap className="h-5 w-5 text-green-400" />
               Swap Executed Successfully!
+              {executeResult.timestamp && (
+                <span className="text-xs text-muted-foreground ml-auto font-normal">
+                  Completed {formatTimestamp(executeResult.timestamp)}
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -964,6 +1026,12 @@ export default function SolanaSwapPage() {
                   <span className="text-muted-foreground">Lookup Tables:</span>
                   <div className="text-foreground font-medium">{executeResult.lookupTablesUsed}</div>
                 </div>
+                {executeResult.timestamp && (
+                  <div>
+                    <span className="text-muted-foreground">Executed:</span>
+                    <div className="text-foreground font-medium">{formatTimestamp(executeResult.timestamp)}</div>
+                  </div>
+                )}
               </div>
 
               <div className="bg-accent/10 rounded-lg p-3">
@@ -985,6 +1053,12 @@ export default function SolanaSwapPage() {
                       </Button>
                     </div>
                   </div>
+                  {executeResult.timestamp && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Transaction Time:</span>
+                      <span className="text-foreground text-xs">{formatTimestamp(executeResult.timestamp)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-center">
                     <Button
                       size="sm"

@@ -141,8 +141,28 @@ class DashboardRateLimitManager {
 
 // Helper functions
 function formatTimestamp(timestamp: string | number): string {
-  const date = new Date(Number(timestamp))
-  return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  try {
+    let date: Date
+    const numTimestamp = Number(timestamp)
+    
+    // Check if timestamp is in seconds (length ~10 digits) or milliseconds (length ~13 digits)
+    if (numTimestamp.toString().length <= 10) {
+      // Timestamp is in seconds, convert to milliseconds
+      date = new Date(numTimestamp * 1000)
+    } else {
+      // Timestamp is already in milliseconds
+      date = new Date(numTimestamp)
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Invalid date"
+    }
+    
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  } catch (error) {
+    return "Invalid date"
+  }
 }
 
 function formatPrice(price: string | number): string {
@@ -892,50 +912,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-10">
-      {/* Loading Progress */}
-      {loading && (
-        <Card className="bg-background/80 dark:bg-black/40 border-border dark:border-white/20 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-purple-600 dark:text-purple-400" />
-                <span className="text-foreground dark:text-white font-medium">Loading Dashboard Data</span>
-                <span className="text-muted-foreground dark:text-white/60 text-sm">({Math.round(progress)}%)</span>
-              </div>
-
-              <div className="w-full bg-muted dark:bg-white/10 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {loadingSteps.map((step, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2 rounded bg-muted/50 dark:bg-white/5">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        step.status === "completed"
-                          ? "bg-green-500 dark:bg-green-400"
-                          : step.status === "loading"
-                            ? "bg-yellow-500 dark:bg-yellow-400 animate-pulse"
-                            : step.status === "error"
-                              ? "bg-red-500 dark:bg-red-400"
-                              : "bg-muted-foreground dark:bg-gray-400"
-                      }`}
-                    ></div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-foreground dark:text-white text-xs font-medium">{step.name}</div>
-                      <div className="text-muted-foreground dark:text-white/60 text-xs truncate">{step.message}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Header Section */}
       <div className="relative">
         <div className="flex justify-between items-start mb-8">
@@ -1165,7 +1141,7 @@ export default function DashboardPage() {
                         <div>
                           <p className="font-medium text-foreground dark:text-white/90">{tx.symbol || "SOL"}</p>
                           <p className="text-sm text-muted-foreground dark:text-white/60">
-                            {tx.txTime ? new Date(Number(tx.txTime) * 1000).toLocaleString() : "Recent"}
+                            {tx.txTime ? formatTimestamp(tx.txTime) : "Recent"}
                           </p>
                         </div>
                       </div>

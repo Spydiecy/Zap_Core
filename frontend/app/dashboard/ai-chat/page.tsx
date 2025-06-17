@@ -11,6 +11,8 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
+
+
 interface Message {
   role: "user" | "system"
   content: string
@@ -98,7 +100,7 @@ function TransactionHistoryDisplay({ transactions, title }: { transactions: any[
                       </p>
                       <p className="text-xs text-muted-foreground dark:text-white/60 flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {tx.txTime ? new Date(Number(tx.txTime) * 1000).toLocaleString() : "Unknown time"}
+                        {tx.txTime ? formatTimestamp(tx.txTime) : "Unknown time"}
                       </p>
                     </div>
                   </div>
@@ -523,8 +525,28 @@ async function callMarketDataApi(type: string, tokenName: string, address: strin
 
 // Helper function to format timestamp to readable date
 function formatTimestamp(timestamp: string | number): string {
-  const date = new Date(Number(timestamp))
-  return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  try {
+    let date: Date
+    const numTimestamp = Number(timestamp)
+    
+    // Check if timestamp is in seconds (length ~10 digits) or milliseconds (length ~13 digits)
+    if (numTimestamp.toString().length <= 10) {
+      // Timestamp is in seconds, convert to milliseconds
+      date = new Date(numTimestamp * 1000)
+    } else {
+      // Timestamp is already in milliseconds
+      date = new Date(numTimestamp)
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Invalid date"
+    }
+    
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  } catch (error) {
+    return "Invalid date"
+  }
 }
 
 // Helper function to format price

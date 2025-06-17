@@ -144,6 +144,32 @@ function filterValidTransactions(transactions: any[]): any[] {
   })
 }
 
+// Helper function to format timestamp to readable date
+function formatTimestamp(timestamp: string | number): string {
+  try {
+    let date: Date
+    const numTimestamp = Number(timestamp)
+
+    // Check if timestamp is in seconds (length ~10 digits) or milliseconds (length ~13 digits)
+    if (numTimestamp.toString().length <= 10) {
+      // Timestamp is in seconds, convert to milliseconds
+      date = new Date(numTimestamp * 1000)
+    } else {
+      // Timestamp is already in milliseconds
+      date = new Date(numTimestamp)
+    }
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Invalid date"
+    }
+
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  } catch (error) {
+    return "Invalid date"
+  }
+}
+
 export default function PortfolioPage() {
   const { connected, publicKey } = useWallet()
   const walletAddress = useWalletAddress()
@@ -917,7 +943,7 @@ function HistoryTable({ transactions }: { transactions: any[] }) {
                 </span>
               </td>
               <td className="text-right py-4 text-muted-foreground text-sm">
-                {tx.txTime ? new Date(Number(tx.txTime) * 1000).toLocaleString() : "Unknown"}
+                {tx.txTime ? formatTimestamp(tx.txTime) : "Unknown"}
               </td>
             </tr>
           )
