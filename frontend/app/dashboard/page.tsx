@@ -385,12 +385,12 @@ function SolanaCandlestickChart({ data, title }: { data: any; title: string }) {
           className="h-[200px]"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+            <div style={{ width: '100%', height: '100%', position: 'relative' }} className="text-foreground">
               <svg width="100%" height="100%" className="candlestick-chart">
                 <defs>
                   <linearGradient id="bgGradientDash" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-                    <stop offset="100%" stopColor="rgba(255,255,255,0.01)" />
+                    <stop offset="0%" stopColor="currentColor" stopOpacity="0.05" />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0.01" />
                   </linearGradient>
                 </defs>
                 
@@ -405,8 +405,10 @@ function SolanaCandlestickChart({ data, title }: { data: any; title: string }) {
                     y1={40 + (percent / 100) * 120}
                     x2="100%"
                     y2={40 + (percent / 100) * 120}
-                    stroke="hsl(var(--border))"
+                    stroke="currentColor"
                     strokeWidth={0.5}
+                    className="text-border"
+                    opacity={0.3}
                   />
                 ))}
                 
@@ -418,9 +420,10 @@ function SolanaCandlestickChart({ data, title }: { data: any; title: string }) {
                       key={percent}
                       x="35"
                       y={45 + (percent / 100) * 120}
-                      fill="hsl(var(--foreground))"
+                      fill="currentColor"
                       fontSize="8"
                       textAnchor="end"
+                      className="text-muted-foreground"
                     >
                       ${price.toFixed(2)}
                     </text>
@@ -503,9 +506,10 @@ Volume: ${item.volume.toLocaleString()}`}
                       key={filteredIndex}
                       x={x}
                       y="175"
-                      fill="hsl(var(--foreground))"
+                      fill="currentColor"
                       fontSize="8"
                       textAnchor="middle"
+                      className="text-muted-foreground"
                     >
                       {item.time.split(' ')[0]}
                     </text>
