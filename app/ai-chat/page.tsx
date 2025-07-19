@@ -20,10 +20,7 @@ interface Message {
     displayName: string
     mimeType: string
   }>
-  generatedImage?: {
-    imageBase64?: string
-    responseText: string
-  }
+    generatedImage?:any
 }
 
 interface FileUpload {
