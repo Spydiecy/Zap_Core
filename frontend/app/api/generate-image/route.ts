@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     const response:any = await ai.models.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
-      contents: "Always use English in the image. If the input mentions a memecoin or token, generate only a visual representation of the token/memecoin. If the input is about smart contracts, blockchain flows, or historical data, generate a workflow diagram. For anything else, generate a relevant illustrative image matching the context. This is my prompt"+prompt,
+      contents: "Always use English in the image. If the input mentions a memecoin or token, generate the image taken example from the given desctption of the token/memecoin. If the input is about smart contracts, blockchain flows, or historical data, generate a workflow diagram. For anything else, generate a relevant illustrative image matching the context. This is my prompt. Use English language or mermaid chart language in my flowchart."+prompt,
       config: {
         responseModalities: [Modality.TEXT, Modality.IMAGE],
       },
@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
     if (!imageBase64) {
       return NextResponse.json({ error: "No image generated" }, { status: 500 })
     }
+    // console.log();
+    
 
     return NextResponse.json({
       imageBase64,

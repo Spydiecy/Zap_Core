@@ -253,7 +253,7 @@ export default function BlockchainAIChat() {
             .join("\n")
 
           // Append IPFS URLs to the original prompt
-          finalPrompt = `${currentInput}\n\nIPFS Upload Results:\n${ipfsInfo}`
+          finalPrompt = `${currentInput}\n\nMy Image Link is::IPFS ${ipfsInfo}`
         } catch (error) {
           console.error("IPFS upload error:", error)
           finalPrompt = `${currentInput}\n\nNote: IPFS upload failed - ${error instanceof Error ? error.message : "Unknown error"}`
@@ -304,14 +304,26 @@ export default function BlockchainAIChat() {
 
       let content = ""
       if (Array.isArray(responseData)) {
-        responseData.forEach((element) => {
-          if (element?.content?.parts?.[0]?.text) {
-            content += element.content.parts[0].text
-          }
-        })
-      } else if (responseData?.content?.parts?.[0]?.text) {
-        content = responseData.content.parts[0].text
+  responseData.forEach((element) => {
+    const parts = element?.content?.parts;
+    if (Array.isArray(parts)) {
+      parts.forEach((part) => {
+        if (part?.text) {
+          content += part.text;
+        }
+      });
+    }
+  });
+} else {
+  const parts = responseData?.content?.parts;
+  if (Array.isArray(parts)) {
+    parts.forEach((part) => {
+      if (part?.text) {
+        content += part.text;
       }
+    });
+  }
+}
 
       let generatedImage = null
       if (needsImageGeneration && content) {
