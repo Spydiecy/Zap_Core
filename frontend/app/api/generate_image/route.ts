@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import dotenv from "dotenv"
-dotenv.config()
+import { writeFile } from "fs/promises";
+import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
+
 export async function POST(req: Request) {
   try {
     const { prompt, model } = await req.json();
@@ -23,13 +26,19 @@ export async function POST(req: Request) {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    return new NextResponse(Buffer.from(arrayBuffer), {
-      headers: {
-        "Content-Type": "image/png",
-        "Content-Disposition": "inline; filename=generated.png",
-        "Job-Offer-Id": response.headers.get("Job-Offer-Id") || "",
-      },
-      status: 200,
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Save to local directory
+    const fileName = `generated_image_${Date.now()}.png`;
+    const filePath = path.join(process.cwd(), fileName);
+    await writeFile(filePath, buffer);
+    console.log(`✅ Image saved locally at: ${filePath}`);
+
+    return NextResponse.json({
+      message: "Image generated and saved successfully.",
+      filePath,
+      fileName,
+      jobOfferId: response.headers.get("Job-Offer-Id") || "",
     });
   } catch (error) {
     console.error("Error generating image:", error);
