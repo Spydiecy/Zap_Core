@@ -41,7 +41,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
     )}>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
+        <div className="flex items-center justify-between px-4 h-16 border-b border-gray-800">
           <div className={cn("flex items-center", !open && "hidden")}>
             <span className="text-xl font-bold text-white">ASTRA</span>
             <span className="text-xs ml-2 px-2 py-1 bg-gray-800 text-gray-300 rounded">v0.1</span>

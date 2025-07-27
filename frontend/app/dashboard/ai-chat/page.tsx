@@ -355,11 +355,11 @@ export default function AstraChatPage() {
   return (
     <div className="h-full bg-black text-white flex flex-col">
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex-1 overflow-y-auto px-2 py-4">
+        <div className="w-full space-y-4">
           {messages.map((message) => (
             <div key={message.id} className={cn(
-              "flex items-start space-x-4",
+              "flex items-start space-x-3 w-full",
               message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
             )}>
               <div
@@ -371,13 +371,13 @@ export default function AstraChatPage() {
                 {message.role === "assistant" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
               <div className={cn(
-                "flex-1 space-y-2",
-                message.role === "user" ? "flex flex-col items-end" : ""
+                "space-y-2 flex-1",
+                message.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"
               )}>
                 <div className={cn(
-                  "rounded-lg p-4 border border-gray-800",
+                  "rounded-lg p-4 border border-gray-800 max-w-[80%]",
                   message.role === "user" 
-                    ? "bg-white text-black max-w-xs ml-auto" 
+                    ? "bg-white text-black" 
                     : "bg-gray-900/50"
                 )}>
                   {message.isLoading ? (
@@ -434,8 +434,8 @@ export default function AstraChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-800 p-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="border-t border-gray-800 p-2">
+        <div className="w-full">
           {/* File Uploads */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
