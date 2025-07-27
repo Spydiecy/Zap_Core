@@ -355,7 +355,7 @@ export default function AstraChatPage() {
   return (
     <div className="h-full bg-black text-white flex flex-col">
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto px-2 py-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="w-full space-y-4">
           {messages.map((message) => (
             <div key={message.id} className={cn(
@@ -375,7 +375,7 @@ export default function AstraChatPage() {
                 message.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"
               )}>
                 <div className={cn(
-                  "rounded-lg p-4 border border-gray-800 max-w-[80%]",
+                  "rounded-lg p-4 border border-gray-800 max-w-[75%]",
                   message.role === "user" 
                     ? "bg-white text-black" 
                     : "bg-gray-900/50"
@@ -434,8 +434,8 @@ export default function AstraChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-800 p-2">
-        <div className="w-full">
+      <div className="border-t border-gray-800 p-4">
+        <div className="max-w-4xl mx-auto">
           {/* File Uploads */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">

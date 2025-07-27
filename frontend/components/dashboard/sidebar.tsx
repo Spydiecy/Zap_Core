@@ -37,7 +37,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
   return (
     <div className={cn(
       "fixed left-0 top-0 h-full bg-black border-r border-gray-800 flex flex-col transition-all duration-300",
-      open ? "w-64" : "w-16"
+      open ? "w-64" : "w-20"
     )}>
       <div className="flex flex-col h-full">
         {/* Header */}
@@ -50,20 +50,20 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
             onClick={() => setOpen(!open)}
             className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
           >
-            <ChevronLeft className={cn("h-5 w-5 text-gray-400 transition-transform", !open && "rotate-180")} />
+            <ChevronLeft className={cn("h-6 w-6 text-gray-400 transition-transform", !open && "rotate-180")} />
           </button>
         </div>
         
         {/* New Chat Button */}
-        <div className="p-4">
+        <div className={cn("p-4", !open && "px-2")}>
           <button 
             onClick={handleNewChat}
             className={cn(
               "flex items-center px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white cursor-pointer group relative w-full",
-              !open && "justify-center"
+              !open && "justify-center px-2"
             )}
           >
-            <Plus className="h-5 w-5" />
+            <Plus className={cn("h-5 w-5", !open && "h-6 w-6")} />
             {open && <span className="ml-3">New Chat</span>}
             
             {!open && (
@@ -82,15 +82,15 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         </div>
         
         {/* Docs Button */}
-        <div className="p-4">
+        <div className={cn("p-4", !open && "px-2")}>
           <Link 
             href="/docs" 
             className={cn(
               "flex items-center px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white cursor-pointer group relative",
-              !open && "justify-center"
+              !open && "justify-center px-2"
             )}
           >
-            <FileText className="h-5 w-5" />
+            <FileText className={cn("h-5 w-5", !open && "h-6 w-6")} />
             {open && <span className="ml-3">Docs</span>}
             
             {!open && (
@@ -102,15 +102,15 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         </div>
         
         {/* Back to Home */}
-        <div className="p-4 border-t border-gray-800">
+        <div className={cn("px-4 pt-2 pb-4 border-t border-gray-800 mt-4", !open && "px-2")}>
           <Link 
             href="/" 
             className={cn(
               "flex items-center px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white cursor-pointer group relative",
-              !open && "justify-center"
+              !open && "justify-center px-2"
             )}
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className={cn("h-5 w-5", !open && "h-6 w-6")} />
             {open && <span className="ml-3">Back to Home</span>}
             
             {!open && (

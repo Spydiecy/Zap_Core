@@ -29,14 +29,14 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className={cn(
         "flex-1 flex flex-col transition-all duration-300",
-        sidebarOpen ? "ml-64" : "ml-16"
+        sidebarOpen ? "ml-64" : "ml-20"
       )}>
         {/* Top Header */}
         <header className="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-black/90 backdrop-blur-sm">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold">Astra Chat</h1>
+            <h1 className="text-xl font-bold">Astra</h1>
             <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded border border-gray-700">
-              Early Access
+              Testnet
             </span>
           </div>
           
