@@ -4,11 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
   ChevronLeft, 
-  BarChart2, 
   MessageSquare, 
-  ArrowLeftRight, 
-  Settings, 
-  Home,
   ArrowLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -23,34 +19,9 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
   
   const routes = [
     {
-      label: "Home",
-      icon: Home,
-      href: "/dashboard"
-    },
-    {
       label: "AI Chat",
       icon: MessageSquare,
       href: "/dashboard/ai-chat"
-    },
-    {
-      label: "Swap",
-      icon: ArrowLeftRight,
-      href: "/dashboard/swap"
-    },
-      {
-      label: "Cross Chain Swap Info",
-      icon: ArrowLeftRight,
-      href: "/dashboard/cross-chain"
-    },
-    {
-      label: "Portfolio",
-      icon: BarChart2,
-      href: "/dashboard/portfolio"
-    },
-    {
-      label: "Settings",
-      icon: Settings,
-      href: "/dashboard/settings"
     }
   ]
 
