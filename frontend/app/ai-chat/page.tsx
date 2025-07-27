@@ -3,10 +3,9 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Wallet, Plus, Paperclip, Send, Bot, User, Zap, ImageIcon } from "lucide-react"
+import { Plus, Paperclip, Send, Bot, User, Zap, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SessionModal } from "@/components/session-modal"
-import { WalletConnectModal } from "@/components/wallet-connect-modal"
 import { uploadFileToIPFS } from "@/lib/pinata"
 
 interface Message {
@@ -39,9 +38,6 @@ export default function BlockchainAIChat() {
   const [appName, setAppName] = useState<string>("")
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([])
   const [showSessionModal, setShowSessionModal] = useState(false)
-  const [userPrivateKey, setUserPrivateKey] = useState<string | null>(null)
-  const [userPublicKey, setUserPublicKey] = useState<string | null>(null)
-  const [showWalletConnectModal, setShowWalletConnectModal] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -99,15 +95,11 @@ export default function BlockchainAIChat() {
     const storedSessionId = localStorage.getItem("sessionId")
     const storedUserId = localStorage.getItem("userId")
     const storedAppName = localStorage.getItem("appName")
-    const storedPrivateKey = localStorage.getItem("userPrivateKey")
-    const storedPublicKey = localStorage.getItem("userPublicKey")
 
     if (storedSessionId && storedUserId && storedAppName) {
       setSessionId(storedSessionId)
       setUserId(storedUserId)
       setAppName(storedAppName)
-      if (storedPrivateKey) setUserPrivateKey(storedPrivateKey)
-      if (storedPublicKey) setUserPublicKey(storedPublicKey)
       initializeChat()
     } else {
       setShowSessionModal(true)
@@ -139,12 +131,6 @@ export default function BlockchainAIChat() {
     setUserId(newUserId)
     setAppName(localStorage.getItem("appName") || "blockchain-assistant")
     initializeChat()
-  }
-
-  const handleWalletConnected = (privateKey: string | null, publicKey: string) => {
-    setUserPrivateKey(privateKey)
-    setUserPublicKey(publicKey)
-    setShowWalletConnectModal(false)
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -396,13 +382,9 @@ export default function BlockchainAIChat() {
     localStorage.removeItem("sessionId")
     localStorage.removeItem("userId")
     localStorage.removeItem("appName")
-    localStorage.removeItem("userPrivateKey")
-    localStorage.removeItem("userPublicKey")
     setSessionId(null)
     setUserId("")
     setAppName("")
-    setUserPrivateKey(null)
-    setUserPublicKey(null)
     setMessages([])
     setShowSessionModal(true)
   }
@@ -465,31 +447,6 @@ export default function BlockchainAIChat() {
                   Session ID: <span className="text-white">{sessionId.substring(0, 8)}...</span>
                 </div>
               )}
-              {userPublicKey && (
-                <div className="text-sm text-gray-400">
-                  Public Key:{" "}
-                  <span className="text-white">
-                    {userPublicKey.substring(0, 6)}...{userPublicKey.substring(userPublicKey.length - 4)}
-                  </span>
-                </div>
-              )}
-              {userPrivateKey && (
-                <div className="text-sm text-gray-400">
-                  Private Key:{" "}
-                  <span className="text-white">
-                    {"*".repeat(4)}...{"*".repeat(4)}
-                  </span>
-                </div>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gray-700 text-white hover:bg-gray-800 bg-transparent"
-                onClick={() => setShowWalletConnectModal(true)}
-              >
-                <Wallet className="w-4 h-4 mr-2" />
-                {userPublicKey ? "Change Account" : "Connect Wallet"}
-              </Button>
             </div>
           </div>
         </header>
@@ -713,12 +670,6 @@ export default function BlockchainAIChat() {
         isOpen={showSessionModal}
         onClose={() => setShowSessionModal(false)}
         onSessionCreated={handleSessionCreated}
-      />
-
-      <WalletConnectModal
-        isOpen={showWalletConnectModal}
-        onClose={() => setShowWalletConnectModal(false)}
-        onWalletConnected={handleWalletConnected}
       />
     </div>
   )

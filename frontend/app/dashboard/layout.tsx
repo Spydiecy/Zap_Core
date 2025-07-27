@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
-import { ConnectWalletButton } from "@/components/ui/connect-wallet-button"
 import { ThemeToggle } from "@/components/ui/theme-provider"
-import { WalletProtection } from "@/components/wallet/WalletProtection"
 import { cn } from "@/lib/utils"
 
 export default function DashboardLayout({
@@ -32,8 +30,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <WalletProtection>
-      <div className="relative min-h-screen bg-background overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-background overflow-hidden transition-colors">
         {/* Enhanced background with theme-aware effects */}
         <div
           aria-hidden
@@ -58,7 +55,6 @@ export default function DashboardLayout({
                 <h2 className="text-lg font-medium text-foreground dark:text-white/90">{getPageName()}</h2>
                 <div className="flex items-center gap-3">
                   <ThemeToggle />
-                  <ConnectWalletButton />
                 </div>
               </div>
             </div>
@@ -72,6 +68,5 @@ export default function DashboardLayout({
         {/* Enhanced bottom gradient with theme awareness */}
         <div className="fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none"></div>
       </div>
-    </WalletProtection>
   )
 }

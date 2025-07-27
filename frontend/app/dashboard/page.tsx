@@ -1,8 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useWallet } from "@/contexts/WalletContext"
-import { useWalletAddress } from "@/components/wallet/WalletProtection"
 import { Button } from "@/components/ui/button"
 import {
   ArrowRight,
@@ -579,8 +577,6 @@ function DashboardCard({
 }
 
 export default function DashboardPage() {
-  const { connected, publicKey } = useWallet()
-  const walletAddress = useWalletAddress()
   const [isHovering, setIsHovering] = useState<string | null>(null)
   const [selectedChain, setSelectedChain] = useState(chainOptions[0])
   const [showChainDropdown, setShowChainDropdown] = useState(false)
@@ -610,7 +606,7 @@ export default function DashboardPage() {
   const rateLimitManager = new DashboardRateLimitManager()
 
   // Get dynamic address based on wallet connection
-  const currentAddress = getDynamicAddress(publicKey)
+  const currentAddress = getDynamicAddress(null)
 
   const updateLoadingStep :any= (
     stepName: string,
@@ -655,7 +651,7 @@ export default function DashboardPage() {
 
     try {
       console.log("Starting sequential Solana data fetch with rate limiting...")
-      console.log("Using address:", currentAddress, connected ? "(Connected wallet)" : "(Dummy address)")
+      console.log("Using address:", currentAddress, "(Demo address)")
 
       // Add initial delay to prevent immediate API bombardment
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -886,26 +882,6 @@ export default function DashboardPage() {
   }, [loading])
 
   // Watch for wallet connection changes and refresh data
-  useEffect(() => {
-    const refreshDataOnWalletChange = async () => {
-      try {
-        console.log("Wallet connection status changed. Connected:", connected, "PublicKey:", publicKey)
-        
-        // Add a small delay to ensure wallet context has fully updated
-        setTimeout(async () => {
-          await fetchAllData()
-        }, 1000)
-      } catch (error) {
-        console.error("Failed to refresh data on wallet change:", error)
-      }
-    }
-
-    // Only trigger refresh if we've already loaded data once (avoid double loading on initial mount)
-    if (lastUpdated) {
-      refreshDataOnWalletChange()
-    }
-  }, [connected, publicKey]) // Watch for changes in wallet connection status
-
   // Debug logging
   useEffect(() => {
     console.log("Dashboard stats updated:", dashboardStats)
@@ -1086,7 +1062,7 @@ export default function DashboardPage() {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground dark:text-white/60">Address</span>
                 <span className="text-foreground dark:text-white font-mono text-xs">
-                  {connected ? `${currentAddress.slice(0, 8)}... (Connected)` : `${SOLANA_ADDRESS.slice(0, 8)}... (Demo)`}
+                  {`${SOLANA_ADDRESS.slice(0, 8)}... (Demo)`}
                 </span>
               </div>
               <div className="flex justify-between items-center">
