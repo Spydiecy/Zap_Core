@@ -479,7 +479,7 @@ export default function BlockchainAIChat() {
               <div
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                  message.role === "assistant" ? "bg-gray-800" : "bg-blue-600",
+                  message.role === "assistant" ? "bg-gray-800" : "bg-white text-black",
                 )}
               >
                 {message.role === "assistant" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}

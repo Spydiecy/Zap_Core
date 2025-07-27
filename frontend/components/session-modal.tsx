@@ -44,11 +44,22 @@ export function SessionModal({ isOpen, onClose, onSessionCreated }: SessionModal
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+        let errorMessage = `HTTP error! status: ${response.status}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (parseError) {
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
 
-      const sessionData = await response.json()
+      let sessionData
+      try {
+        sessionData = await response.json()
+      } catch (parseError) {
+        throw new Error("Invalid response format from server")
+      }
 
       // Store in localStorage
       localStorage.setItem("sessionId", sessionData.id)

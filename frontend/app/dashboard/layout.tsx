@@ -35,7 +35,7 @@ export default function DashboardLayout({
         <header className="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-black/90 backdrop-blur-sm">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold">Astra Chat</h1>
-            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">
+            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded border border-gray-700">
               Early Access
             </span>
           </div>

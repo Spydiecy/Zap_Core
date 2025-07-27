@@ -358,7 +358,10 @@ export default function AstraChatPage() {
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {messages.map((message) => (
-            <div key={message.id} className="flex items-start space-x-4">
+            <div key={message.id} className={cn(
+              "flex items-start space-x-4",
+              message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
+            )}>
               <div
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
@@ -367,15 +370,26 @@ export default function AstraChatPage() {
               >
                 {message.role === "assistant" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="rounded-lg p-4 bg-gray-900/50 border border-gray-800">
+              <div className={cn(
+                "flex-1 space-y-2",
+                message.role === "user" ? "flex flex-col items-end" : ""
+              )}>
+                <div className={cn(
+                  "rounded-lg p-4 border border-gray-800",
+                  message.role === "user" 
+                    ? "bg-white text-black max-w-xs ml-auto" 
+                    : "bg-gray-900/50"
+                )}>
                   {message.isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                       <span className="text-gray-400">Thinking...</span>
                     </div>
                   ) : (
-                    <div className="whitespace-pre-wrap text-gray-100">{message.content}</div>
+                    <div className={cn(
+                      "whitespace-pre-wrap",
+                      message.role === "user" ? "text-black" : "text-gray-100"
+                    )}>{message.content}</div>
                   )}
                   
                   {/* Show uploaded images for user messages */}
@@ -449,7 +463,7 @@ export default function AstraChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Message Astra..."
-              className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-400 pr-20 py-4 text-base rounded-lg"
+              className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-500 pr-20 py-4 text-base rounded-lg focus:border-gray-600 focus:ring-0"
               disabled={isLoading}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
@@ -472,7 +486,7 @@ export default function AstraChatPage() {
                 onClick={sendMessage}
                 disabled={isLoading || (!input.trim() && uploadedFiles.length === 0)}
                 size="sm"
-                className="bg-white text-black hover:bg-gray-200"
+                className="bg-white text-black hover:bg-gray-200 border-0"
               >
                 <Send className="w-4 h-4" />
               </Button>
