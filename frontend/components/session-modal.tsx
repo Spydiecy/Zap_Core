@@ -1,8 +1,7 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import React from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -12,13 +11,32 @@ interface SessionModalProps {
   isOpen: boolean
   onClose: () => void
   onSessionCreated: (sessionId: string, userId: string) => void
+  currentSessionId?: string | null
+  currentUserId?: string
+  currentAppName?: string
 }
 
-export function SessionModal({ isOpen, onClose, onSessionCreated }: SessionModalProps) {
-  const [userId, setUserId] = useState("")
-  const [appName, setAppName] = useState("blockchain-assistant")
+export function SessionModal({ 
+  isOpen, 
+  onClose, 
+  onSessionCreated, 
+  currentSessionId, 
+  currentUserId, 
+  currentAppName 
+}: SessionModalProps) {
+  const [userId, setUserId] = useState(currentUserId || "")
+  const [appName, setAppName] = useState(currentAppName || "blockchain-assistant")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setUserId(currentUserId || "")
+      setAppName(currentAppName || "blockchain-assistant")
+      setError("")
+    }
+  }, [isOpen, currentUserId, currentAppName])
 
   const createSession = async () => {
     if (!userId.trim() || !appName.trim()) {
@@ -75,11 +93,27 @@ export function SessionModal({ isOpen, onClose, onSessionCreated }: SessionModal
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-gray-900 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle>Create New Session</DialogTitle>
+          <DialogTitle>
+            {currentSessionId ? "Create New Chat Session" : "Create New Session"}
+          </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Enter your details to start a new AI chat session
+            {currentSessionId 
+              ? "Start a new chat session. This will create a fresh conversation." 
+              : "Enter your details to start a new AI chat session"
+            }
           </DialogDescription>
         </DialogHeader>
+
+        {currentSessionId && (
+          <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
+            <div className="text-sm text-gray-400 mb-1">Current Session</div>
+            <div className="text-sm">
+              <div>Session ID: <span className="text-gray-300">{currentSessionId}</span></div>
+              <div>User ID: <span className="text-gray-300">{currentUserId}</span></div>
+              <div>App: <span className="text-gray-300">{currentAppName}</span></div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="space-y-2">
@@ -124,7 +158,7 @@ export function SessionModal({ isOpen, onClose, onSessionCreated }: SessionModal
               disabled={isLoading || !userId.trim() || !appName.trim()}
               className="bg-white text-black hover:bg-gray-200"
             >
-              {isLoading ? "Creating..." : "Create Session"}
+              {isLoading ? "Creating..." : currentSessionId ? "Create New Session" : "Create Session"}
             </Button>
           </div>
         </div>

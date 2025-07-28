@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Paperclip, Send, Bot, User } from "lucide-react"
+import { Paperclip, Send, Bot, User, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SessionModal } from "@/components/session-modal"
 import { uploadFileToIPFS } from "@/lib/pinata"
@@ -100,6 +100,13 @@ export default function AstraChatPage() {
     setSessionId(newSessionId)
     setUserId(newUserId)
     setAppName(localStorage.getItem("appName") || "astra-assistant")
+    
+    // Reset chat state for new session
+    setMessages([])
+    setInput("")
+    setUploadedFiles([])
+    setIsLoading(false)
+    
     initializeChat()
   }
 
@@ -347,13 +354,36 @@ export default function AstraChatPage() {
           isOpen={showSessionModal}
           onClose={() => setShowSessionModal(false)}
           onSessionCreated={handleSessionCreated}
+          currentSessionId={sessionId}
+          currentUserId={userId}
+          currentAppName={appName}
         />
       </div>
     )
   }
 
+  const handleNewChat = () => {
+    setShowSessionModal(true)
+  }
+
   return (
     <div className="h-full bg-black text-white flex flex-col">
+      {/* Header with New Chat Button */}
+      <div className="border-b border-gray-800 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Astra AI Assistant</h1>
+          <Button
+            onClick={handleNewChat}
+            variant="outline"
+            size="sm"
+            className="border-gray-600 text-white hover:bg-gray-800 bg-transparent flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            New Session
+          </Button>
+        </div>
+      </div>
+
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="w-full space-y-4">
@@ -499,6 +529,9 @@ export default function AstraChatPage() {
         isOpen={showSessionModal}
         onClose={() => setShowSessionModal(false)}
         onSessionCreated={handleSessionCreated}
+        currentSessionId={sessionId}
+        currentUserId={userId}
+        currentAppName={appName}
       />
     </div>
   )
