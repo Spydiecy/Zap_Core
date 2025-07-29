@@ -3,10 +3,11 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Paperclip, Send, Bot, User, Zap, ImageIcon } from "lucide-react"
+import { Paperclip, Send, Bot, User, Plus, Zap, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SessionModal } from "@/components/session-modal"
 import { uploadFileToIPFS } from "@/lib/pinata"
+import { useCredentials } from "@/contexts/CredentialsContext"
 
 interface Message {
   id: string
@@ -29,7 +30,7 @@ interface FileUpload {
   data: string
 }
 
-export default function BlockchainAIChat() {
+export default function AstraChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -39,21 +40,11 @@ export default function BlockchainAIChat() {
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([])
   const [showSessionModal, setShowSessionModal] = useState(false)
 
+  // Get credentials from context
+  const { publicKey, privateKey, hasCredentials, isConfirmed } = useCredentials()
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const exampleQueries = [
-    "Show my token balances",
-    "What is the current gas price?",
-    "Explain how a smart contract works.",
-    "What is DeFi?",
-    "How to swap ETH for DAI?",
-    "Describe the process of minting an NFT.",
-    "What are the latest trends in blockchain gaming?",
-    "Compare Proof of Work vs Proof of Stake.",
-    "Generate a diagram of a typical blockchain network.",
-    "Create a visualization of my portfolio distribution.",
-  ]
 
   const imageGenerationKeywords = [
     "generate",
@@ -119,8 +110,7 @@ export default function BlockchainAIChat() {
       {
         id: "1",
         role: "assistant",
-        content:
-          "Hello! I'm your blockchain AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps, and even generate images or diagrams. What would you like to explore today?",
+        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps, and even generate images or diagrams. What would you like to explore today?",
         timestamp: Date.now(),
       },
     ])
@@ -129,7 +119,7 @@ export default function BlockchainAIChat() {
   const handleSessionCreated = (newSessionId: string, newUserId: string) => {
     setSessionId(newSessionId)
     setUserId(newUserId)
-    setAppName(localStorage.getItem("appName") || "blockchain-assistant")
+    setAppName(localStorage.getItem("appName") || "astra-assistant")
     initializeChat()
   }
 
@@ -198,8 +188,17 @@ export default function BlockchainAIChat() {
       const needsIPFSStorage = shouldUseIPFSStorage(currentInput)
 
       let finalPrompt = currentInput
-      const str =
-        "My Wallet Public Key Or User Address: 0xe26B62d6113659527c7cB3eDf4c1F660BE25dd70 and My  Wallet private key:2d7e6aead724a6fc219089d0d0c2477e614c09cf0d5e4eebd10272b0a68e7211"
+      
+      // Check if we actually have credential values (not just hasCredentials boolean)
+      const hasActualCredentials = publicKey && privateKey && publicKey.trim() !== '' && privateKey.trim() !== ''
+      
+      // Use context credentials if available, otherwise fallback to hardcoded (for backwards compatibility)
+      const str = hasActualCredentials 
+        ? `My Wallet Public Key Or User Address: ${publicKey} and My  Wallet private key:${privateKey}`
+        : "My Wallet Public Key Or User Address: 0xe26B62d6113659527c7cB3eDf4c1F660BE25dd70 and My  Wallet private key:2d7e6aead724a6fc219089d0d0c2477e614c09cf0d5e4eebd10272b0a68e7211"
+        
+      console.log('Has actual credentials:', hasActualCredentials)
+      console.log('Credential string to append:', str)
 
       // Handle IPFS storage for specific keywords
       if (needsIPFSStorage && currentFiles.length > 0) {
@@ -378,22 +377,11 @@ export default function BlockchainAIChat() {
     }
   }
 
-  const startNewChat = () => {
-    localStorage.removeItem("sessionId")
-    localStorage.removeItem("userId")
-    localStorage.removeItem("appName")
-    setSessionId(null)
-    setUserId("")
-    setAppName("")
-    setMessages([])
-    setShowSessionModal(true)
-  }
-
   if (!sessionId) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="h-full bg-black text-white flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-4">Blockchain AI Assistant</h1>
+          <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
           <p className="text-gray-400 mb-6">Create a session to start chatting</p>
           <Button onClick={() => setShowSessionModal(true)} className="bg-white text-black hover:bg-gray-200">
             Create Session
@@ -409,73 +397,15 @@ export default function BlockchainAIChat() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
-      {/* Sidebar for Recent Queries */}
-      <div className="w-64 border-r border-gray-800 p-4 overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">Recent Queries</h3>
-        <div className="space-y-2">
-          {exampleQueries.map((query, index) => (
-            <Button
-              key={index}
-              variant="ghost"
-              size="sm"
-              className="w-full text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-2 whitespace-normal justify-start"
-              onClick={() => setInput(query)}
-            >
-              <div className="truncate">{query}</div>
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="border-b border-gray-800 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <span>Dashboard</span>
-              <span>/</span>
-              <span>AI chat</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-400">
-                User: <span className="text-white">{userId}</span>
-              </div>
-              {sessionId && (
-                <div className="text-sm text-gray-400">
-                  Session ID: <span className="text-white">{sessionId.substring(0, 8)}...</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Chat Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-semibold">Blockchain AI Assistant</h1>
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <button className="hover:text-white">↑</button>
-              <span>100%</span>
-              <button className="hover:text-white">+</button>
-            </div>
-          </div>
-          <Button
-            onClick={startNewChat}
-            variant="outline"
-            size="sm"
-            className="border-gray-700 text-white hover:bg-gray-800 bg-transparent"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New Chat
-          </Button>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+    <div className="h-full bg-black text-white flex flex-col">
+      {/* Chat Messages Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="w-full space-y-4">
           {messages.map((message) => (
-            <div key={message.id} className="flex items-start space-x-4">
+            <div key={message.id} className={cn(
+              "flex items-start space-x-3 w-full",
+              message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
+            )}>
               <div
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
@@ -484,49 +414,58 @@ export default function BlockchainAIChat() {
               >
                 {message.role === "assistant" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+              <div className={cn(
+                "space-y-2 flex-1",
+                message.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"
+              )}>
+                <div className={cn(
+                  "rounded-lg p-4 border border-gray-800 max-w-[75%]",
+                  message.role === "user" 
+                    ? "bg-white text-black" 
+                    : "bg-gray-900/50"
+                )}>
                   {message.isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                       <span className="text-gray-400">Thinking...</span>
                     </div>
                   ) : (
-                    <div className="whitespace-pre-wrap">{message.content}</div>
+                    <div className={cn(
+                      "whitespace-pre-wrap",
+                      message.role === "user" ? "text-black" : "text-gray-100"
+                    )}>{message.content}</div>
                   )}
+                  
                   {/* Show uploaded images for user messages */}
                   {message.role === "user" && message.images && message.images.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {message.images.map((image, index) => (
                         <div key={index} className="relative">
                           <img
-                            src={image.data || "/placeholder.svg"}
+                            src={image.data}
                             alt={image.displayName}
-                            className="max-w-xs max-h-48 rounded-lg object-cover"
+                            className="max-w-xs max-h-48 rounded-lg border border-gray-700"
                           />
-                          <div className="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                            {image.displayName}
-                          </div>
                         </div>
                       ))}
                     </div>
                   )}
-                  {/* Show generated image for assistant messages, only if imageBase64 exists */}
-                  {message.role === "assistant" && message.generatedImage?.imageBase64 && (
-                    <div className="mt-3">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <ImageIcon className="w-4 h-4 text-cyan-400" />
-                        <span className="text-cyan-400 text-sm font-medium">Generated Visualization:</span>
-                      </div>
+
+                  {/* Show generated images for assistant messages */}
+                  {message.role === "assistant" && message.generatedImage && (
+                    <div className="mt-4 space-y-3">
                       <div className="relative">
                         <img
                           src={`data:image/png;base64,${message.generatedImage.imageBase64}`}
                           alt="Generated visualization"
-                          className="max-w-full max-h-96 rounded-lg object-contain"
+                          className="max-w-full rounded-lg border border-gray-700"
                         />
                       </div>
                       {message.generatedImage.responseText && (
-                        <div className="mt-2 text-sm text-gray-300 italic">{message.generatedImage.responseText}</div>
+                        <div className="text-sm text-gray-400 p-3 bg-gray-900 rounded border border-gray-800">
+                          <strong>Image Generation Response:</strong>
+                          <div className="mt-1">{message.generatedImage.responseText}</div>
+                        </div>
                       )}
                     </div>
                   )}
@@ -536,131 +475,81 @@ export default function BlockchainAIChat() {
           ))}
           <div ref={messagesEndRef} />
         </div>
+      </div>
 
-        {/* Example Queries */}
-        {messages.length === 1 && (
-          <div className="px-6 py-4">
-            <div className="flex items-center space-x-2 mb-4">
-              <Zap className="w-4 h-4 text-cyan-400" />
-              <span className="text-cyan-400 text-sm font-medium">Try these example queries:</span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {exampleQueries.slice(0, 6).map((query, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-700 text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-3 whitespace-normal bg-transparent"
-                  onClick={() => setInput(query)}
-                >
-                  {query}
-                </Button>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-              {exampleQueries.slice(6).map((query, index) => (
-                <Button
-                  key={index + 6}
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-700 text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-3 whitespace-normal bg-transparent"
-                  onClick={() => setInput(query)}
-                >
-                  {query}
-                </Button>
-              ))}
-            </div>
-            <div className="mt-4">
-              <div className="text-sm text-gray-400 mb-2">Image Generation Examples:</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-700 text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-3 whitespace-normal bg-transparent"
-                  onClick={() => setInput("Generate a workflow diagram for blockchain transaction process")}
-                >
-                  Generate a workflow diagram for blockchain transaction process
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-700 text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-3 whitespace-normal bg-transparent"
-                  onClick={() => setInput("Create a visualization of my portfolio distribution")}
-                >
-                  Create a visualization of my portfolio distribution
-                </Button>
+      {/* Input Area */}
+      <div className="border-t border-gray-800 p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Credential Status Indicator */}
+          <div className="mb-3">
+            {publicKey && privateKey && (
+              <div className="flex items-center space-x-2 text-xs text-green-400">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span>Wallet credentials active (Public: {publicKey.substring(0, 10)}...)</span>
               </div>
-              <div className="mt-3">
-                <div className="text-sm text-gray-400 mb-2">IPFS Storage Examples:</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-700 text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-3 whitespace-normal bg-transparent"
-                    onClick={() => setInput("Save NFT metadata to IPFS")}
-                  >
-                    Save NFT metadata to IPFS
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-700 text-left text-gray-300 hover:bg-gray-800 hover:text-white h-auto p-3 whitespace-normal bg-transparent"
-                    onClick={() => setInput("Store asset on IPFS")}
-                  >
-                    Store asset on IPFS
-                  </Button>
-                </div>
+            )}
+            {(!publicKey || !privateKey) && (
+              <div className="flex items-center space-x-2 text-xs text-yellow-400">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                <span>Using fallback credentials</span>
               </div>
-            </div>
+            )}
           </div>
-        )}
 
-        {/* Input Area */}
-        <div className="border-t border-gray-800 px-6 py-4">
           {/* File Uploads */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
               {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center space-x-2 bg-gray-800 rounded-lg px-3 py-2">
-                  <Paperclip className="w-4 h-4" />
-                  <span className="text-sm">{file.displayName}</span>
-                  <button onClick={() => removeFile(index)} className="text-gray-400 hover:text-white">
-                    ×
-                  </button>
+                <div key={index} className="relative">
+                  <div className="flex items-center space-x-2 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
+                    <Paperclip className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-300 truncate max-w-32">{file.displayName}</span>
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-          <div className="flex items-center space-x-4">
-            <div className="flex-1 relative">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about transactions, blocks, events, portfolio, or say 'save asset/NFT' to upload to IPFS..."
-                className="bg-gray-900 border-gray-700 text-white placeholder-gray-400 pr-20"
-                disabled={isLoading}
+
+          {/* Input Form */}
+          <div className="relative">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Message Astra..."
+              className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-500 pr-20 py-4 text-base rounded-lg focus:border-gray-600 focus:ring-0"
+              disabled={isLoading}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                multiple
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+                className="hidden"
               />
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                <input ref={fileInputRef} type="file" multiple onChange={handleFileUpload} className="hidden" />
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-gray-400 hover:text-white p-1"
-                >
-                  <Paperclip className="w-4 h-4" />
-                </Button>
-                <Button
-                  onClick={sendMessage}
-                  size="sm"
-                  disabled={isLoading || (!input.trim() && uploadedFiles.length === 0)}
-                  className="bg-white text-black hover:bg-gray-200 p-1"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 text-gray-400 hover:text-white transition-colors rounded"
+                disabled={isLoading}
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+              <Button
+                onClick={sendMessage}
+                disabled={isLoading || (!input.trim() && uploadedFiles.length === 0)}
+                size="sm"
+                className="bg-white text-black hover:bg-gray-200 border-0"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
