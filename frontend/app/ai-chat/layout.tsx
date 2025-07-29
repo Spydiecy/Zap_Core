@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { Button } from "@/components/ui/button"
 import { SessionModal } from "@/components/session-modal"
+import { CustomConnectButton } from "@/components/ui/connect-wallet-button"
 import { Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -81,13 +82,7 @@ export default function AiChatLayout({
               <Plus className="w-4 h-4" />
               New Session
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-gray-700 bg-transparent text-white hover:bg-gray-800"
-            >
-              Connect Wallet
-            </Button>
+            <CustomConnectButton />
           </div>
         </header>
 
