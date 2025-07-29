@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { Button } from "@/components/ui/button"
+import { SessionModal } from "@/components/session-modal"
+import { Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function DashboardLayout({
@@ -13,7 +15,39 @@ export default function DashboardLayout({
 }>) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [showSessionModal, setShowSessionModal] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string>("")
+  const [appName, setAppName] = useState<string>("")
   const pathname = usePathname()
+
+  useEffect(() => {
+    setMounted(true)
+    
+    // Load session data from localStorage
+    const storedSessionId = localStorage.getItem("sessionId")
+    const storedUserId = localStorage.getItem("userId")
+    const storedAppName = localStorage.getItem("appName")
+    
+    if (storedSessionId) setSessionId(storedSessionId)
+    if (storedUserId) setUserId(storedUserId)
+    if (storedAppName) setAppName(storedAppName)
+  }, [])
+
+  const handleNewSession = () => {
+    setShowSessionModal(true)
+  }
+
+  const handleSessionCreated = (newSessionId: string, newUserId: string) => {
+    setSessionId(newSessionId)
+    setUserId(newUserId)
+    setAppName(localStorage.getItem("appName") || "astra-assistant")
+    
+    // Trigger a custom event to notify the AI chat page to reset
+    window.dispatchEvent(new CustomEvent('newSessionCreated', {
+      detail: { sessionId: newSessionId, userId: newUserId }
+    }))
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -41,6 +75,15 @@ export default function DashboardLayout({
           </div>
           
           <div className="flex items-center space-x-3">
+            <Button
+              onClick={handleNewSession}
+              variant="outline"
+              size="sm"
+              className="border-gray-700 bg-transparent text-white hover:bg-gray-800 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              New Session
+            </Button>
             <Button 
               variant="outline" 
               size="sm"
@@ -56,6 +99,16 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      
+      {/* Session Modal */}
+      <SessionModal
+        isOpen={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
+        onSessionCreated={handleSessionCreated}
+        currentSessionId={sessionId}
+        currentUserId={userId}
+        currentAppName={appName}
+      />
     </div>
   )
 }
