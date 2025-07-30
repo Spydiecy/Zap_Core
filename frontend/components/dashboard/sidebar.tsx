@@ -120,8 +120,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         
         {/* Docs Button - Moved here, right below New Chat */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
-          <Link 
-            href="/docs" 
+          <a 
+            href="https://github.com/Spydiecy/Astra_Morph/blob/main/README.md"
+            target="_blank"
+            rel="noopener noreferrer"
             className={cn(
               "flex items-center px-3 py-3 text-sm rounded-lg transition-colors cursor-pointer group relative",
               isDark 
@@ -143,7 +145,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                 Docs
               </div>
             )}
-          </Link>
+          </a>
         </div>
         
         {/* Spacer */}

@@ -37,6 +37,17 @@ Astra: 🚀 Token deployed! Contract: 0xdef456...
 - Create tokens & NFT collections
 - Automated transaction processing
 
+### 📅 Payment Scheduling & Automation
+```
+You: "Schedule $1000 MORPH salary to john_doe monthly"
+Astra: ✅ Recurring payment set! Next: Feb 1st
+```
+- **Salary Automation**: Monthly/weekly employee payments
+- **Event-Based Payments**: Birthday, holiday bonuses
+- **Recurring Transfers**: Custom schedules (daily, weekly, monthly)
+- **Bulk Distributions**: Mass payments to multiple addresses
+- **Smart Reminders**: Automated payment notifications
+
 ### 🔧 Developer Tools
 - **Workflow Visualization**: Interactive Mermaid diagrams
 - **Contract Templates**: Pre-built smart contracts
@@ -127,6 +138,9 @@ flowchart LR
 🖼️ "Deploy CyberPunks NFT collection"
 📊 "Show me MORPH price trends"
 ⚙️ "Generate voting contract workflow"
+📅 "Schedule $2000 MORPH salary to alice monthly"
+🎉 "Set birthday bonus of 100 MORPH for bob on March 15th"
+⏰ "Pay rent of 500 MORPH every 1st of month"
 ```
 
 ---

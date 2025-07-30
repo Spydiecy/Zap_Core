@@ -83,7 +83,7 @@ export function HeroSection() {
                                     <Link
                                         href="#link"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                                        <span className="text-foreground text-sm">Introducing Support for Solana</span>
+                                        <span className="text-foreground text-sm">Introducing Morph Network Support</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                                         <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -100,11 +100,11 @@ export function HeroSection() {
                         
                                     <h1
                                         className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                                        Your AI-powered copilot for DeFi trading
+                                        Your AI Agent for Morph Network
                                     </h1>
                                     <p
                                         className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                        Astra harnesses the power of artificial intelligence and Solana's high-performance blockchain to transform your DeFi experience.
+                                        Deploy contracts, create tokens, schedule payments, and interact with Morph blockchain using simple chat commands. Powered by Google Gemini AI.
                                     </p>
                                 </AnimatedGroup>
 
@@ -191,7 +191,7 @@ export function HeroSection() {
                         <div className="mb-16 text-center">
                             <h2 className="mb-4 text-4xl font-bold md:text-5xl">Core Features</h2>
                             <p className="mx-auto max-w-2xl text-muted-foreground">
-                                Powerful capabilities that elevate your DeFi trading experience
+                                Powerful AI capabilities that revolutionize blockchain interactions
                             </p>
                         </div>
                         
@@ -200,24 +200,26 @@ export function HeroSection() {
                             <div className="group rounded-xl border p-6 hover:border-primary/50">
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide">
-                                        <path d="M12 20v-6M6 20V10M18 20V4"/>
+                                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                                        <rect width="4" height="12" x="2" y="9"/>
+                                        <circle cx="4" cy="4" r="2"/>
                                     </svg>
                                 </div>
-                                <h3 className="mb-2 text-xl font-semibold">AI-Powered Trading Intelligence</h3>
-                                <p className="text-muted-foreground">Advanced algorithms provide data-driven suggestions for optimal trade entry and exit points.</p>
+                                <h3 className="mb-2 text-xl font-semibold">One-Command Operations</h3>
+                                <p className="text-muted-foreground">Deploy smart contracts, create tokens, and mint NFTs with simple chat commands on Morph Network.</p>
                             </div>
                             
                             {/* Feature 2 */}
                             <div className="group rounded-xl border p-6 hover:border-primary/50">
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide">
-                                        <path d="m8 6 4-4 4 4"/>
-                                        <path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22"/>
-                                        <path d="m20 22-5-5"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v6m0 6v6"/>
+                                        <path d="m21 12-6 0m-6 0-6 0"/>
                                     </svg>
                                 </div>
-                                <h3 className="mb-2 text-xl font-semibold">Seamless Multi-DEX Execution</h3>
-                                <p className="text-muted-foreground">Execute token swaps across multiple decentralized exchanges with minimal friction.</p>
+                                <h3 className="mb-2 text-xl font-semibold">Payment Scheduling</h3>
+                                <p className="text-muted-foreground">Automate salary payments, set recurring transfers, and schedule event-based payments with AI assistance.</p>
                             </div>
                             
                             {/* Feature 3 */}
@@ -232,34 +234,32 @@ export function HeroSection() {
                                         <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
                                     </svg>
                                 </div>
-                                <h3 className="mb-2 text-xl font-semibold">Comprehensive Portfolio Analysis</h3>
-                                <p className="text-muted-foreground">Gain powerful insights about your holdings, performance metrics, and risk exposure.</p>
+                                <h3 className="mb-2 text-xl font-semibold">Contract Workflow Visualization</h3>
+                                <p className="text-muted-foreground">Generate interactive Mermaid diagrams to visualize smart contract workflows and interactions.</p>
                             </div>
                             
                             {/* Feature 4 */}
                             <div className="group rounded-xl border p-6 hover:border-primary/50">
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide">
-                                        <path d="M2 22h20"/>
-                                        <path d="M10 7H5a2 2 0 0 0-2 2v11h7V7Z"/>
-                                        <path d="M10 18h7V5a2 2 0 0 0-2-2h-3v15Z"/>
-                                        <path d="M17 18h2a2 2 0 0 0 2-2V9h-4v9Z"/>
+                                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                                     </svg>
                                 </div>
-                                <h3 className="mb-2 text-xl font-semibold">Intelligent Gas Optimization</h3>
-                                <p className="text-muted-foreground">Sophisticated timing mechanisms determine optimal transaction execution to minimize fees.</p>
+                                <h3 className="mb-2 text-xl font-semibold">Real-time Market Data</h3>
+                                <p className="text-muted-foreground">Access live MORPH prices and market insights powered by Coinbase API integration.</p>
                             </div>
                             
                             {/* Feature 5 */}
                             <div className="group rounded-xl border p-6 hover:border-primary/50">
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide">
-                                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-                                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                                        <path d="M9 12l2 2 4-4"/>
+                                        <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1"/>
+                                        <path d="M3 10v4c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-4"/>
                                     </svg>
                                 </div>
-                                <h3 className="mb-2 text-xl font-semibold">Real-time Market Sentiment Analysis</h3>
-                                <p className="text-muted-foreground">Leverage cutting-edge NLP to analyze market trends and sentiment indicators.</p>
+                                <h3 className="mb-2 text-xl font-semibold">Secure Credential System</h3>
+                                <p className="text-muted-foreground">Military-grade encryption for wallet credentials with autonomous AI agent access for instant operations.</p>
                             </div>
                             
                             {/* Feature 6 */}
@@ -271,8 +271,8 @@ export function HeroSection() {
                                         <line x1="12" y1="17" x2="12" y2="21"/>
                                     </svg>
                                 </div>
-                                <h3 className="mb-2 text-xl font-semibold">Intuitive Interface</h3>
-                                <p className="text-muted-foreground">Clean, professional dashboard suitable for both novice and sophisticated traders.</p>
+                                <h3 className="mb-2 text-xl font-semibold">Premium Subscription Tiers</h3>
+                                <p className="text-muted-foreground">Multiple subscription levels with increasing capabilities and priority transaction processing.</p>
                             </div>
                         </div>
                     </div>
@@ -283,9 +283,9 @@ export function HeroSection() {
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="grid items-center gap-12 lg:grid-cols-2">
                             <div>
-                                <h2 className="mb-4 text-4xl font-bold md:text-5xl">Technical Architecture</h2>
+                                <h2 className="mb-4 text-4xl font-bold md:text-5xl">Powered by Advanced AI</h2>
                                 <p className="mb-6 text-muted-foreground">
-                                    Astra employs a robust technical foundation designed for performance, security, and exceptional user experience.
+                                    Astra Morph employs cutting-edge technology designed for performance, security, and seamless blockchain interactions on Morph Network.
                                 </p>
                                 
                                 <ul className="space-y-4">
@@ -296,7 +296,7 @@ export function HeroSection() {
                                                 <polyline points="22 4 12 14.01 9 11.01"/>
                                             </svg>
                                         </div>
-                                        <span><strong>Frontend:</strong> React.js with Tailwind CSS for responsive design</span>
+                                        <span><strong>Frontend:</strong> Next.js 14 with TypeScript and RainbowKit wallet integration</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <div className="flex-shrink-0 text-primary">
@@ -305,7 +305,7 @@ export function HeroSection() {
                                                 <polyline points="22 4 12 14.01 9 11.01"/>
                                             </svg>
                                         </div>
-                                        <span><strong>AI Engine:</strong> Custom-trained TensorFlow models with specialized trading algorithms</span>
+                                        <span><strong>AI Engine:</strong> Google Gemini AI with Agent Kit SDK for advanced reasoning</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <div className="flex-shrink-0 text-primary">
@@ -314,7 +314,7 @@ export function HeroSection() {
                                                 <polyline points="22 4 12 14.01 9 11.01"/>
                                             </svg>
                                         </div>
-                                        <span><strong>Blockchain Layer:</strong> Solana Web3.js for high-throughput transaction processing</span>
+                                        <span><strong>Blockchain:</strong> Morph Network L2 with Solidity smart contracts</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <div className="flex-shrink-0 text-primary">
@@ -323,7 +323,7 @@ export function HeroSection() {
                                                 <polyline points="22 4 12 14.01 9 11.01"/>
                                             </svg>
                                         </div>
-                                        <span><strong>Integration Layer:</strong> OKX DEX API for liquidity access and trade execution</span>
+                                        <span><strong>Protocol:</strong> MCP Server/Client for agent communication</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <div className="flex-shrink-0 text-primary">
@@ -332,7 +332,7 @@ export function HeroSection() {
                                                 <polyline points="22 4 12 14.01 9 11.01"/>
                                             </svg>
                                         </div>
-                                        <span><strong>Data Services:</strong> Pyth Network for reliable, low-latency price oracle data</span>
+                                        <span><strong>Storage:</strong> MongoDB + Pinata IPFS for secure data and NFT metadata</span>
                                     </li>
                                 </ul>
                             </div>
@@ -354,65 +354,24 @@ export function HeroSection() {
                         <div className="mb-16 text-center">
                             <h2 className="mb-4 text-4xl font-bold md:text-5xl">Simple, Transparent Pricing</h2>
                             <p className="mx-auto max-w-2xl text-muted-foreground">
-                                Choose the plan that best suits your trading needs
+                                Get started with our testnet access plan - more pricing options coming soon!
                             </p>
                         </div>
                         
-                        <div className="grid gap-8 md:grid-cols-3">
-                            {/* Basic Plan */}
-                            <div className="flex flex-col rounded-xl border bg-card p-8">
-                                <div className="mb-6">
-                                    <h3 className="mb-2 text-xl font-medium">Basic</h3>
-                                    <div className="mb-2 flex items-baseline">
-                                        <span className="text-4xl font-bold">Free</span>
-                                    </div>
-                                    <p className="text-muted-foreground">Perfect for beginners exploring DeFi</p>
-                                </div>
-                                
-                                <ul className="mb-8 space-y-3 text-sm">
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Basic portfolio analytics</span>
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Single DEX trading</span>
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Market data dashboard</span>
-                                    </li>
-                                </ul>
-                                
-                                <div className="mt-auto">
-                                    <Button asChild variant="outline" className="w-full">
-                                        <Link href="/ai-chat">Get Started</Link>
-                                    </Button>
-                                </div>
-                            </div>
-                            
-                            {/* Pro Plan */}
-                            <div className="flex flex-col rounded-xl border border-primary bg-card p-8 relative">
+                        <div className="grid gap-8 justify-center">
+                            {/* Testnet Access Plan */}
+                            <div className="flex flex-col rounded-xl border border-primary bg-card p-8 relative max-w-md mx-auto">
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-sm font-medium text-primary-foreground">
-                                    Popular
+                                    Available Now
                                 </div>
                                 
                                 <div className="mb-6">
-                                    <h3 className="mb-2 text-xl font-medium">Pro</h3>
+                                    <h3 className="mb-2 text-xl font-medium">Testnet Access</h3>
                                     <div className="mb-2 flex items-baseline">
-                                        <span className="text-4xl font-bold">$39</span>
-                                        <span className="text-muted-foreground">/month</span>
+                                        <span className="text-4xl font-bold">0.01 ETH</span>
+                                        <span className="text-muted-foreground ml-2">one-time</span>
                                     </div>
-                                    <p className="text-muted-foreground">For active traders seeking an edge</p>
+                                    <p className="text-muted-foreground">Full platform access on Morph testnet</p>
                                 </div>
                                 
                                 <ul className="mb-8 space-y-3 text-sm">
@@ -421,35 +380,42 @@ export function HeroSection() {
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                             <polyline points="22 4 12 14.01 9 11.01"/>
                                         </svg>
-                                        <span>Everything in Basic</span>
+                                        <span>Complete AI chat interface</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                             <polyline points="22 4 12 14.01 9 11.01"/>
                                         </svg>
-                                        <span>AI-powered trading insights</span>
+                                        <span>Smart contract deployment</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                             <polyline points="22 4 12 14.01 9 11.01"/>
                                         </svg>
-                                        <span>Multi-DEX trading</span>
+                                        <span>Token & NFT creation</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                             <polyline points="22 4 12 14.01 9 11.01"/>
                                         </svg>
-                                        <span>Gas optimization</span>
+                                        <span>Payment scheduling system</span>
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                             <polyline points="22 4 12 14.01 9 11.01"/>
                                         </svg>
-                                        <span>Advanced portfolio analytics</span>
+                                        <span>Workflow visualization</span>
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                            <polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                        <span>Real-time market data</span>
                                     </li>
                                 </ul>
                                 
@@ -459,96 +425,46 @@ export function HeroSection() {
                                     </Button>
                                 </div>
                             </div>
-                            
-                            {/* Enterprise Plan */}
-                            <div className="flex flex-col rounded-xl border bg-card p-8">
-                                <div className="mb-6">
-                                    <h3 className="mb-2 text-xl font-medium">Enterprise</h3>
-                                    <div className="mb-2 flex items-baseline">
-                                        <span className="text-4xl font-bold">$99</span>
-                                        <span className="text-muted-foreground">/month</span>
-                                    </div>
-                                    <p className="text-muted-foreground">For professional traders and institutions</p>
-                                </div>
-                                
-                                <ul className="mb-8 space-y-3 text-sm">
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Everything in Pro</span>
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Algorithmic trading strategies</span>
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Flash loan implementation</span>
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Custom API integrations</span>
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22 4 12 14.01 9 11.01"/>
-                                        </svg>
-                                        <span>Dedicated account manager</span>
-                                    </li>
-                                </ul>
-                                
-                                <div className="mt-auto">
-                                    <Button asChild variant="outline" className="w-full">
-                                        <Link href="#">Contact Sales</Link>
-                                    </Button>
-                                </div>
-                            </div>
+                        </div>
+                        
+                        <div className="mt-12 text-center">
+                            <p className="text-muted-foreground text-sm">
+                                🚀 More pricing plans coming soon for mainnet launch
+                            </p>
                         </div>
                     </div>
                 </section>
                 
                 {/* Testimonials Section */}
                 <TestimonialsSection
-                  title="Trusted by traders worldwide"
-                  description="Join thousands of traders who are already building the future with our AI-powered DeFi platform"
+                  title="Trusted by developers worldwide"
+                  description="Join thousands of developers who are building the future with our AI-powered blockchain agent"
                   testimonials={[
                     {
                       author: {
-                        name: "Emma Thompson",
-                        handle: "@emmaai",
+                        name: "Sarah Chen",
+                        handle: "@sarahdev",
                         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face"
                       },
-                      text: "Using Astra has transformed how we handle DeFi trading. The speed and accuracy of the AI recommendations are unprecedented.",
-                      href: "https://twitter.com/emmaai"
+                      text: "Astra Morph has completely transformed how I interact with smart contracts. Deploying an NFT collection used to take hours, now it's done in minutes with a simple chat command!",
+                      href: "https://twitter.com/sarahdev"
                     },
                     {
                       author: {
-                        name: "David Park",
-                        handle: "@davidtech",
+                        name: "Marcus Thompson",
+                        handle: "@marcusmorph",
                         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
                       },
-                      text: "The multi-DEX integration is flawless. I've reduced my transaction costs by 60% since implementing Astra for my trades.",
-                      href: "https://twitter.com/davidtech"
+                      text: "The payment scheduling feature is a game-changer for our DAO. Setting up monthly salary payments for 50+ contributors takes just one command. Incredible efficiency!",
+                      href: "https://twitter.com/marcusmorph"
                     },
                     {
                       author: {
-                        name: "Sofia Rodriguez",
-                        handle: "@sofiaml",
+                        name: "Elena Rodriguez",
+                        handle: "@elenaai",
                         avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face"
                       },
-                      text: "Finally, a trading tool that actually understands market context! The accuracy in sentiment analysis is impressive."
+                      text: "The workflow visualization with Mermaid diagrams helps our team understand complex contract interactions. The AI explanations are spot-on and incredibly helpful."
                     }
                   ]}
                 />
@@ -560,7 +476,7 @@ export function HeroSection() {
                             <div className="md:col-span-2">
                                 <Logo className="mb-4" />
                                 <p className="mb-4 max-w-xs text-muted-foreground">
-                                    Your AI-powered copilot for DeFi trading on Solana. Enhancing trading efficiency through advanced algorithms.
+                                    Your AI agent for seamless blockchain interactions on Morph Network. Powered by Google Gemini AI.
                                 </p>
                                 <div className="flex space-x-4">
                                     <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -607,7 +523,7 @@ export function HeroSection() {
                         
                         <div className="mt-10 border-t pt-6">
                             <p className="text-center text-xs text-muted-foreground">
-                                © {new Date().getFullYear()} Astra. All rights reserved. Developed for the OKX Solana Accelerate Hackathon 2025.
+                                © {new Date().getFullYear()} Astra Morph. All rights reserved. Built for Morph Network with ❤️
                             </p>
                         </div>
                     </div>
@@ -708,7 +624,7 @@ const Logo = ({ className }: { className?: string }) => {
     return (
         <div className={cn('flex items-center gap-2', className)}>
             <div className="font-bold text-xl bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent dark:from-white dark:to-gray-400">
-                ASTRA
+                ASTRA MORPH
             </div>
         </div>
     )
