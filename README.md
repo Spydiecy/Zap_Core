@@ -1,4 +1,4 @@
-# Astra Morph 🚀
+# Astra 🚀
 ## AI-Powered Blockchain Agent for Morph Network
 
 > Transform blockchain interactions with simple chat commands. Deploy contracts, send tokens, create NFTs - all with natural language.
