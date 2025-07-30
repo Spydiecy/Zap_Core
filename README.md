@@ -120,19 +120,6 @@ flowchart LR
 
 ## 🚀 Try It Out!
 
-### Quick Demo
-```bash
-# 1. Clone & setup
-git clone https://github.com/Spydiecy/Astra_Morph.git
-cd Astra_Morph/frontend && npm install
-
-# 2. Start MCP server
-cd ../backend && python mcp_server.py
-
-# 3. Launch app
-npm run dev
-```
-
 ### Example Commands
 ```
 💰 "Send 50 MORPH to john_doe"
