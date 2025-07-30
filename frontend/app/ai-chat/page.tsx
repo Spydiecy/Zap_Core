@@ -7,6 +7,8 @@ import { Paperclip, Send, Bot, User, Plus, Zap, ImageIcon, Wallet } from "lucide
 import { cn } from "@/lib/utils"
 import { uploadFileToIPFS } from "@/lib/pinata"
 import { useCredentials } from "@/contexts/CredentialsContext"
+import { AccessControlModal } from "@/components/access-control-modal"
+import { useAccount, useReadContract } from 'wagmi'
 
 interface Message {
   id: string
@@ -39,6 +41,30 @@ interface FileUpload {
   data: string
 }
 
+// Access Control Constants
+const CONTRACT_ADDRESS = '0xF887B4D3b17C12C86cc917cF72fb8881f866a847'
+const CONTRACT_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "hasPaid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
+
 export default function AstraChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
@@ -47,9 +73,26 @@ export default function AstraChatPage() {
   const [userId, setUserId] = useState<string>("")
   const [appName, setAppName] = useState<string>("")
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([])
+  const [hasAccess, setHasAccess] = useState(false)
+  const [showAccessModal, setShowAccessModal] = useState(true)
 
   // Get credentials from context
   const { publicKey, privateKey, hasCredentials, isConfirmed } = useCredentials()
+  
+  // Wallet connection
+  const { address, isConnected } = useAccount()
+
+  // Check if user has paid for access
+  const { data: hasPaid } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'hasPaid',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 5000,
+    },
+  }) as { data: boolean | undefined }
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -308,11 +351,22 @@ export default function AstraChatPage() {
   }
 
   useEffect(() => {
+    // Check access when wallet connects or payment status changes
+    if (isConnected && hasPaid) {
+      setHasAccess(true)
+      setShowAccessModal(false)
+    } else if (isConnected && hasPaid === false) {
+      setHasAccess(false)
+      setShowAccessModal(true)
+    }
+  }, [isConnected, hasPaid])
+
+  useEffect(() => {
     const storedSessionId = localStorage.getItem("sessionId")
     const storedUserId = localStorage.getItem("userId")
     const storedAppName = localStorage.getItem("appName")
 
-    if (storedSessionId && storedUserId && storedAppName) {
+    if (storedSessionId && storedUserId && storedAppName && hasAccess) {
       setSessionId(storedSessionId)
       setUserId(storedUserId)
       setAppName(storedAppName)
@@ -321,6 +375,8 @@ export default function AstraChatPage() {
 
     // Listen for new session events from the layout
     const handleNewSession = (event: CustomEvent) => {
+      if (!hasAccess) return // Don't create session if no access
+      
       console.log('New session created:', event.detail)
       const { sessionId: newSessionId, userId: newUserId } = event.detail
       setSessionId(newSessionId)
@@ -335,7 +391,7 @@ export default function AstraChatPage() {
     return () => {
       window.removeEventListener('newSessionCreated', handleNewSession as EventListener)
     }
-  }, [])
+  }, [hasAccess])
 
   useEffect(() => {
     scrollToBottom()
@@ -613,11 +669,46 @@ export default function AstraChatPage() {
     }
   }
 
+  const handleAccessGranted = () => {
+    setHasAccess(true)
+    setShowAccessModal(false)
+    
+    // Initialize session if not already done
+    const storedSessionId = localStorage.getItem("sessionId")
+    const storedUserId = localStorage.getItem("userId")
+    const storedAppName = localStorage.getItem("appName")
+
+    if (storedSessionId && storedUserId && storedAppName) {
+      setSessionId(storedSessionId)
+      setUserId(storedUserId)
+      setAppName(storedAppName)
+      initializeChat()
+    }
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
+  }
+
+  // Show access control modal if user doesn't have access
+  if (!hasAccess || showAccessModal) {
+    return (
+      <>
+        <AccessControlModal
+          isOpen={showAccessModal}
+          onAccessGranted={handleAccessGranted}
+        />
+        <div className="h-full bg-black text-white flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
+            <p className="text-gray-400 mb-6">Premium access required to continue</p>
+          </div>
+        </div>
+      </>
+    )
   }
 
   if (!sessionId) {

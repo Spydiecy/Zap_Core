@@ -128,8 +128,8 @@ export function HeroSection() {
                                             asChild
                                             size="lg"
                                             className="rounded-xl px-5 text-base">
-                                            <Link href="/dashboard">
-                                                <span className="text-nowrap">Dashboard</span>
+                                            <Link href="/ai-chat">
+                                                <span className="text-nowrap">Launch AI Assistant</span>
                                             </Link>
                                         </Button>
                                     </div>
@@ -395,7 +395,7 @@ export function HeroSection() {
                                 
                                 <div className="mt-auto">
                                     <Button asChild variant="outline" className="w-full">
-                                        <Link href="#">Get Started</Link>
+                                        <Link href="/ai-chat">Get Started</Link>
                                     </Button>
                                 </div>
                             </div>
@@ -455,7 +455,7 @@ export function HeroSection() {
                                 
                                 <div className="mt-auto">
                                     <Button asChild className="w-full">
-                                        <Link href="#">Get Started</Link>
+                                        <Link href="/ai-chat">Get Started</Link>
                                     </Button>
                                 </div>
                             </div>
@@ -691,8 +691,8 @@ const HeroHeader = () => {
                                 <Button
                                     asChild
                                     size="sm">
-                                    <Link href="dashboard">
-                                        <span>Launch Dashboard</span>
+                                    <Link href="/ai-chat">
+                                        <span>Launch AI Assistant</span>
                                     </Link>
                                 </Button>
                             </div>

@@ -68,6 +68,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider
+            modalSize="compact"
             theme={{
               blurs: {
                 modalOverlay: 'blur(4px)',

@@ -171,3 +171,24 @@
 .animate-marquee {
   animation: marquee var(--duration) linear infinite;
 }
+
+/* RainbowKit modal z-index fixes */
+div[data-rk] {
+  z-index: 9999 !important;
+}
+
+/* Ensure RainbowKit backdrop has high z-index */
+div[data-rk] > div {
+  z-index: 9999 !important;
+}
+
+/* Fix wallet selection clickability */
+button[data-rk] {
+  pointer-events: auto !important;
+}
+
+/* Ensure modal content is clickable */
+[data-rk] button, [data-rk] a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
