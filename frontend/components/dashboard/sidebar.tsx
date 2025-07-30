@@ -108,26 +108,26 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         <div className="flex-1"></div>
         
         {/* Wallet Credentials Section - Moved to bottom */}
-        <div className={cn("px-4 py-4 border-t border-gray-800", !open && "px-2")}>
+        <div className={cn("p-4 border-t border-gray-800", !open && "px-2")}>
           {open && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Credentials Header with Toggle */}
               <button
                 onClick={() => setShowCredentials(!showCredentials)}
-                className="flex items-center justify-between w-full text-left group"
+                className="flex items-center justify-between w-full px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white group"
               >
-                <div className="flex items-center space-x-2">
-                  <Wallet className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-300">Wallet Credentials</span>
+                <div className="flex items-center space-x-3">
+                  <Wallet className="h-5 w-5" />
+                  <span className="font-medium">Wallet Credentials</span>
                 </div>
                 <ChevronDown className={cn(
-                  "h-4 w-4 text-gray-400 transition-transform",
+                  "h-4 w-4 transition-transform",
                   showCredentials && "rotate-180"
                 )} />
               </button>
               
-              {/* Credentials Status - Always visible */}
-              <div className="flex items-center space-x-2">
+              {/* Credentials Status - Always visible when expanded */}
+              <div className="flex items-center space-x-2 px-3">
                 <div className={cn(
                   "w-2 h-2 rounded-full",
                   isConfirmed ? "bg-green-500" : hasCredentials ? "bg-yellow-500" : "bg-red-500"
@@ -139,9 +139,9 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
               
               {/* Collapsible Credentials Form */}
               {showCredentials && (
-                <div className="space-y-4 pt-2">
+                <div className="space-y-3 px-3">
                   {/* Public Key Input */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-xs text-gray-400 flex items-center space-x-1">
                       <Key className="h-3 w-3" />
                       <span>Public Key</span>
@@ -156,7 +156,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                   </div>
                   
                   {/* Private Key Input */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-xs text-gray-400 flex items-center space-x-1">
                       <Key className="h-3 w-3" />
                       <span>Private Key</span>
@@ -181,7 +181,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                   
                   {/* Confirm Button - only show when both credentials are entered and not confirmed */}
                   {publicKey && privateKey && !isConfirmed && (
-                    <div className="pt-3">
+                    <div className="pt-2">
                       <button
                         onClick={() => {
                           confirmCredentials()
@@ -218,7 +218,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           )}
           
           {!open && (
-            <div className="flex justify-center">
+            <div className="flex justify-center py-3">
               <div className={cn(
                 "w-4 h-4 rounded-full",
                 isConfirmed ? "bg-green-500" : hasCredentials ? "bg-yellow-500" : "bg-red-500"
@@ -228,7 +228,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         </div>
         
         {/* Back to Home */}
-        <div className={cn("px-4 pt-2 pb-4 border-t border-gray-800", !open && "px-2")}>
+        <div className={cn("p-4 border-t border-gray-800", !open && "px-2")}>
           <Link 
             href="/" 
             className={cn(
