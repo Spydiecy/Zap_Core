@@ -1,12 +1,14 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import { useTheme } from 'next-themes'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useWriteContract, useReadContract } from 'wagmi'
 import { parseEther } from 'viem'
 import { Wallet, Shield, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const CONTRACT_ADDRESS = '0xF887B4D3b17C12C86cc917cF72fb8881f866a847'
 const CONTRACT_ABI = [
@@ -76,9 +78,13 @@ interface AccessControlModalProps {
 }
 
 export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlModalProps) {
+  const { theme } = useTheme()
   const { address, isConnected } = useAccount()
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  const isDark = theme === 'dark'
 
   // Check if user has already paid
   const { data: hasPaid, refetch: refetchHasPaid } = useReadContract({
@@ -109,12 +115,22 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
     },
   })
 
+  // Ensure component is mounted before rendering to avoid hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Check access when wallet connects or payment status changes
   useEffect(() => {
     if (hasPaid) {
       onAccessGranted()
     }
   }, [hasPaid, onAccessGranted])
+
+  // Don't render until mounted to prevent hydration issues
+  if (!mounted) {
+    return null
+  }
 
   const handlePayment = async () => {
     if (!address) return
@@ -145,7 +161,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
       case 'error':
         return <AlertCircle className="w-5 h-5 text-red-400" />
       default:
-        return <Shield className="w-5 h-5 text-gray-400" />
+        return <Shield className={cn("w-5 h-5", isDark ? "text-gray-400" : "text-gray-600")} />
     }
   }
 
@@ -164,7 +180,12 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="bg-black border-gray-800 text-white max-w-md mx-auto">
+      <DialogContent className={cn(
+        "max-w-md mx-auto border transition-colors duration-300",
+        isDark 
+          ? "bg-black border-gray-800 text-white" 
+          : "bg-white border-gray-300 text-black"
+      )}>
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
             <Shield className="w-6 h-6 text-blue-400" />
@@ -174,25 +195,30 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
         
         <div className="space-y-6 pt-4">
           {/* Access Fee Info */}
-          <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+          <div className={cn(
+            "rounded-lg p-4 border",
+            isDark 
+              ? "bg-gray-900/50 border-gray-700" 
+              : "bg-gray-100/50 border-gray-300"
+          )}>
             <h3 className="text-lg font-medium mb-2">Premium Access Required</h3>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className={cn("text-sm mb-4", isDark ? "text-gray-400" : "text-gray-600")}>
               Access to Astra AI Assistant requires a one-time payment of 0.01 ETH on Morph Holesky Testnet.
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-gray-300">One-time payment</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>One-time payment</span>
             </div>
             <div className="flex items-center space-x-2 text-sm mt-1">
               <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-gray-300">Morph Holesky Testnet</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Morph Holesky Testnet</span>
             </div>
           </div>
 
           {/* Wallet Connection */}
           {!isConnected ? (
             <div className="space-y-4">
-              <div className="flex items-center space-x-2 text-gray-300">
+              <div className={cn("flex items-center space-x-2", isDark ? "text-gray-300" : "text-gray-700")}>
                 <Wallet className="w-5 h-5" />
                 <span>Step 1: Connect your wallet</span>
               </div>
@@ -203,19 +229,24 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
           ) : (
             <div className="space-y-4">
               {/* Connected Wallet */}
-              <div className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+              <div className={cn(
+                "flex items-center justify-between p-3 rounded-lg border",
+                isDark 
+                  ? "bg-gray-900/50 border-gray-700" 
+                  : "bg-gray-100/50 border-gray-300"
+              )}>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-5 h-5 text-green-400" />
                   <span className="text-sm">Wallet Connected</span>
                 </div>
-                <span className="text-xs text-gray-400 font-mono">
+                <span className={cn("text-xs font-mono", isDark ? "text-gray-400" : "text-gray-600")}>
                   {address?.slice(0, 6)}...{address?.slice(-4)}
                 </span>
               </div>
 
               {/* Payment Status */}
               <div className="space-y-3">
-                <div className="flex items-center space-x-2 text-gray-300">
+                <div className={cn("flex items-center space-x-2", isDark ? "text-gray-300" : "text-gray-700")}>
                   {getStatusIcon()}
                   <span>Step 2: {getStatusMessage()}</span>
                 </div>
@@ -243,7 +274,12 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
 
                 {/* Already Paid Status */}
                 {hasPaid && (
-                  <div className="flex items-center justify-center space-x-2 p-3 bg-green-900/20 rounded-lg border border-green-700">
+                  <div className={cn(
+                    "flex items-center justify-center space-x-2 p-3 rounded-lg border",
+                    isDark 
+                      ? "bg-green-900/20 border-green-700" 
+                      : "bg-green-100/50 border-green-300"
+                  )}>
                     <CheckCircle className="w-5 h-5 text-green-400" />
                     <span className="text-green-400">Access granted! Redirecting...</span>
                   </div>
@@ -253,7 +289,12 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
           )}
 
           {/* Network Info */}
-          <div className="text-xs text-gray-500 text-center p-3 bg-gray-900/30 rounded border border-gray-800">
+          <div className={cn(
+            "text-xs text-center p-3 rounded border",
+            isDark 
+              ? "text-gray-500 bg-gray-900/30 border-gray-800" 
+              : "text-gray-600 bg-gray-100/30 border-gray-300"
+          )}>
             <p>Make sure you're connected to Morph Holesky Testnet</p>
             <p className="mt-1">Contract: {CONTRACT_ADDRESS}</p>
           </div>
