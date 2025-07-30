@@ -3,7 +3,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Paperclip, Send, Bot, User, Plus, Zap, ImageIcon } from "lucide-react"
+import { Paperclip, Send, Bot, User, Plus, Zap, ImageIcon, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { uploadFileToIPFS } from "@/lib/pinata"
 import { useCredentials } from "@/contexts/CredentialsContext"
@@ -19,7 +19,17 @@ interface Message {
     displayName: string
     mimeType: string
   }>
-    generatedImage?:any
+  generatedImage?: any
+  balanceData?: {
+    tokens: Array<{
+      symbol: string
+      name: string
+      balance: string
+      usdValue?: string
+      icon?: string
+    }>
+    totalUsdValue?: string
+  }
 }
 
 interface FileUpload {
@@ -78,6 +88,223 @@ export default function AstraChatPage() {
   const shouldUseIPFSStorage = (text: string): boolean => {
     const lowerText = text.toLowerCase()
     return ipfsStorageKeywords.some((keyword) => lowerText.includes(keyword))
+  }
+
+  const isBalanceResponse = (text: string): boolean => {
+    const lowerText = text.toLowerCase()
+    
+    // Check for specific balance response patterns
+    const balanceKeywords = [
+      'wallet balance is',
+      'balance is',
+      'your balance',
+      'current balance',
+      'account balance'
+    ]
+    
+    const hasBalanceKeyword = balanceKeywords.some(keyword => lowerText.includes(keyword))
+    
+    // Also check for token-specific balance patterns
+    const tokenBalancePattern = (
+      lowerText.includes("balance") || 
+      lowerText.includes("wallet") ||
+      lowerText.includes("tokens") ||
+      lowerText.includes("eth") ||
+      lowerText.includes("usdt") ||
+      lowerText.includes("inj") ||
+      lowerText.includes("agent")
+    )
+    
+    // Check for numerical values that look like balances
+    const hasNumericValue = /[\d.]+/.test(text)
+    
+    return (hasBalanceKeyword || tokenBalancePattern) && hasNumericValue
+  }
+
+  const parseBalanceData = async (text: string) => {
+    // Try to extract balance information from the AI response
+    const tokens: Array<{
+      symbol: string
+      name: string
+      balance: string
+      usdValue: string
+      icon: string
+    }> = []
+    
+    // Enhanced patterns for better balance extraction
+    const patterns = [
+      // Pattern: "Your wallet balance is 0.609746632743044111"
+      /(?:wallet\s+balance\s+is|balance\s+is)\s*([\d.,]+)/gi,
+      // Pattern: "INJ: 2.64" or "USDT: 30.23"
+      /(\w+):\s*([\d.,]+)/gi,
+      // Pattern: "INJ balance: 2.64" 
+      /(\w+)\s+balance:\s*([\d.,]+)/gi,
+      // Pattern: "2.64 INJ" or "30.23 USDT"
+      /([\d.,]+)\s+(\w+)/gi,
+      // Pattern: "balance: 0.619957302943058765"
+      /balance:\s*([\d.,]+)/gi
+    ]
+    
+    // Common token symbols to look for
+    const tokenSymbols = ['INJ', 'USDT', 'ETH', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    
+    let foundTokens = new Set() // To avoid duplicates
+    
+    // Process each pattern
+    for (const [patternIndex, pattern] of patterns.entries()) {
+      let match
+      while ((match = pattern.exec(text)) !== null) {
+        let tokenSymbol, balanceValue
+        
+        if (match.length === 3) {
+          // Two capture groups - could be symbol:balance or balance symbol
+          const first = match[1].toUpperCase()
+          const second = match[2]
+          
+          if (tokenSymbols.includes(first)) {
+            tokenSymbol = first
+            balanceValue = second
+          } else if (tokenSymbols.includes(second.toUpperCase())) {
+            tokenSymbol = second.toUpperCase()
+            balanceValue = first
+          }
+        } else if (match.length === 2) {
+          // One capture group - likely just a balance number
+          balanceValue = match[1]
+          
+          // For the "wallet balance is" pattern, try to determine the token
+          if (patternIndex === 0) { // First pattern (wallet balance is)
+            // Look for token symbols in the surrounding text
+            tokenSymbol = tokenSymbols.find(symbol => 
+              text.toUpperCase().includes(symbol)
+            )
+            
+            // If no specific token found, try to determine from context or default to ETH
+            if (!tokenSymbol) {
+              // Check if it's likely an ETH address context
+              if (text.includes('0x') || text.toLowerCase().includes('ethereum')) {
+                tokenSymbol = 'ETH'
+              } else if (text.toLowerCase().includes('injective') || text.toLowerCase().includes('inj')) {
+                tokenSymbol = 'INJ'
+              } else {
+                // Default to ETH for generic balance responses
+                tokenSymbol = 'ETH'
+              }
+            }
+          } else {
+            // For other patterns, try to find token symbol in surrounding text
+            tokenSymbol = tokenSymbols.find(symbol => 
+              text.toUpperCase().includes(symbol)
+            ) || 'ETH' // Default to ETH if no symbol found
+          }
+        }
+        
+        if (tokenSymbol && balanceValue && !foundTokens.has(tokenSymbol)) {
+          foundTokens.add(tokenSymbol)
+          
+          const cleanBalance = parseFloat(balanceValue.replace(/,/g, ''))
+          if (!isNaN(cleanBalance)) {
+            const usdValue = await calculateUSDValue(tokenSymbol, cleanBalance)
+            tokens.push({
+              symbol: tokenSymbol,
+              name: getTokenFullName(tokenSymbol),
+              balance: cleanBalance.toFixed(6),
+              usdValue: usdValue,
+              icon: getTokenIcon(tokenSymbol)
+            })
+          }
+        }
+      }
+    }
+
+    // Calculate total USD value
+    let totalUsdValue = '0.00'
+    if (tokens.length > 0) {
+      const total = tokens.reduce((sum, token) => {
+        return sum + parseFloat(token.usdValue || '0')
+      }, 0)
+      totalUsdValue = total.toFixed(2)
+    }
+
+    return tokens.length > 0 ? { tokens, totalUsdValue } : null
+  }
+
+  const getTokenFullName = (symbol: string): string => {
+    const tokenNames: Record<string, string> = {
+      'INJ': 'Injective Protocol',
+      'USDT': 'Tether USD',
+      'ETH': 'Ethereum',
+      'AGENT': 'Agent Token',
+      'BTC': 'Bitcoin',
+      'WETH': 'Wrapped Ethereum'
+    }
+    return tokenNames[symbol] || symbol
+  }
+
+  const calculateUSDValue = async (symbol: string, balance: number): Promise<string> => {
+    try {
+      // Map token symbols to Coinbase API symbols
+      const coinbaseSymbols: Record<string, string> = {
+        'USDT': 'USDT-USD',
+        'ETH': 'ETH-USD',
+        'BTC': 'BTC-USD',
+        'WETH': 'ETH-USD', // Use ETH price for WETH
+        'MATIC': 'MATIC-USD',
+        'ATOM': 'ATOM-USD'
+      }
+      
+      const coinbaseSymbol = coinbaseSymbols[symbol]
+      
+      if (!coinbaseSymbol) {
+        // Fallback to mock price for unsupported tokens
+        const mockPrices: Record<string, number> = {
+          'AGENT': 0.50,
+          'OSMO': 0.80
+        }
+        const price = mockPrices[symbol] || 0
+        return (balance * price).toFixed(2)
+      }
+      
+      const response = await fetch(`https://api.coinbase.com/v2/prices/${coinbaseSymbol}/spot`)
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch price for ${symbol}`)
+      }
+      
+      const data = await response.json()
+      const price = parseFloat(data.data.amount)
+      
+      return (balance * price).toFixed(2)
+    } catch (error) {
+      console.error(`Error fetching price for ${symbol}:`, error)
+      
+      // Fallback to mock prices if API fails
+      const mockPrices: Record<string, number> = {
+        'USDT': 1.00,
+        'ETH': 3200.00,
+        'AGENT': 0.50,
+        'BTC': 45000.00,
+        'WETH': 3200.00,
+        'MATIC': 1.20,
+        'ATOM': 8.50,
+        'OSMO': 0.80
+      }
+      
+      const price = mockPrices[symbol] || 0
+      return (balance * price).toFixed(2)
+    }
+  }
+
+  const getTokenIcon = (symbol: string): string => {
+    const tokenIcons: Record<string, string> = {
+      'INJ': '⚡',
+      'USDT': '💎',
+      'ETH': '/eth.svg',
+      'AGENT': '🤖',
+      'BTC': '₿',
+      'WETH': '🔶'
+    }
+    return tokenIcons[symbol] || '🪙'
   }
 
   useEffect(() => {
@@ -347,14 +574,24 @@ export default function AstraChatPage() {
         }
       }
 
+      // Check if this is a balance response and parse the data
+      console.log('AI Response content:', content)
+      const isBalance = isBalanceResponse(content)
+      console.log('Is balance response:', isBalance)
+      
+      const balanceData = isBalance ? await parseBalanceData(content) : null
+      console.log('Parsed balance data:', balanceData)
+
       setMessages((prev) => {
         const filtered = prev.filter((msg) => !msg.isLoading)
+        
         const assistantMessage: Message = {
           id: (Date.now() + 2).toString(),
           role: "assistant",
           content: content || "I apologize, but I encountered an issue processing your request.",
           timestamp: Date.now(),
           generatedImage: generatedImage,
+          balanceData: balanceData || undefined,
         }
         return [...filtered, assistantMessage]
       })
@@ -467,6 +704,55 @@ export default function AstraChatPage() {
                       )}
                     </div>
                   )}
+
+                  {/* Show balance data for assistant messages */}
+                  {message.role === "assistant" && message.balanceData && (
+                    <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                      <h3 className="text-sm font-medium text-gray-300 mb-3">Wallet Balance</h3>
+                      <div className="space-y-3">
+                        {message.balanceData.tokens.map((token, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg">
+                                {token.icon && token.icon.startsWith('/') ? (
+                                  <img 
+                                    src={token.icon} 
+                                    alt={token.symbol} 
+                                    className="w-6 h-6"
+                                  />
+                                ) : (
+                                  token.icon || '🪙'
+                                )}
+                              </div>
+                              <div>
+                                <div className="text-white font-medium">{token.symbol}</div>
+                                <div className="text-sm text-gray-400">{token.name}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white font-medium">{token.balance}</div>
+                              {token.usdValue && (
+                                <div className="text-sm text-gray-400">${token.usdValue}</div>
+                              )}
+                            </div>
+                            <div className="ml-3">
+                              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                                Contract ⚡
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {message.balanceData.totalUsdValue && (
+                        <div className="mt-3 pt-3 border-t border-gray-700">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Total Value</span>
+                            <span className="text-white font-medium">${message.balanceData.totalUsdValue}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -478,22 +764,6 @@ export default function AstraChatPage() {
       {/* Input Area */}
       <div className="border-t border-gray-800 p-4">
         <div className="max-w-4xl mx-auto">
-          {/* Credential Status Indicator */}
-          <div className="mb-3">
-            {publicKey && privateKey && (
-              <div className="flex items-center space-x-2 text-xs text-green-400">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span>Wallet credentials active (Public: {publicKey.substring(0, 10)}...)</span>
-              </div>
-            )}
-            {(!publicKey || !privateKey) && (
-              <div className="flex items-center space-x-2 text-xs text-yellow-400">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                <span>Using fallback credentials</span>
-              </div>
-            )}
-          </div>
-
           {/* File Uploads */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">

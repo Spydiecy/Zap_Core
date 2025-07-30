@@ -20,6 +20,16 @@ interface Message {
     mimeType: string
   }>
   generatedImage?: any
+  balanceData?: {
+    tokens: Array<{
+      symbol: string
+      name: string
+      balance: string
+      usdValue?: string
+      icon?: string
+    }>
+    totalUsdValue?: string
+  }
 }
 
 interface FileUpload {
@@ -58,6 +68,152 @@ export default function AstraChatPage() {
   const shouldUseIPFSStorage = (text: string): boolean => {
     const lowerText = text.toLowerCase()
     return ipfsStorageKeywords.some((keyword) => lowerText.includes(keyword))
+  }
+
+  const isBalanceResponse = (text: string): boolean => {
+    const lowerText = text.toLowerCase()
+    return (
+      lowerText.includes("balance") || 
+      lowerText.includes("wallet") ||
+      lowerText.includes("tokens") ||
+      lowerText.includes("eth") ||
+      lowerText.includes("usdt") ||
+      lowerText.includes("inj") ||
+      lowerText.includes("agent")
+    ) && (
+      text.includes("0.") || 
+      text.includes("1.") || 
+      text.includes("2.") || 
+      text.includes("3.") || 
+      text.includes("4.") || 
+      text.includes("5.") || 
+      text.includes("6.") || 
+      text.includes("7.") || 
+      text.includes("8.") || 
+      text.includes("9.")
+    )
+  }
+
+  const parseBalanceData = (text: string) => {
+    // Try to extract balance information from the AI response
+    const tokens: Array<{
+      symbol: string
+      name: string
+      balance: string
+      usdValue: string
+      icon: string
+    }> = []
+    
+    // Enhanced patterns for better balance extraction
+    const patterns = [
+      // Pattern: "INJ: 2.64" or "USDT: 30.23"
+      /(\w+):\s*([\d.,]+)/gi,
+      // Pattern: "INJ balance: 2.64" 
+      /(\w+)\s+balance:\s*([\d.,]+)/gi,
+      // Pattern: "2.64 INJ" or "30.23 USDT"
+      /([\d.,]+)\s+(\w+)/gi,
+      // Pattern: "Your wallet balance: 0.619957302943058765"
+      /balance:\s*([\d.,]+)/gi
+    ]
+    
+    // Common token symbols to look for
+    const tokenSymbols = ['INJ', 'USDT', 'ETH', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    
+    let foundTokens = new Set() // To avoid duplicates
+    
+    // Try each pattern
+    patterns.forEach(pattern => {
+      let match
+      while ((match = pattern.exec(text)) !== null) {
+        let tokenSymbol, balanceValue
+        
+        if (match.length === 3) {
+          // Two capture groups - could be symbol:balance or balance symbol
+          const first = match[1].toUpperCase()
+          const second = match[2]
+          
+          if (tokenSymbols.includes(first)) {
+            tokenSymbol = first
+            balanceValue = second
+          } else if (tokenSymbols.includes(second.toUpperCase())) {
+            tokenSymbol = second.toUpperCase()
+            balanceValue = first
+          }
+        } else if (match.length === 2) {
+          // One capture group - likely just a balance number
+          balanceValue = match[1]
+          // Try to find token symbol in surrounding text
+          tokenSymbol = tokenSymbols.find(symbol => 
+            text.toUpperCase().includes(symbol)
+          ) || 'ETH' // Default to ETH if no symbol found
+        }
+        
+        if (tokenSymbol && balanceValue && !foundTokens.has(tokenSymbol)) {
+          foundTokens.add(tokenSymbol)
+          
+          const cleanBalance = parseFloat(balanceValue.replace(/,/g, ''))
+          if (!isNaN(cleanBalance)) {
+            tokens.push({
+              symbol: tokenSymbol,
+              name: getTokenFullName(tokenSymbol),
+              balance: cleanBalance.toFixed(6),
+              usdValue: calculateUSDValue(tokenSymbol, cleanBalance),
+              icon: getTokenIcon(tokenSymbol)
+            })
+          }
+        }
+      }
+    })
+
+    // Calculate total USD value
+    let totalUsdValue = '0.00'
+    if (tokens.length > 0) {
+      const total = tokens.reduce((sum, token) => {
+        return sum + parseFloat(token.usdValue || '0')
+      }, 0)
+      totalUsdValue = total.toFixed(2)
+    }
+
+    return tokens.length > 0 ? { tokens, totalUsdValue } : null
+  }
+
+  const getTokenFullName = (symbol: string): string => {
+    const tokenNames: Record<string, string> = {
+      'INJ': 'Injective Protocol',
+      'USDT': 'Tether USD',
+      'ETH': 'Ethereum',
+      'AGENT': 'Agent Token',
+      'BTC': 'Bitcoin',
+      'WETH': 'Wrapped Ethereum'
+    }
+    return tokenNames[symbol] || symbol
+  }
+
+  const calculateUSDValue = (symbol: string, balance: number): string => {
+    // Mock USD values - in a real app, you'd fetch from an API
+    const mockPrices: Record<string, number> = {
+      'INJ': 25.50,
+      'USDT': 1.00,
+      'ETH': 3200.00,
+      'AGENT': 0.50,
+      'BTC': 45000.00,
+      'WETH': 3200.00
+    }
+    
+    const price = mockPrices[symbol] || 0
+    return (balance * price).toFixed(2)
+  }
+
+  const getTokenIcon = (symbol: string): string => {
+    const tokenIcons: Record<string, string> = {
+      'INJ': '⚡',
+      'USDT': '💎',
+      'ETH': '🔷',
+      'AGENT': '🤖',
+      'BTC': '₿',
+      'WETH': '🔶'
+    }
+    return tokenIcons[symbol] || '🪙'
   }
 
   useEffect(() => {
@@ -313,12 +469,17 @@ export default function AstraChatPage() {
 
       setMessages((prev) => {
         const filtered = prev.filter((msg) => !msg.isLoading)
+        
+        // Check if this is a balance response and parse the data
+        const balanceData = isBalanceResponse(content) ? parseBalanceData(content) : null
+        
         const assistantMessage: Message = {
           id: (Date.now() + 2).toString(),
           role: "assistant",
           content: content || "I apologize, but I encountered an issue processing your request.",
           timestamp: Date.now(),
           generatedImage: generatedImage,
+          balanceData: balanceData || undefined,
         }
         return [...filtered, assistantMessage]
       })
@@ -427,6 +588,47 @@ export default function AstraChatPage() {
                         <div className="text-sm text-gray-400 p-3 bg-gray-900 rounded border border-gray-800">
                           <strong>Image Generation Response:</strong>
                           <div className="mt-1">{message.generatedImage.responseText}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Show balance data for assistant messages */}
+                  {message.role === "assistant" && message.balanceData && (
+                    <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                      <h3 className="text-sm font-medium text-gray-300 mb-3">Wallet Balance</h3>
+                      <div className="space-y-3">
+                        {message.balanceData.tokens.map((token, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg">
+                                {token.icon}
+                              </div>
+                              <div>
+                                <div className="text-white font-medium">{token.symbol}</div>
+                                <div className="text-sm text-gray-400">{token.name}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white font-medium">{token.balance}</div>
+                              {token.usdValue && (
+                                <div className="text-sm text-gray-400">${token.usdValue}</div>
+                              )}
+                            </div>
+                            <div className="ml-3">
+                              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                                Contract ⚡
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {message.balanceData.totalUsdValue && (
+                        <div className="mt-3 pt-3 border-t border-gray-700">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Total Value</span>
+                            <span className="text-white font-medium">${message.balanceData.totalUsdValue}</span>
+                          </div>
                         </div>
                       )}
                     </div>
