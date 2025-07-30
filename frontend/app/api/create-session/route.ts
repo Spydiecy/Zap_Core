@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call your actual API endpoint
-    const response = await fetch(`${process.env.API_BASE_URL || 'https://your-api-domain.com'}/apps/app/users/${userId}/sessions`, {
+    const response = await fetch(`${process.env.API_BASE_URL || 'https://your-api-domain.com'}/apps/morph_agent/users/${userId}/sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

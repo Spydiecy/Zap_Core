@@ -3,9 +3,6 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-// Ensure fetch is available in Node.js
-import fetch from "node-fetch";
-
 // NOTE: Adjust the import based on actual Google GenAI SDK (this may vary)
 // Example import, confirm with your SDK documentation:
 // import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
@@ -81,8 +78,8 @@ const isContractRelated = containsGenerate && containsContract;
           throw new Error(`Mermaid API error: ${imageResponse.status}`);
         }
 
-        const imageBuffer = await imageResponse.buffer();
-        imageBase64 = imageBuffer.toString("base64");
+        const imageArrayBuffer = await imageResponse.arrayBuffer();
+        imageBase64 = Buffer.from(imageArrayBuffer).toString("base64");
       } catch (mermaidError) {
         console.error(
           "Mermaid generation failed, falling back to Gemini image generation:",
