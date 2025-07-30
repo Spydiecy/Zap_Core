@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { Button } from "@/components/ui/button"
 import { SessionModal } from "@/components/session-modal"
 import { CustomConnectButton } from "@/components/ui/connect-wallet-button"
+import { ThemeToggle } from "@/components/ui/theme-provider"
 import { Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -54,7 +55,7 @@ export default function AiChatLayout({
   if (!mounted) return null
 
   return (
-    <div className="h-screen bg-black text-white flex overflow-hidden">
+    <div className="h-screen bg-white dark:bg-black text-black dark:text-white flex overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
       <DashboardSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       
@@ -64,20 +65,21 @@ export default function AiChatLayout({
         sidebarOpen ? "ml-64" : "ml-20"
       )}>
         {/* Top Header */}
-        <header className="h-16 border-b border-gray-800 flex items-center justify-between px-6 bg-black/90 backdrop-blur-sm">
+        <header className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white/90 dark:bg-black/90 backdrop-blur-sm transition-colors duration-300">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold">Astra</h1>
-            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded border border-gray-700">
+            <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded border border-gray-200 dark:border-gray-700 transition-colors duration-300">
               Testnet
             </span>
           </div>
           
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             <Button
               onClick={handleNewSession}
               variant="outline"
               size="sm"
-              className="border-gray-700 bg-transparent text-white hover:bg-gray-800 flex items-center gap-2"
+              className="border-gray-300 dark:border-gray-700 bg-transparent text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors duration-300"
             >
               <Plus className="w-4 h-4" />
               New Session

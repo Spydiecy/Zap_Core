@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
 import { 
   MessageSquare, 
   Plus,
@@ -25,9 +26,18 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const { theme } = useTheme()
   const { publicKey, privateKey, setPublicKey, setPrivateKey, hasCredentials, isConfirmed, confirmCredentials } = useCredentials()
   const [showPrivateKey, setShowPrivateKey] = useState(false)
   const [showCredentials, setShowCredentials] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure component is mounted before rendering to avoid hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
   
   const routes = [
     {
@@ -44,23 +54,39 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
     }
   }
 
+  const isDark = theme === 'dark'
+
   return (
     <div className={cn(
-      "fixed left-0 top-0 h-full bg-black border-r border-gray-800 flex flex-col transition-all duration-300",
+      "fixed left-0 top-0 h-full border-r flex flex-col transition-all duration-300",
+      isDark ? "bg-black border-gray-800 text-white" : "bg-white border-gray-300 text-black",
       open ? "w-64" : "w-20"
     )}>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-16 border-b border-gray-800">
+        <div className={cn(
+          "flex items-center justify-between px-4 h-16 border-b",
+          isDark ? "border-gray-800" : "border-gray-300"
+        )}>
           <div className={cn("flex items-center", !open && "hidden")}>
-            <span className="text-xl font-bold text-white">ASTRA</span>
-            <span className="text-xs ml-2 px-2 py-1 bg-gray-800 text-gray-300 rounded">v0.1</span>
+            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA</span>
+            <span className={cn(
+              "text-xs ml-2 px-2 py-1 rounded",
+              isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"
+            )}>v0.1</span>
           </div>
           <button 
             onClick={() => setOpen(!open)}
-            className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            className={cn(
+              "p-2 rounded-lg transition-colors",
+              isDark ? "hover:bg-gray-800" : "hover:bg-gray-200"
+            )}
           >
-            <ChevronLeft className={cn("h-6 w-6 text-gray-400 transition-transform", !open && "rotate-180")} />
+            <ChevronLeft className={cn(
+              "h-6 w-6 transition-transform",
+              isDark ? "text-gray-400" : "text-gray-600",
+              !open && "rotate-180"
+            )} />
           </button>
         </div>
         
@@ -69,7 +95,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           <button 
             onClick={handleNewChat}
             className={cn(
-              "flex items-center px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white cursor-pointer group relative w-full",
+              "flex items-center px-3 py-3 text-sm rounded-lg transition-colors cursor-pointer group relative w-full",
+              isDark 
+                ? "text-gray-400 hover:bg-gray-800 hover:text-white" 
+                : "text-gray-600 hover:bg-gray-200 hover:text-black",
               !open && "justify-center px-2"
             )}
           >
@@ -77,7 +106,12 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
             {open && <span className="ml-3">New Chat</span>}
             
             {!open && (
-              <div className="absolute left-full ml-2 rounded-md px-2 py-1 bg-gray-800 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-gray-700">
+              <div className={cn(
+                "absolute left-full ml-2 rounded-md px-2 py-1 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border",
+                isDark 
+                  ? "bg-gray-800 text-white border-gray-700" 
+                  : "bg-gray-200 text-black border-gray-300"
+              )}>
                 New Chat
               </div>
             )}
@@ -89,7 +123,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           <Link 
             href="/docs" 
             className={cn(
-              "flex items-center px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white cursor-pointer group relative",
+              "flex items-center px-3 py-3 text-sm rounded-lg transition-colors cursor-pointer group relative",
+              isDark 
+                ? "text-gray-400 hover:bg-gray-800 hover:text-white" 
+                : "text-gray-600 hover:bg-gray-200 hover:text-black",
               !open && "justify-center px-2"
             )}
           >
@@ -97,7 +134,12 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
             {open && <span className="ml-3">Docs</span>}
             
             {!open && (
-              <div className="absolute left-full ml-2 rounded-md px-2 py-1 bg-gray-800 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-gray-700">
+              <div className={cn(
+                "absolute left-full ml-2 rounded-md px-2 py-1 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border",
+                isDark 
+                  ? "bg-gray-800 text-white border-gray-700" 
+                  : "bg-gray-200 text-black border-gray-300"
+              )}>
                 Docs
               </div>
             )}
@@ -108,13 +150,18 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         <div className="flex-1"></div>
         
         {/* Wallet Credentials Section - Moved to bottom */}
-        <div className={cn("p-4 border-t border-gray-800", !open && "px-2")}>
+        <div className={cn("p-4 border-t", isDark ? "border-gray-800" : "border-gray-300", !open && "px-2")}>
           {open && (
             <div className="space-y-3">
               {/* Credentials Header with Toggle */}
               <button
                 onClick={() => setShowCredentials(!showCredentials)}
-                className="flex items-center justify-between w-full px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white group"
+                className={cn(
+                  "flex items-center justify-between w-full px-3 py-3 text-sm rounded-lg transition-colors group",
+                  isDark 
+                    ? "text-gray-400 hover:bg-gray-800 hover:text-white" 
+                    : "text-gray-600 hover:bg-gray-200 hover:text-black"
+                )}
               >
                 <div className="flex items-center space-x-3">
                   <Wallet className="h-5 w-5" />
@@ -132,7 +179,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                   "w-2 h-2 rounded-full",
                   isConfirmed ? "bg-green-500" : hasCredentials ? "bg-yellow-500" : "bg-red-500"
                 )} />
-                <span className="text-xs text-gray-400">
+                <span className={cn("text-xs", isDark ? "text-gray-400" : "text-gray-600")}>
                   {isConfirmed ? "Credentials Confirmed" : hasCredentials ? "Credentials Set (Unconfirmed)" : "Missing Credentials"}
                 </span>
               </div>
@@ -142,7 +189,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                 <div className="space-y-3 px-3">
                   {/* Public Key Input */}
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 flex items-center space-x-1">
+                    <label className={cn("text-xs flex items-center space-x-1", isDark ? "text-gray-400" : "text-gray-600")}>
                       <Key className="h-3 w-3" />
                       <span>Public Key</span>
                     </label>
@@ -151,13 +198,18 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                       value={publicKey}
                       onChange={(e) => setPublicKey(e.target.value)}
                       placeholder="Enter your wallet public key..."
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                      className={cn(
+                        "w-full px-3 py-2 border rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent",
+                        isDark 
+                          ? "bg-gray-900 border-gray-700 text-white focus:ring-white" 
+                          : "bg-gray-100 border-gray-300 text-black focus:ring-gray-500"
+                      )}
                     />
                   </div>
                   
                   {/* Private Key Input */}
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 flex items-center space-x-1">
+                    <label className={cn("text-xs flex items-center space-x-1", isDark ? "text-gray-400" : "text-gray-600")}>
                       <Key className="h-3 w-3" />
                       <span>Private Key</span>
                     </label>
@@ -167,12 +219,22 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                         value={privateKey}
                         onChange={(e) => setPrivateKey(e.target.value)}
                         placeholder="Enter your wallet private key..."
-                        className="w-full px-3 py-2 pr-10 bg-gray-900 border border-gray-700 rounded-md text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                        className={cn(
+                          "w-full px-3 py-2 pr-10 border rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent",
+                          isDark 
+                            ? "bg-gray-900 border-gray-700 text-white focus:ring-white" 
+                            : "bg-gray-100 border-gray-300 text-black focus:ring-gray-500"
+                        )}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPrivateKey(!showPrivateKey)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className={cn(
+                          "absolute right-3 top-1/2 transform -translate-y-1/2",
+                          isDark 
+                            ? "text-gray-400 hover:text-white" 
+                            : "text-gray-600 hover:text-black"
+                        )}
                       >
                         {showPrivateKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -206,7 +268,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                             setShowCredentials(false)
                           }, 2500)
                         }}
-                        className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        className={cn(
+                          "w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2",
+                          isDark ? "focus:ring-offset-gray-900" : "focus:ring-offset-gray-100"
+                        )}
                       >
                         Confirm Credentials
                       </button>
@@ -228,11 +293,14 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         </div>
         
         {/* Back to Home */}
-        <div className={cn("p-4 border-t border-gray-800", !open && "px-2")}>
+        <div className={cn("p-4 border-t", isDark ? "border-gray-800" : "border-gray-300", !open && "px-2")}>
           <Link 
             href="/" 
             className={cn(
-              "flex items-center px-3 py-3 text-sm text-gray-400 rounded-lg transition-colors hover:bg-gray-800 hover:text-white cursor-pointer group relative",
+              "flex items-center px-3 py-3 text-sm rounded-lg transition-colors cursor-pointer group relative",
+              isDark 
+                ? "text-gray-400 hover:bg-gray-800 hover:text-white" 
+                : "text-gray-600 hover:bg-gray-200 hover:text-black",
               !open && "justify-center px-2"
             )}
           >
@@ -240,7 +308,12 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
             {open && <span className="ml-3">Back to Home</span>}
             
             {!open && (
-              <div className="absolute left-full ml-2 rounded-md px-2 py-1 bg-gray-800 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-gray-700">
+              <div className={cn(
+                "absolute left-full ml-2 rounded-md px-2 py-1 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border",
+                isDark 
+                  ? "bg-gray-800 text-white border-gray-700" 
+                  : "bg-gray-200 text-black border-gray-300"
+              )}>
                 Back to Home
               </div>
             )}

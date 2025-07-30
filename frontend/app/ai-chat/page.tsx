@@ -701,10 +701,10 @@ export default function AstraChatPage() {
           isOpen={showAccessModal}
           onAccessGranted={handleAccessGranted}
         />
-        <div className="h-full bg-black text-white flex items-center justify-center">
+        <div className="h-full bg-white dark:bg-black text-black dark:text-white flex items-center justify-center transition-colors duration-300">
           <div className="text-center">
             <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
-            <p className="text-gray-400 mb-6">Premium access required to continue</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Premium access required to continue</p>
           </div>
         </div>
       </>
@@ -713,17 +713,17 @@ export default function AstraChatPage() {
 
   if (!sessionId) {
     return (
-      <div className="h-full bg-black text-white flex items-center justify-center">
+      <div className="h-full bg-white dark:bg-black text-black dark:text-white flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
-          <p className="text-gray-400 mb-6">Please create a session using the "New Session" button in the header</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Please create a session using the "New Session" button in the header</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="h-full bg-black text-white flex flex-col">
+    <div className="h-full bg-white dark:bg-black text-black dark:text-white flex flex-col transition-colors duration-300">
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="w-full space-y-4">
@@ -735,7 +735,9 @@ export default function AstraChatPage() {
               <div
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                  message.role === "assistant" ? "bg-gray-800" : "bg-white text-black",
+                  message.role === "assistant" 
+                    ? "bg-gray-200 dark:bg-gray-800" 
+                    : "bg-gray-800 dark:bg-white text-white dark:text-black",
                 )}
               >
                 {message.role === "assistant" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
@@ -745,20 +747,22 @@ export default function AstraChatPage() {
                 message.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"
               )}>
                 <div className={cn(
-                  "rounded-lg p-4 border border-gray-800 max-w-[75%]",
+                  "rounded-lg p-4 border border-gray-300 dark:border-gray-800 max-w-[75%]",
                   message.role === "user" 
-                    ? "bg-white text-black" 
-                    : "bg-gray-900/50"
+                    ? "bg-gray-800 dark:bg-white text-white dark:text-black" 
+                    : "bg-gray-100 dark:bg-gray-900/50"
                 )}>
                   {message.isLoading ? (
                     <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span className="text-gray-400">Thinking...</span>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-white"></div>
+                      <span className="text-gray-600 dark:text-gray-400">Thinking...</span>
                     </div>
                   ) : (
                     <div className={cn(
                       "whitespace-pre-wrap",
-                      message.role === "user" ? "text-black" : "text-gray-100"
+                      message.role === "user" 
+                        ? "text-white dark:text-black" 
+                        : "text-gray-800 dark:text-gray-100"
                     )}>{message.content}</div>
                   )}
                   
@@ -770,7 +774,7 @@ export default function AstraChatPage() {
                           <img
                             src={image.data}
                             alt={image.displayName}
-                            className="max-w-xs max-h-48 rounded-lg border border-gray-700"
+                            className="max-w-xs max-h-48 rounded-lg border border-gray-400 dark:border-gray-700"
                           />
                         </div>
                       ))}
@@ -784,11 +788,11 @@ export default function AstraChatPage() {
                         <img
                           src={`data:image/png;base64,${message.generatedImage.imageBase64}`}
                           alt="Generated visualization"
-                          className="max-w-full rounded-lg border border-gray-700"
+                          className="max-w-full rounded-lg border border-gray-400 dark:border-gray-700"
                         />
                       </div>
                       {message.generatedImage.responseText && (
-                        <div className="text-sm text-gray-400 p-3 bg-gray-900 rounded border border-gray-800">
+                        <div className="text-sm text-gray-600 dark:text-gray-400 p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-800">
                           <strong>Image Generation Response:</strong>
                           <div className="mt-1">{message.generatedImage.responseText}</div>
                         </div>
@@ -798,13 +802,13 @@ export default function AstraChatPage() {
 
                   {/* Show balance data for assistant messages */}
                   {message.role === "assistant" && message.balanceData && (
-                    <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                      <h3 className="text-sm font-medium text-gray-300 mb-3">Wallet Balance</h3>
+                    <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Wallet Balance</h3>
                       <div className="space-y-3">
                         {message.balanceData.tokens.map((token, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg">
+                              <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-lg">
                                 {token.icon && token.icon.startsWith('/') ? (
                                   <img 
                                     src={token.icon} 
@@ -816,18 +820,18 @@ export default function AstraChatPage() {
                                 )}
                               </div>
                               <div>
-                                <div className="text-white font-medium">{token.symbol}</div>
-                                <div className="text-sm text-gray-400">{token.name}</div>
+                                <div className="text-black dark:text-white font-medium">{token.symbol}</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">{token.name}</div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-white font-medium">{token.balance}</div>
+                              <div className="text-black dark:text-white font-medium">{token.balance}</div>
                               {token.usdValue && (
-                                <div className="text-sm text-gray-400">${token.usdValue}</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">${token.usdValue}</div>
                               )}
                             </div>
                             <div className="ml-3">
-                              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                              <span className="text-xs text-gray-600 dark:text-gray-500 bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">
                                 Contract ⚡
                               </span>
                             </div>
@@ -835,10 +839,10 @@ export default function AstraChatPage() {
                         ))}
                       </div>
                       {message.balanceData.totalUsdValue && (
-                        <div className="mt-3 pt-3 border-t border-gray-700">
+                        <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-700">
                           <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Total Value</span>
-                            <span className="text-white font-medium">${message.balanceData.totalUsdValue}</span>
+                            <span className="text-gray-600 dark:text-gray-400">Total Value</span>
+                            <span className="text-black dark:text-white font-medium">${message.balanceData.totalUsdValue}</span>
                           </div>
                         </div>
                       )}
@@ -853,19 +857,19 @@ export default function AstraChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-800 p-4">
+      <div className="border-t border-gray-300 dark:border-gray-800 p-4">
         <div className="max-w-4xl mx-auto">
           {/* File Uploads */}
           {uploadedFiles.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
               {uploadedFiles.map((file, index) => (
                 <div key={index} className="relative">
-                  <div className="flex items-center space-x-2 bg-gray-800 rounded-lg px-3 py-2 border border-gray-700">
-                    <Paperclip className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-300 truncate max-w-32">{file.displayName}</span>
+                  <div className="flex items-center space-x-2 bg-gray-200 dark:bg-gray-800 rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-700">
+                    <Paperclip className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-32">{file.displayName}</span>
                     <button
                       onClick={() => removeFile(index)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
                     >
                       ×
                     </button>
@@ -882,7 +886,7 @@ export default function AstraChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Message Astra..."
-              className="w-full bg-gray-900 border-gray-700 text-white placeholder-gray-500 pr-20 py-4 text-base rounded-lg focus:border-gray-600 focus:ring-0"
+              className="w-full bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-500 pr-20 py-4 text-base rounded-lg focus:border-gray-500 dark:focus:border-gray-600 focus:ring-0"
               disabled={isLoading}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
@@ -896,7 +900,7 @@ export default function AstraChatPage() {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 text-gray-400 hover:text-white transition-colors rounded"
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors rounded"
                 disabled={isLoading}
               >
                 <Paperclip className="w-4 h-4" />
@@ -905,7 +909,7 @@ export default function AstraChatPage() {
                 onClick={sendMessage}
                 disabled={isLoading || (!input.trim() && uploadedFiles.length === 0)}
                 size="sm"
-                className="bg-white text-black hover:bg-gray-200 border-0"
+                className="bg-gray-800 dark:bg-white text-white dark:text-black hover:bg-gray-700 dark:hover:bg-gray-200 border-0"
               >
                 <Send className="w-4 h-4" />
               </Button>
