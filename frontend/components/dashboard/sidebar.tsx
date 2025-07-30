@@ -43,14 +43,14 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
     {
       label: "AI Chat",
       icon: MessageSquare,
-      href: "/dashboard/ai-chat"
+      href: "/ai-chat"
     }
   ]
 
   const handleNewChat = () => {
-    // Clear chat history and redirect to ai-chat
+    // Clear chat history and redirect to standalone ai-chat
     if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard/ai-chat'
+      window.location.href = '/ai-chat'
     }
   }
 
