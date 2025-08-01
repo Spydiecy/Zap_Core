@@ -42,7 +42,7 @@ interface FileUpload {
 }
 
 // Access Control Constants
-const CONTRACT_ADDRESS = '0xF887B4D3b17C12C86cc917cF72fb8881f866a847'
+const CONTRACT_ADDRESS = '0xCa36dD890F987EDcE1D6D7C74Fb9df627c216BF6'
 const CONTRACT_ABI = [
   {
     "inputs": [

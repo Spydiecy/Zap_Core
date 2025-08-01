@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         // Add any required headers like API keys
       },
       body: JSON.stringify({
-        "appName":"morph_agent", // hardcoded 
+        "appName":"lisk_agent", // hardcoded 
         userId,
         sessionId,
         newMessage,

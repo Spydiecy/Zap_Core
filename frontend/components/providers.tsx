@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider"
 import { RainbowKitProvider, getDefaultWallets, connectorsForWallets } from '@rainbow-me/rainbowkit'
 import { WagmiProvider, createConfig, http } from 'wagmi'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import { morphHolesky, mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains'
+import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains'
 import { 
   metaMaskWallet,
   injectedWallet,
@@ -19,6 +19,29 @@ import {
 import '@rainbow-me/rainbowkit/styles.css'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'astra-default-project-id'
+
+// Lisk Sepolia Testnet configuration
+const liskSepolia = {
+  id: 4202,
+  name: 'Lisk Sepolia',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.sepolia-api.lisk.com'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Lisk Sepolia Explorer',
+      url: 'https://sepolia-blockscout.lisk.com',
+    },
+  },
+  testnet: true,
+} as const
 
 const connectors = connectorsForWallets(
   [
@@ -48,10 +71,10 @@ const connectors = connectorsForWallets(
 )
 
 const config = createConfig({
-  chains: [morphHolesky],
+  chains: [liskSepolia],
   connectors,
   transports: {
-    [morphHolesky.id]: http(),
+    [liskSepolia.id]: http(),
   },
 }) as any // Type assertion to resolve compatibility issue
 
