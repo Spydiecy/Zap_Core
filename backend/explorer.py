@@ -1,4 +1,4 @@
-# Morph Explorer Module (Demo-Safe)
+# Lisk Explorer Module (Demo-Safe)
 from typing import List, Dict
 from datetime import datetime, timedelta
 import random

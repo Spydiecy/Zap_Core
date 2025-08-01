@@ -12,7 +12,7 @@ from CoinGecko import CoinGeckoToken
 schedule_engine = BackgroundScheduler()
 schedule_engine.start()
 
-token_reference = CoinGeckoToken("morph")
+token_reference = CoinGeckoToken("lisk")
 
 cached_tokens = {}
 with open("tokensList.json") as f:
@@ -20,10 +20,10 @@ with open("tokensList.json") as f:
 
 runtime = datetime.now()
 network = {
-    "rpc": "https://rpc-quicknode-holesky.morphl2.io/",
-    "id": 2810,
-    "explorer": "https://explorer-holesky.morphl2.io/",
-    "api": "YourBscscanAPIKey"
+    "rpc": "https://rpc.sepolia-api.lisk.com/",
+    "id": 4202,
+    "explorer": "https://sepolia-blockscout.lisk.com/",
+    "api": "YourBlockscoutAPIKey"
 }
 
 handler = EVMTokenSender(network, "0x89E4228D216Ff8ae567f6CA5D5dbeB9231d18F9C")

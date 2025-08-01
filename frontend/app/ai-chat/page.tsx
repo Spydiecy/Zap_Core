@@ -405,7 +405,10 @@ export default function AstraChatPage() {
       '**nonce:**',
       '**transaction index:**',
       '**type:**',
-      '**value:**'
+      '**value:**',
+      'tx hash',
+      'txn hash',
+      'transaction details'
     ]
     
     const hasTransactionKeyword = transactionKeywords.some(keyword => lowerText.includes(keyword))
@@ -418,19 +421,33 @@ export default function AstraChatPage() {
     
     // Check for the specific phrase about transaction details
     const hasTransactionPhrase = lowerText.includes('details for the transaction') || 
-                                 lowerText.includes('transaction with hash')
+                                 lowerText.includes('transaction with hash') ||
+                                 lowerText.includes('here are the details') ||
+                                 lowerText.includes('transaction information')
     
-    return (hasTransactionKeyword || hasTransactionPhrase) && (hasTransactionHash || hasAddress)
+    // More lenient detection - if we have transaction keywords AND any identifying data
+    const result = hasTransactionKeyword && (hasTransactionHash || hasAddress || hasTransactionPhrase)
+    
+    console.log('Transaction detection debug:', {
+      hasTransactionKeyword,
+      hasTransactionHash,
+      hasAddress,
+      hasTransactionPhrase,
+      result,
+      textSample: lowerText.substring(0, 200)
+    })
+    
+    return result
   }
 
   const parseTransactionData = (text: string) => {
     const patterns = {
-      hash: /(?:\*\*Hash:\*\*|hash|transaction\s+with\s+hash)[\s:`"]*([a-fA-F0-9]{64})/i,
+      hash: /(?:\*\*Hash:\*\*|\*\*Transaction Hash:\*\*|hash|transaction\s+with\s+hash|tx\s*hash|txn\s*hash)[\s:`"]*([a-fA-F0-9x]{64,66})/i,
       blockHash: /(?:\*\*Block\s+Hash:\*\*|block\s+hash)[\s:`"]*([a-fA-F0-9x]+)/i,
-      blockNumber: /(?:\*\*Block\s+Number:\*\*|block\s+number)[\s:`"]*(\d+)/i,
+      blockNumber: /(?:\*\*Block\s+Number:\*\*|block\s+number)[\s:`"]*[#]?(\d+)/i,
       chainId: /(?:\*\*Chain\s+ID:\*\*|chain\s+id)[\s:`"]*(\d+)/i,
-      from: /(?:\*\*From\s+Address:\*\*|from\s+address)[\s:`"]*([a-fA-F0-9x]+)/i,
-      to: /(?:\*\*To\s+Address:\*\*|to\s+address)[\s:`"]*([a-fA-F0-9x]+)/i,
+      from: /(?:\*\*From[\s\w]*:\*\*|from[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
+      to: /(?:\*\*To[\s\w]*:\*\*|to[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
       value: /(?:\*\*Value:\*\*|value)[\s:`"]*(\d+)/i,
       gasUsed: /(?:\*\*Gas\s+Used:\*\*|gas\s+used)[\s:`"]*(\d+)/i,
       gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)/i,
@@ -448,8 +465,14 @@ export default function AstraChatPage() {
       }
     }
 
-    // Only return if we have at least a hash and some other data
-    if (result.hash && Object.keys(result).length > 1) {
+    console.log('Transaction parsing debug:', {
+      foundFields: Object.keys(result),
+      result,
+      textSample: text.substring(0, 300)
+    })
+
+    // Return if we have at least a hash OR any meaningful transaction data
+    if (result.hash || Object.keys(result).length >= 2) {
       return result
     }
 
@@ -769,6 +792,7 @@ export default function AstraChatPage() {
       // Check if this is a transaction response and parse the data
       const isTransaction = isTransactionResponse(content)
       console.log('Is transaction response:', isTransaction)
+      console.log('Full AI response content for debugging:', content)
       
       const transactionData = isTransaction ? parseTransactionData(content) : null
       console.log('Parsed transaction data:', transactionData)
