@@ -68,7 +68,12 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           "flex items-center justify-between px-4 h-16 border-b",
           isDark ? "border-gray-800" : "border-gray-300"
         )}>
-          <div className={cn("flex items-center", !open && "hidden")}>
+          <div className={cn("flex items-center gap-2", !open && "hidden")}>
+            <img 
+              src="/lisk.png" 
+              alt="Lisk" 
+              className="w-6 h-6 object-contain" 
+            />
             <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA LISK</span>
             <span className={cn(
               "text-xs ml-2 px-2 py-1 rounded",

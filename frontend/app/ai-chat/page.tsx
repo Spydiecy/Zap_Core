@@ -342,7 +342,8 @@ export default function AstraChatPage() {
     const tokenIcons: Record<string, string> = {
       'INJ': '⚡',
       'USDT': '💎',
-      'ETH': '/eth.svg',
+      'ETH': '/lisk.png',
+      'LSK': '/lisk.png',
       'AGENT': '🤖',
       'BTC': '₿',
       'WETH': '🔶'

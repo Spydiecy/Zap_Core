@@ -285,7 +285,7 @@ export function HeroSection() {
                             <div>
                                 <h2 className="mb-4 text-4xl font-bold md:text-5xl">Powered by Advanced AI</h2>
                                 <p className="mb-6 text-muted-foreground">
-                                    Astra Morph employs cutting-edge technology designed for performance, security, and seamless blockchain interactions on Lisk Network.
+                                    Astra Lisk employs cutting-edge technology designed for performance, security, and seamless blockchain interactions on Lisk Network.
                                 </p>
                                 
                                 <ul className="space-y-4">
@@ -623,6 +623,11 @@ const HeroHeader = () => {
 const Logo = ({ className }: { className?: string }) => {
     return (
         <div className={cn('flex items-center gap-2', className)}>
+            <img 
+                src="/lisk.png" 
+                alt="Lisk" 
+                className="w-8 h-8 object-contain" 
+            />
             <div className="font-bold text-xl bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent dark:from-white dark:to-gray-400">
                 ASTRA LISK
             </div>
