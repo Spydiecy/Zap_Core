@@ -107,7 +107,7 @@ export function SessionModal({
       <DialogContent className={cn(
         "border transition-colors",
         isDark 
-          ? "bg-gray-900 border-gray-700 text-white" 
+          ? "bg-black border-gray-800 text-white" 
           : "bg-white border-gray-300 text-black"
       )}>
         <DialogHeader>
@@ -117,7 +117,7 @@ export function SessionModal({
             {currentSessionId ? "Create New Chat Session" : "Create New Session"}
           </DialogTitle>
           <DialogDescription className={cn(
-            isDark ? "text-gray-400" : "text-gray-600"
+            isDark ? "text-gray-300" : "text-gray-600"
           )}>
             {currentSessionId 
               ? "Start a new chat session. This will create a fresh conversation." 
@@ -130,22 +130,22 @@ export function SessionModal({
           <div className={cn(
             "rounded-lg p-3 border",
             isDark 
-              ? "bg-gray-800 border-gray-700" 
+              ? "bg-gray-900 border-gray-800" 
               : "bg-gray-50 border-gray-200"
           )}>
             <div className={cn(
               "text-sm mb-1",
-              isDark ? "text-gray-400" : "text-gray-600"
+              isDark ? "text-gray-300" : "text-gray-600"
             )}>Current Session</div>
             <div className="text-sm">
               <div>Session ID: <span className={cn(
-                isDark ? "text-gray-300" : "text-gray-700"
+                isDark ? "text-white" : "text-gray-700"
               )}>{currentSessionId}</span></div>
               <div>User ID: <span className={cn(
-                isDark ? "text-gray-300" : "text-gray-700"
+                isDark ? "text-white" : "text-gray-700"
               )}>{currentUserId}</span></div>
               <div>App: <span className={cn(
-                isDark ? "text-gray-300" : "text-gray-700"
+                isDark ? "text-white" : "text-gray-700"
               )}>{currentAppName}</span></div>
             </div>
           </div>
@@ -165,7 +165,7 @@ export function SessionModal({
               className={cn(
                 "border transition-colors",
                 isDark 
-                  ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400" 
+                  ? "bg-black border-gray-800 text-white placeholder:text-gray-400" 
                   : "bg-white border-gray-300 text-black placeholder:text-gray-500"
               )}
               disabled={isLoading}
@@ -185,7 +185,7 @@ export function SessionModal({
               className={cn(
                 "border transition-colors",
                 isDark 
-                  ? "bg-gray-800 border-gray-600 text-white placeholder:text-gray-400" 
+                  ? "bg-black border-gray-800 text-white placeholder:text-gray-400" 
                   : "bg-white border-gray-300 text-black placeholder:text-gray-500"
               )}
               disabled={isLoading}
@@ -205,7 +205,7 @@ export function SessionModal({
               className={cn(
                 "border transition-colors",
                 isDark 
-                  ? "border-gray-600 text-white hover:bg-gray-800 bg-transparent" 
+                  ? "border-gray-800 text-white hover:bg-gray-900 bg-transparent" 
                   : "border-gray-300 text-black hover:bg-gray-50 bg-white"
               )}
             >

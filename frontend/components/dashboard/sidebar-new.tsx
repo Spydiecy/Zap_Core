@@ -70,7 +70,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         )}>
           <div className={cn("flex items-center gap-2", !open && "hidden")}>
             <img 
-              src="/lisk.png" 
+              src="/lisk.svg" 
               alt="Lisk" 
               className="w-6 h-6 object-contain" 
             />

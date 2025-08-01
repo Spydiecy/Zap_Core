@@ -155,7 +155,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
   const getStatusIcon = () => {
     switch (paymentStatus) {
       case 'pending':
-        return <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+        return <Loader2 className={cn("w-5 h-5 animate-spin", isDark ? "text-gray-400" : "text-gray-600")} />
       case 'success':
         return <CheckCircle className="w-5 h-5 text-green-400" />
       case 'error':
@@ -188,7 +188,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
       )}>
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-xl font-semibold">
-            <Shield className="w-6 h-6 text-blue-400" />
+            <Shield className={cn("w-6 h-6", isDark ? "text-gray-400" : "text-gray-600")} />
             <span>Access Control</span>
           </DialogTitle>
         </DialogHeader>
@@ -210,7 +210,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
               <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>One-time payment</span>
             </div>
             <div className="flex items-center space-x-2 text-sm mt-1">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <div className={cn("w-2 h-2 rounded-full", isDark ? "bg-gray-400" : "bg-gray-600")}></div>
               <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Lisk Sepolia Testnet</span>
             </div>
           </div>
@@ -256,7 +256,12 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
                   <Button
                     onClick={handlePayment}
                     disabled={isPending || paymentStatus === 'pending'}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 py-3"
+                    className={cn(
+                      "w-full border-0 py-3",
+                      isDark 
+                        ? "bg-white text-black hover:bg-gray-200" 
+                        : "bg-black text-white hover:bg-gray-800"
+                    )}
                   >
                     {isPending || paymentStatus === 'pending' ? (
                       <div className="flex items-center space-x-2">

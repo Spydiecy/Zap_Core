@@ -171,6 +171,8 @@ export default function AstraChatPage() {
       lowerText.includes("eth") ||
       lowerText.includes("usdt") ||
       lowerText.includes("inj") ||
+      lowerText.includes("lsk") ||
+      lowerText.includes("lisk") ||
       lowerText.includes("agent")
     )
     
@@ -205,7 +207,7 @@ export default function AstraChatPage() {
     ]
     
     // Common token symbols to look for
-    const tokenSymbols = ['INJ', 'USDT', 'ETH', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    const tokenSymbols = ['INJ', 'USDT', 'ETH', 'LSK', 'LISK', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
     
     let foundTokens = new Set() // To avoid duplicates
     
@@ -245,6 +247,8 @@ export default function AstraChatPage() {
                 tokenSymbol = 'ETH'
               } else if (text.toLowerCase().includes('injective') || text.toLowerCase().includes('inj')) {
                 tokenSymbol = 'INJ'
+              } else if (text.toLowerCase().includes('lisk') || text.toLowerCase().includes('lsk')) {
+                tokenSymbol = 'LSK'
               } else {
                 // Default to ETH for generic balance responses
                 tokenSymbol = 'ETH'
@@ -293,6 +297,8 @@ export default function AstraChatPage() {
       'INJ': 'Injective Protocol',
       'USDT': 'Tether USD',
       'ETH': 'Ethereum',
+      'LSK': 'Lisk',
+      'LISK': 'Lisk',
       'AGENT': 'Agent Token',
       'BTC': 'Bitcoin',
       'WETH': 'Wrapped Ethereum'
@@ -318,6 +324,8 @@ export default function AstraChatPage() {
         // Fallback to mock price for unsupported tokens
         const mockPrices: Record<string, number> = {
           'AGENT': 0.50,
+          'LSK': 1.50,
+          'LISK': 1.50,
           'OSMO': 0.80
         }
         const price = mockPrices[symbol] || 0
@@ -341,6 +349,8 @@ export default function AstraChatPage() {
       const mockPrices: Record<string, number> = {
         'USDT': 1.00,
         'ETH': 3200.00,
+        'LSK': 1.50, // Lisk price
+        'LISK': 1.50, // Alternative Lisk symbol
         'AGENT': 0.50,
         'BTC': 45000.00,
         'WETH': 3200.00,
@@ -358,8 +368,9 @@ export default function AstraChatPage() {
     const tokenIcons: Record<string, string> = {
       'INJ': '⚡',
       'USDT': '💎',
-      'ETH': '/lisk.png',
-      'LSK': '/lisk.png',
+      'ETH': '/eth.svg', // Ethereum icon (blue diamond)
+      'LSK': '/lisk.svg', // Lisk logo
+      'LISK': '/lisk.svg', // Alternative Lisk symbol
       'AGENT': '🤖',
       'BTC': '₿',
       'WETH': '🔶'
@@ -956,11 +967,11 @@ export default function AstraChatPage() {
 
                   {/* Show balance data for assistant messages */}
                   {message.role === "assistant" && message.balanceData && (
-                    <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Wallet Balance</h3>
+                    <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800">
+                      <h3 className="text-sm font-medium text-black dark:text-white mb-3">Wallet Balance</h3>
                       <div className="space-y-3">
                         {message.balanceData.tokens.map((token, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                             <div className="flex items-center space-x-3">
                               <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-lg">
                                 {token.icon && token.icon.startsWith('/') ? (
@@ -975,17 +986,17 @@ export default function AstraChatPage() {
                               </div>
                               <div>
                                 <div className="text-black dark:text-white font-medium">{token.symbol}</div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">{token.name}</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-300">{token.name}</div>
                               </div>
                             </div>
                             <div className="text-right">
                               <div className="text-black dark:text-white font-medium">{token.balance}</div>
                               {token.usdValue && (
-                                <div className="text-sm text-gray-600 dark:text-gray-400">${token.usdValue}</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-300">${token.usdValue}</div>
                               )}
                             </div>
                             <div className="ml-3">
-                              <span className="text-xs text-gray-600 dark:text-gray-500 bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">
+                              <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">
                                 Contract ⚡
                               </span>
                             </div>
@@ -993,9 +1004,9 @@ export default function AstraChatPage() {
                         ))}
                       </div>
                       {message.balanceData.totalUsdValue && (
-                        <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-700">
+                        <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <div className="flex justify-between items-center">
-                            <span className="text-gray-600 dark:text-gray-400">Total Value</span>
+                            <span className="text-gray-600 dark:text-gray-300">Total Value</span>
                             <span className="text-black dark:text-white font-medium">${message.balanceData.totalUsdValue}</span>
                           </div>
                         </div>
@@ -1005,9 +1016,9 @@ export default function AstraChatPage() {
 
                   {/* Show transaction data for assistant messages */}
                   {message.role === "assistant" && message.transactionData && (
-                    <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center mr-3">
+                    <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800">
+                      <h3 className="text-sm font-medium text-black dark:text-white mb-4 flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-800 dark:bg-white flex items-center justify-center mr-3">
                           🔗
                         </div>
                         Transaction Details
@@ -1016,14 +1027,14 @@ export default function AstraChatPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Transaction Hash */}
                         {message.transactionData.hash && (
-                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700 col-span-1 md:col-span-2">
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Transaction Hash</div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Transaction Hash</div>
                             <div className="text-black dark:text-white font-mono text-sm break-all">
                               {message.transactionData.hash}
                             </div>
                             <button 
                               onClick={() => navigator.clipboard.writeText(message.transactionData!.hash)}
-                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
                             >
                               Copy Hash
                             </button>
@@ -1033,8 +1044,8 @@ export default function AstraChatPage() {
                         {/* Block Information */}
                         <div className="space-y-3">
                           {message.transactionData.blockNumber && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Block Number</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Number</div>
                               <div className="text-black dark:text-white font-medium">
                                 #{message.transactionData.blockNumber}
                               </div>
@@ -1042,10 +1053,10 @@ export default function AstraChatPage() {
                           )}
                           
                           {message.transactionData.chainId && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Chain ID</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Chain ID</div>
                               <div className="text-black dark:text-white font-medium flex items-center">
-                                <img src="/lisk.png" alt="Lisk" className="w-4 h-4 mr-2" />
+                                <img src="/lisk.svg" alt="Lisk" className="w-4 h-4 mr-2" />
                                 {message.transactionData.chainId}
                               </div>
                             </div>
@@ -1055,8 +1066,8 @@ export default function AstraChatPage() {
                         {/* Transaction Details */}
                         <div className="space-y-3">
                           {message.transactionData.value && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Value</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Value</div>
                               <div className="text-black dark:text-white font-medium">
                                 {formatTransactionValue(message.transactionData.value)}
                               </div>
@@ -1064,8 +1075,8 @@ export default function AstraChatPage() {
                           )}
                           
                           {message.transactionData.gasUsed && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gas Used</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Gas Used</div>
                               <div className="text-black dark:text-white font-medium">
                                 {parseInt(message.transactionData.gasUsed).toLocaleString()}
                               </div>
@@ -1075,14 +1086,14 @@ export default function AstraChatPage() {
 
                         {/* Addresses */}
                         {message.transactionData.from && (
-                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">From Address</div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">From Address</div>
                             <div className="text-black dark:text-white font-mono text-sm break-all">
                               {message.transactionData.from}
                             </div>
                             <button 
                               onClick={() => navigator.clipboard.writeText(message.transactionData!.from)}
-                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
                             >
                               Copy Address
                             </button>
@@ -1090,14 +1101,14 @@ export default function AstraChatPage() {
                         )}
 
                         {message.transactionData.to && (
-                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">To Address</div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">To Address</div>
                             <div className="text-black dark:text-white font-mono text-sm break-all">
                               {message.transactionData.to}
                             </div>
                             <button 
                               onClick={() => navigator.clipboard.writeText(message.transactionData!.to)}
-                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
                             >
                               Copy Address
                             </button>
@@ -1107,8 +1118,8 @@ export default function AstraChatPage() {
                         {/* Additional Details */}
                         <div className="grid grid-cols-2 gap-3 col-span-1 md:col-span-2">
                           {message.transactionData.gasPrice && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gas Price</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Gas Price</div>
                               <div className="text-black dark:text-white font-medium">
                                 {formatGasPrice(message.transactionData.gasPrice)}
                               </div>
@@ -1116,8 +1127,8 @@ export default function AstraChatPage() {
                           )}
                           
                           {message.transactionData.nonce && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Nonce</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Nonce</div>
                               <div className="text-black dark:text-white font-medium">
                                 {message.transactionData.nonce}
                               </div>
@@ -1125,8 +1136,8 @@ export default function AstraChatPage() {
                           )}
                           
                           {message.transactionData.transactionIndex && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Transaction Index</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Transaction Index</div>
                               <div className="text-black dark:text-white font-medium">
                                 {message.transactionData.transactionIndex}
                               </div>
@@ -1134,8 +1145,8 @@ export default function AstraChatPage() {
                           )}
                           
                           {message.transactionData.type && (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Type</div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Type</div>
                               <div className="text-black dark:text-white font-medium">
                                 {message.transactionData.type}
                               </div>
@@ -1145,14 +1156,14 @@ export default function AstraChatPage() {
 
                         {/* Block Hash */}
                         {message.transactionData.blockHash && (
-                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700 col-span-1 md:col-span-2">
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Block Hash</div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Hash</div>
                             <div className="text-black dark:text-white font-mono text-sm break-all">
                               {message.transactionData.blockHash}
                             </div>
                             <button 
                               onClick={() => navigator.clipboard.writeText(message.transactionData!.blockHash)}
-                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
                             >
                               Copy Block Hash
                             </button>
@@ -1160,12 +1171,12 @@ export default function AstraChatPage() {
                         )}
                         
                         {/* Explorer Link */}
-                        <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-700">
+                        <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
                             href={`https://sepolia-blockscout.lisk.com/tx/0x${message.transactionData!.hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                            className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
                             View on Lisk Explorer ↗
                           </a>
