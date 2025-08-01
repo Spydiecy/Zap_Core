@@ -32,6 +32,22 @@ interface Message {
     }>
     totalUsdValue?: string
   }
+  transactionData?: {
+    hash: string
+    blockHash: string
+    blockNumber: string
+    chainId: string
+    from: string
+    to: string
+    value: string
+    gasUsed: string
+    gasPrice: string
+    nonce: string
+    transactionIndex: string
+    type: string
+    status?: string
+    timestamp?: string
+  }
 }
 
 interface FileUpload {
@@ -351,6 +367,106 @@ export default function AstraChatPage() {
     return tokenIcons[symbol] || '🪙'
   }
 
+  const isTransactionResponse = (text: string): boolean => {
+    const lowerText = text.toLowerCase()
+    
+    // Check for transaction-related keywords including markdown bold format
+    const transactionKeywords = [
+      'transaction',
+      'transaction hash',
+      'block hash',
+      'block number',
+      'gas used',
+      'gas price',
+      'transaction index',
+      'from address',
+      'to address',
+      'chain id',
+      'nonce',
+      '**block hash:**',
+      '**block number:**',
+      '**chain id:**',
+      '**from address:**',
+      '**to address:**',
+      '**gas used:**',
+      '**gas price:**',
+      '**hash:**',
+      '**nonce:**',
+      '**transaction index:**',
+      '**type:**',
+      '**value:**'
+    ]
+    
+    const hasTransactionKeyword = transactionKeywords.some(keyword => lowerText.includes(keyword))
+    
+    // Check for transaction hash pattern (various formats)
+    const hasTransactionHash = /[a-fA-F0-9]{64}/.test(text) || /0x[a-fA-F0-9]{64}/.test(text)
+    
+    // Check for address patterns (0x followed by 40 hex characters)
+    const hasAddress = /0x[a-fA-F0-9]{40}/.test(text)
+    
+    // Check for the specific phrase about transaction details
+    const hasTransactionPhrase = lowerText.includes('details for the transaction') || 
+                                 lowerText.includes('transaction with hash')
+    
+    return (hasTransactionKeyword || hasTransactionPhrase) && (hasTransactionHash || hasAddress)
+  }
+
+  const parseTransactionData = (text: string) => {
+    const patterns = {
+      hash: /(?:\*\*Hash:\*\*|hash|transaction\s+with\s+hash)[\s:`"]*([a-fA-F0-9]{64})/i,
+      blockHash: /(?:\*\*Block\s+Hash:\*\*|block\s+hash)[\s:`"]*([a-fA-F0-9x]+)/i,
+      blockNumber: /(?:\*\*Block\s+Number:\*\*|block\s+number)[\s:`"]*(\d+)/i,
+      chainId: /(?:\*\*Chain\s+ID:\*\*|chain\s+id)[\s:`"]*(\d+)/i,
+      from: /(?:\*\*From\s+Address:\*\*|from\s+address)[\s:`"]*([a-fA-F0-9x]+)/i,
+      to: /(?:\*\*To\s+Address:\*\*|to\s+address)[\s:`"]*([a-fA-F0-9x]+)/i,
+      value: /(?:\*\*Value:\*\*|value)[\s:`"]*(\d+)/i,
+      gasUsed: /(?:\*\*Gas\s+Used:\*\*|gas\s+used)[\s:`"]*(\d+)/i,
+      gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)/i,
+      nonce: /(?:\*\*Nonce:\*\*|nonce)[\s:`"]*(\d+)/i,
+      transactionIndex: /(?:\*\*Transaction\s+Index:\*\*|transaction\s+index)[\s:`"]*(\d+)/i,
+      type: /(?:\*\*Type:\*\*|type)[\s:`"]*(\d+)/i
+    }
+
+    const result: any = {}
+    
+    for (const [key, pattern] of Object.entries(patterns)) {
+      const match = text.match(pattern)
+      if (match) {
+        result[key] = match[1]
+      }
+    }
+
+    // Only return if we have at least a hash and some other data
+    if (result.hash && Object.keys(result).length > 1) {
+      return result
+    }
+
+    return null
+  }
+
+  const formatTransactionValue = (value: string): string => {
+    if (!value) return '0'
+    try {
+      // Convert wei to ETH (divide by 10^18)
+      const ethValue = parseFloat(value) / Math.pow(10, 18)
+      return ethValue.toFixed(6) + ' ETH'
+    } catch {
+      return value
+    }
+  }
+
+  const formatGasPrice = (gasPrice: string): string => {
+    if (!gasPrice) return '0'
+    try {
+      // Convert wei to Gwei (divide by 10^9)
+      const gweiValue = parseFloat(gasPrice) / Math.pow(10, 9)
+      return gweiValue.toFixed(2) + ' Gwei'
+    } catch {
+      return gasPrice
+    }
+  }
+
   useEffect(() => {
     // Check access when wallet connects or payment status changes
     if (isConnected && hasPaid) {
@@ -639,6 +755,13 @@ export default function AstraChatPage() {
       const balanceData = isBalance ? await parseBalanceData(content) : null
       console.log('Parsed balance data:', balanceData)
 
+      // Check if this is a transaction response and parse the data
+      const isTransaction = isTransactionResponse(content)
+      console.log('Is transaction response:', isTransaction)
+      
+      const transactionData = isTransaction ? parseTransactionData(content) : null
+      console.log('Parsed transaction data:', transactionData)
+
       setMessages((prev) => {
         const filtered = prev.filter((msg) => !msg.isLoading)
         
@@ -649,6 +772,7 @@ export default function AstraChatPage() {
           timestamp: Date.now(),
           generatedImage: generatedImage,
           balanceData: balanceData || undefined,
+          transactionData: transactionData || undefined,
         }
         return [...filtered, assistantMessage]
       })
@@ -759,12 +883,41 @@ export default function AstraChatPage() {
                       <span className="text-gray-600 dark:text-gray-400">Thinking...</span>
                     </div>
                   ) : (
-                    <div className={cn(
-                      "whitespace-pre-wrap",
-                      message.role === "user" 
-                        ? "text-white dark:text-black" 
-                        : "text-gray-800 dark:text-gray-100"
-                    )}>{message.content}</div>
+                    <>
+                      {/* Only show text content if this isn't a balance or transaction response */}
+                      {!message.balanceData && !message.transactionData && (
+                        <div className={cn(
+                          "whitespace-pre-wrap",
+                          message.role === "user" 
+                            ? "text-white dark:text-black" 
+                            : "text-gray-800 dark:text-gray-100"
+                        )}>{message.content}</div>
+                      )}
+                      
+                      {/* Show a brief message for balance responses */}
+                      {message.balanceData && (
+                        <div className={cn(
+                          "text-sm",
+                          message.role === "user" 
+                            ? "text-white dark:text-black" 
+                            : "text-gray-600 dark:text-gray-400"
+                        )}>
+                          Here's your wallet balance information:
+                        </div>
+                      )}
+                      
+                      {/* Show a brief message for transaction responses */}
+                      {message.transactionData && (
+                        <div className={cn(
+                          "text-sm",
+                          message.role === "user" 
+                            ? "text-white dark:text-black" 
+                            : "text-gray-600 dark:text-gray-400"
+                        )}>
+                          Here are the transaction details:
+                        </div>
+                      )}
+                    </>
                   )}
                   
                   {/* Show uploaded images for user messages */}
@@ -847,6 +1000,177 @@ export default function AstraChatPage() {
                           </div>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Show transaction data for assistant messages */}
+                  {message.role === "assistant" && message.transactionData && (
+                    <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center mr-3">
+                          🔗
+                        </div>
+                        Transaction Details
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Transaction Hash */}
+                        {message.transactionData.hash && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Transaction Hash</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.transactionData.hash}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.transactionData!.hash)}
+                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              Copy Hash
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Block Information */}
+                        <div className="space-y-3">
+                          {message.transactionData.blockNumber && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Block Number</div>
+                              <div className="text-black dark:text-white font-medium">
+                                #{message.transactionData.blockNumber}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.transactionData.chainId && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Chain ID</div>
+                              <div className="text-black dark:text-white font-medium flex items-center">
+                                <img src="/lisk.png" alt="Lisk" className="w-4 h-4 mr-2" />
+                                {message.transactionData.chainId}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Transaction Details */}
+                        <div className="space-y-3">
+                          {message.transactionData.value && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Value</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {formatTransactionValue(message.transactionData.value)}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.transactionData.gasUsed && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gas Used</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {parseInt(message.transactionData.gasUsed).toLocaleString()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Addresses */}
+                        {message.transactionData.from && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">From Address</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.transactionData.from}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.transactionData!.from)}
+                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              Copy Address
+                            </button>
+                          </div>
+                        )}
+
+                        {message.transactionData.to && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">To Address</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.transactionData.to}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.transactionData!.to)}
+                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              Copy Address
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Additional Details */}
+                        <div className="grid grid-cols-2 gap-3 col-span-1 md:col-span-2">
+                          {message.transactionData.gasPrice && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gas Price</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {formatGasPrice(message.transactionData.gasPrice)}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.transactionData.nonce && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Nonce</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {message.transactionData.nonce}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.transactionData.transactionIndex && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Transaction Index</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {message.transactionData.transactionIndex}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.transactionData.type && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Type</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {message.transactionData.type}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Block Hash */}
+                        {message.transactionData.blockHash && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-300 dark:border-gray-700 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Block Hash</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.transactionData.blockHash}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.transactionData!.blockHash)}
+                              className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              Copy Block Hash
+                            </button>
+                          </div>
+                        )}
+                        
+                        {/* Explorer Link */}
+                        <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-700">
+                          <a 
+                            href={`https://sepolia-blockscout.lisk.com/tx/0x${message.transactionData!.hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                          >
+                            View on Lisk Explorer ↗
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
