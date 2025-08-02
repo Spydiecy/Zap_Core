@@ -158,7 +158,14 @@ export default function AstraChatPage() {
       'balance is',
       'your balance',
       'current balance',
-      'account balance'
+      'account balance',
+      'balance:',
+      'lsk balance',
+      'lisk balance',
+      'lisk token balance',
+      'show balance',
+      'check balance',
+      'my balance'
     ]
     
     const hasBalanceKeyword = balanceKeywords.some(keyword => lowerText.includes(keyword))
@@ -173,6 +180,7 @@ export default function AstraChatPage() {
       lowerText.includes("inj") ||
       lowerText.includes("lsk") ||
       lowerText.includes("lisk") ||
+      lowerText.includes("lisk token") ||
       lowerText.includes("agent")
     )
     
@@ -182,7 +190,7 @@ export default function AstraChatPage() {
     return (hasBalanceKeyword || tokenBalancePattern) && hasNumericValue
   }
 
-  const parseBalanceData = async (text: string) => {
+  const parseBalanceData = async (text: string, userInput?: string) => {
     // Try to extract balance information from the AI response
     const tokens: Array<{
       symbol: string
@@ -194,8 +202,14 @@ export default function AstraChatPage() {
     
     // Enhanced patterns for better balance extraction
     const patterns = [
+      // Pattern: "Wallet Balance0.1" (exact concatenated format from backend)
+      /^wallet\s*balance([\d.,]+)$/gi,
       // Pattern: "Your wallet balance is 0.609746632743044111"
       /(?:wallet\s+balance\s+is|balance\s+is)\s*([\d.,]+)/gi,
+      // Pattern: "Balance: 0.1" (simple backend response format)
+      /^balance:\s*([\d.,]+)$/gi,
+      // Pattern: General "Wallet Balance" with spaces and numbers
+      /wallet\s*balance\s*:?\s*([\d.,]+)/gi,
       // Pattern: "INJ: 2.64" or "USDT: 30.23"
       /(\w+):\s*([\d.,]+)/gi,
       // Pattern: "INJ balance: 2.64" 
@@ -203,7 +217,11 @@ export default function AstraChatPage() {
       // Pattern: "2.64 INJ" or "30.23 USDT"
       /([\d.,]+)\s+(\w+)/gi,
       // Pattern: "balance: 0.619957302943058765"
-      /balance:\s*([\d.,]+)/gi
+      /balance:\s*([\d.,]+)/gi,
+      // Pattern: "LSK balance is 0.1" or "Lisk balance is 0.1"
+      /(?:lsk|lisk)\s+balance\s+is\s*([\d.,]+)/gi,
+      // Pattern: "Your LSK balance: 0.1"
+      /(?:your\s+)?(?:lsk|lisk)\s+balance:\s*([\d.,]+)/gi
     ]
     
     // Common token symbols to look for
@@ -233,32 +251,49 @@ export default function AstraChatPage() {
           // One capture group - likely just a balance number
           balanceValue = match[1]
           
-          // For the "wallet balance is" pattern, try to determine the token
-          if (patternIndex === 0) { // First pattern (wallet balance is)
-            // Look for token symbols in the surrounding text
-            tokenSymbol = tokenSymbols.find(symbol => 
-              text.toUpperCase().includes(symbol)
-            )
+          // Enhanced token detection logic
+          // Look for token symbols in the surrounding text
+          tokenSymbol = tokenSymbols.find(symbol => 
+            text.toUpperCase().includes(symbol)
+          )
+          
+          // Enhanced context-based token detection
+          if (!tokenSymbol) {
+            const lowerText = text.toLowerCase()
+            const userInputLower = userInput?.toLowerCase() || ''
             
-            // If no specific token found, try to determine from context or default to ETH
-            if (!tokenSymbol) {
-              // Check if it's likely an ETH address context
-              if (text.includes('0x') || text.toLowerCase().includes('ethereum')) {
-                tokenSymbol = 'ETH'
-              } else if (text.toLowerCase().includes('injective') || text.toLowerCase().includes('inj')) {
-                tokenSymbol = 'INJ'
-              } else if (text.toLowerCase().includes('lisk') || text.toLowerCase().includes('lsk')) {
+            // Check for Lisk-related keywords first (from user input or AI response)
+            if (lowerText.includes('lisk') || lowerText.includes('lsk') || 
+                lowerText.includes('lisk token') || lowerText.includes('lisk balance') ||
+                lowerText.includes('show lsk') || lowerText.includes('tell my balance') ||
+                lowerText.includes('my lisk') || lowerText.includes('my lsk') ||
+                userInputLower.includes('lisk') || userInputLower.includes('lsk') ||
+                userInputLower.includes('lisk token') || userInputLower.includes('lisk balance')) {
+              tokenSymbol = 'LSK'
+            }
+            // Check for other specific token contexts
+            else if (lowerText.includes('ethereum') || lowerText.includes('eth') || text.includes('0x') ||
+                     userInputLower.includes('ethereum') || userInputLower.includes('eth')) {
+              tokenSymbol = 'ETH'
+            } else if (lowerText.includes('injective') || lowerText.includes('inj') ||
+                       userInputLower.includes('injective') || userInputLower.includes('inj')) {
+              tokenSymbol = 'INJ'
+            } else if (lowerText.includes('usdt') || lowerText.includes('tether') ||
+                       userInputLower.includes('usdt') || userInputLower.includes('tether')) {
+              tokenSymbol = 'USDT'
+            } else if (lowerText.includes('bitcoin') || lowerText.includes('btc') ||
+                       userInputLower.includes('bitcoin') || userInputLower.includes('btc')) {
+              tokenSymbol = 'BTC'
+            } else {
+              // For simple "Wallet Balance" or "Balance:" responses, default to LSK since this is a Lisk project
+              if (patternIndex === 0 || patternIndex === 1 || patternIndex === 2 || 
+                  text.trim().startsWith('Balance:') || text.trim().startsWith('Wallet Balance')) {
                 tokenSymbol = 'LSK'
               } else {
-                // Default to ETH for generic balance responses
+                // Default fallback
                 tokenSymbol = 'ETH'
               }
             }
-          } else {
-            // For other patterns, try to find token symbol in surrounding text
-            tokenSymbol = tokenSymbols.find(symbol => 
-              text.toUpperCase().includes(symbol)
-            ) || 'ETH' // Default to ETH if no symbol found
           }
         }
         
@@ -786,7 +821,7 @@ export default function AstraChatPage() {
       const isBalance = isBalanceResponse(content)
       console.log('Is balance response:', isBalance)
       
-      const balanceData = isBalance ? await parseBalanceData(content) : null
+      const balanceData = isBalance ? await parseBalanceData(content, currentInput) : null
       console.log('Parsed balance data:', balanceData)
 
       // Check if this is a transaction response and parse the data
@@ -991,13 +1026,13 @@ export default function AstraChatPage() {
 
                   {/* Show balance data for assistant messages */}
                   {message.role === "assistant" && message.balanceData && (
-                    <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800">
-                      <h3 className="text-sm font-medium text-black dark:text-white mb-3">Wallet Balance</h3>
+                    <div className="mt-4 p-4 bg-gray-900 dark:bg-gray-900 rounded-lg border border-gray-700">
+                      <h3 className="text-sm font-medium text-white mb-3">Wallet Balance</h3>
                       <div className="space-y-3">
                         {message.balanceData.tokens.map((token, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-800 dark:bg-gray-800 rounded-lg border border-gray-700">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-lg">
+                              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg">
                                 {token.icon && token.icon.startsWith('/') ? (
                                   <img 
                                     src={token.icon} 
@@ -1005,33 +1040,30 @@ export default function AstraChatPage() {
                                     className="w-6 h-6"
                                   />
                                 ) : (
-                                  token.icon || '🪙'
+                                  <span className="text-white">{token.icon || '🪙'}</span>
                                 )}
                               </div>
                               <div>
-                                <div className="text-black dark:text-white font-medium">{token.symbol}</div>
-                                <div className="text-sm text-gray-600 dark:text-gray-300">{token.name}</div>
+                                <div className="text-white font-medium">{token.symbol}</div>
+                                <div className="text-sm text-gray-300">{token.name}</div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-black dark:text-white font-medium">{token.balance}</div>
+                              <div className="text-white font-medium">{token.balance}</div>
                               {token.usdValue && (
-                                <div className="text-sm text-gray-600 dark:text-gray-300">${token.usdValue}</div>
+                                <div className="text-sm text-gray-300">${token.usdValue}</div>
                               )}
                             </div>
                             <div className="ml-3">
-                              <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">
-                                Contract ⚡
-                              </span>
                             </div>
                           </div>
                         ))}
                       </div>
                       {message.balanceData.totalUsdValue && (
-                        <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-800">
+                        <div className="mt-3 pt-3 border-t border-gray-700">
                           <div className="flex justify-between items-center">
-                            <span className="text-gray-600 dark:text-gray-300">Total Value</span>
-                            <span className="text-black dark:text-white font-medium">${message.balanceData.totalUsdValue}</span>
+                            <span className="text-gray-300">Total Value</span>
+                            <span className="text-white font-medium">${message.balanceData.totalUsdValue}</span>
                           </div>
                         </div>
                       )}
