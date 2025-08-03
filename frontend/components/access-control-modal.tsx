@@ -10,7 +10,7 @@ import { parseEther } from 'viem'
 import { Wallet, Shield, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const CONTRACT_ADDRESS = '0xCa36dD890F987EDcE1D6D7C74Fb9df627c216BF6'
+const CONTRACT_ADDRESS = '0x753720b82E83826Db0024ae5Ee8d1F2b31105B02'
 const CONTRACT_ABI = [
   {
     "inputs": [],
@@ -143,7 +143,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: 'pay',
-        value: parseEther('0.01'),
+        value: parseEther('0.1'),
       })
     } catch (error) {
       setPaymentStatus('error')
@@ -174,7 +174,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
       case 'error':
         return errorMessage || 'Payment failed. Please try again.'
       default:
-        return 'Pay 0.01 ETH to access Astra AI Assistant'
+        return 'Pay 0.1 XFI to access Astra AI Assistant'
     }
   }
 
@@ -271,7 +271,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
                     ) : (
                       <div className="flex items-center space-x-2">
                         <Wallet className="w-4 h-4" />
-                        <span>Pay 0.01 ETH</span>
+                        <span>Pay 0.1 XFI</span>
                       </div>
                     )}
                   </Button>

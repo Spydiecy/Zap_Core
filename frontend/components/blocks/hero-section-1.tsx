@@ -624,7 +624,7 @@ const Logo = ({ className }: { className?: string }) => {
     return (
         <div className={cn('flex items-center gap-2', className)}>
             <img 
-                src="/crossfi.svg" 
+                src="/xfi.svg" 
                 alt="CrossFi" 
                 className="w-8 h-8 object-contain" 
             />

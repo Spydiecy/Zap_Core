@@ -222,7 +222,7 @@ export default function AstraChatPage() {
     ]
     
     // Common token symbols to look for
-    const tokenSymbols = ['XFI', 'CROSSFI', 'USDT', 'ETH', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    const tokenSymbols = ['XFI', 'CROSSFI', 'USDT', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
     
     let foundTokens = new Set() // To avoid duplicates
     
@@ -326,7 +326,6 @@ export default function AstraChatPage() {
       'XFI': 'CrossFi',
       'CROSSFI': 'CrossFi',
       'USDT': 'Tether USD',
-      'ETH': 'Ethereum',
       'AGENT': 'Agent Token',
       'BTC': 'Bitcoin',
       'WETH': 'Wrapped Ethereum'
@@ -339,7 +338,6 @@ export default function AstraChatPage() {
       // Map token symbols to Coinbase API symbols
       const coinbaseSymbols: Record<string, string> = {
         'USDT': 'USDT-USD',
-        'ETH': 'ETH-USD',
         'BTC': 'BTC-USD',
         'WETH': 'ETH-USD', // Use ETH price for WETH
         'MATIC': 'MATIC-USD',
@@ -376,7 +374,6 @@ export default function AstraChatPage() {
       // Fallback to mock prices if API fails
       const mockPrices: Record<string, number> = {
         'USDT': 1.00,
-        'ETH': 3200.00,
         'XFI': 0.85, // CrossFi price
         'CROSSFI': 0.85, // Alternative CrossFi symbol
         'AGENT': 0.50,
@@ -394,10 +391,9 @@ export default function AstraChatPage() {
 
   const getTokenIcon = (symbol: string): string => {
     const tokenIcons: Record<string, string> = {
-      'XFI': '/crossfi.svg', // CrossFi logo
-      'CROSSFI': '/crossfi.svg', // Alternative CrossFi symbol
+      'XFI': '/xfi.svg', // CrossFi logo
+      'CROSSFI': '/xfi.svg', // Alternative CrossFi symbol
       'USDT': '💎',
-      'ETH': '/eth.svg', // Ethereum icon (blue diamond)
       'AGENT': '🤖',
       'BTC': '₿',
       'WETH': '🔶'
@@ -1104,7 +1100,7 @@ export default function AstraChatPage() {
                             <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                               <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Chain ID</div>
                               <div className="text-black dark:text-white font-medium flex items-center">
-                                <img src="/crossfi.svg" alt="CrossFi" className="w-4 h-4 mr-2" />
+                                <img src="/xfi.svg" alt="CrossFi" className="w-4 h-4 mr-2" />
                                 {message.transactionData.chainId}
                               </div>
                             </div>
@@ -1221,7 +1217,7 @@ export default function AstraChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://test.xfiscan.com/tx/0x${message.transactionData!.hash}`}
+                            href={`https://test.xfiscan.com/tx/${message.transactionData.hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
