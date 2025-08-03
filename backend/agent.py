@@ -12,7 +12,7 @@ from CoinGecko import CoinGeckoToken
 schedule_engine = BackgroundScheduler()
 schedule_engine.start()
 
-token_reference = CoinGeckoToken("lisk")
+token_reference = CoinGeckoToken("crossfi")
 
 cached_tokens = {}
 with open("tokensList.json") as f:
@@ -20,9 +20,10 @@ with open("tokensList.json") as f:
 
 runtime = datetime.now()
 network = {
-    "rpc": "https://rpc.sepolia-api.lisk.com/",
-    "id": 4202,
-    "explorer": "https://sepolia-blockscout.lisk.com/",
+        "chain_id": 4157,
+    "rpc": "https://rpc.testnet.ms/",
+    "name": "CrossFi Testnet",
+    "explorer": "https://test.xfiscan.com/",
     "api": "YourBlockscoutAPIKey"
 }
 

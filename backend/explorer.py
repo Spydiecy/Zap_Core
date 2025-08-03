@@ -1,4 +1,4 @@
-# Lisk Explorer Module (Demo-Safe)
+# CrossFi Explorer Module (Demo-Safe)
 from typing import List, Dict
 from datetime import datetime, timedelta
 import random

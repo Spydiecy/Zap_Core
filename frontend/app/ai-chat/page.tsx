@@ -58,7 +58,7 @@ interface FileUpload {
 }
 
 // Access Control Constants
-const CONTRACT_ADDRESS = '0xCa36dD890F987EDcE1D6D7C74Fb9df627c216BF6'
+const CONTRACT_ADDRESS = '0x753720b82E83826Db0024ae5Ee8d1F2b31105B02'
 const CONTRACT_ABI = [
   {
     "inputs": [
@@ -160,9 +160,9 @@ export default function AstraChatPage() {
       'current balance',
       'account balance',
       'balance:',
-      'lsk balance',
-      'lisk balance',
-      'lisk token balance',
+      'xfi balance',
+      'crossfi balance',
+      'crossfi token balance',
       'show balance',
       'check balance',
       'my balance'
@@ -175,12 +175,9 @@ export default function AstraChatPage() {
       lowerText.includes("balance") || 
       lowerText.includes("wallet") ||
       lowerText.includes("tokens") ||
-      lowerText.includes("eth") ||
-      lowerText.includes("usdt") ||
-      lowerText.includes("inj") ||
-      lowerText.includes("lsk") ||
-      lowerText.includes("lisk") ||
-      lowerText.includes("lisk token") ||
+      lowerText.includes("xfi") ||
+      lowerText.includes("crossfi") ||
+      lowerText.includes("crossfi token") ||
       lowerText.includes("agent")
     )
     
@@ -218,14 +215,14 @@ export default function AstraChatPage() {
       /([\d.,]+)\s+(\w+)/gi,
       // Pattern: "balance: 0.619957302943058765"
       /balance:\s*([\d.,]+)/gi,
-      // Pattern: "LSK balance is 0.1" or "Lisk balance is 0.1"
-      /(?:lsk|lisk)\s+balance\s+is\s*([\d.,]+)/gi,
-      // Pattern: "Your LSK balance: 0.1"
-      /(?:your\s+)?(?:lsk|lisk)\s+balance:\s*([\d.,]+)/gi
+      // Pattern: "XFI balance is 0.1" or "CrossFi balance is 0.1"
+      /(?:xfi|crossfi)\s+balance\s+is\s*([\d.,]+)/gi,
+      // Pattern: "Your XFI balance: 0.1"
+      /(?:your\s+)?(?:xfi|crossfi)\s+balance:\s*([\d.,]+)/gi
     ]
     
     // Common token symbols to look for
-    const tokenSymbols = ['INJ', 'USDT', 'ETH', 'LSK', 'LISK', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    const tokenSymbols = ['XFI', 'CROSSFI', 'USDT', 'ETH', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
     
     let foundTokens = new Set() // To avoid duplicates
     
@@ -262,22 +259,19 @@ export default function AstraChatPage() {
             const lowerText = text.toLowerCase()
             const userInputLower = userInput?.toLowerCase() || ''
             
-            // Check for Lisk-related keywords first (from user input or AI response)
-            if (lowerText.includes('lisk') || lowerText.includes('lsk') || 
-                lowerText.includes('lisk token') || lowerText.includes('lisk balance') ||
-                lowerText.includes('show lsk') || lowerText.includes('tell my balance') ||
-                lowerText.includes('my lisk') || lowerText.includes('my lsk') ||
-                userInputLower.includes('lisk') || userInputLower.includes('lsk') ||
-                userInputLower.includes('lisk token') || userInputLower.includes('lisk balance')) {
-              tokenSymbol = 'LSK'
+            // Check for CrossFi-related keywords first (from user input or AI response)
+            if (lowerText.includes('crossfi') || lowerText.includes('xfi') || 
+                lowerText.includes('crossfi token') || lowerText.includes('crossfi balance') ||
+                lowerText.includes('show xfi') || lowerText.includes('tell my balance') ||
+                lowerText.includes('my crossfi') || lowerText.includes('my xfi') ||
+                userInputLower.includes('crossfi') || userInputLower.includes('xfi') ||
+                userInputLower.includes('crossfi token') || userInputLower.includes('crossfi balance')) {
+              tokenSymbol = 'XFI'
             }
             // Check for other specific token contexts
-            else if (lowerText.includes('ethereum') || lowerText.includes('eth') || text.includes('0x') ||
-                     userInputLower.includes('ethereum') || userInputLower.includes('eth')) {
-              tokenSymbol = 'ETH'
-            } else if (lowerText.includes('injective') || lowerText.includes('inj') ||
-                       userInputLower.includes('injective') || userInputLower.includes('inj')) {
-              tokenSymbol = 'INJ'
+            else if (lowerText.includes('crossfi') || lowerText.includes('xfi') || text.includes('0x') ||
+                     userInputLower.includes('crossfi') || userInputLower.includes('xfi')) {
+              tokenSymbol = 'XFI'
             } else if (lowerText.includes('usdt') || lowerText.includes('tether') ||
                        userInputLower.includes('usdt') || userInputLower.includes('tether')) {
               tokenSymbol = 'USDT'
@@ -285,13 +279,13 @@ export default function AstraChatPage() {
                        userInputLower.includes('bitcoin') || userInputLower.includes('btc')) {
               tokenSymbol = 'BTC'
             } else {
-              // For simple "Wallet Balance" or "Balance:" responses, default to LSK since this is a Lisk project
+              // For simple "Wallet Balance" or "Balance:" responses, default to XFI since this is a CrossFi project
               if (patternIndex === 0 || patternIndex === 1 || patternIndex === 2 || 
                   text.trim().startsWith('Balance:') || text.trim().startsWith('Wallet Balance')) {
-                tokenSymbol = 'LSK'
+                tokenSymbol = 'XFI'
               } else {
                 // Default fallback
-                tokenSymbol = 'ETH'
+                tokenSymbol = 'XFI'
               }
             }
           }
@@ -329,11 +323,10 @@ export default function AstraChatPage() {
 
   const getTokenFullName = (symbol: string): string => {
     const tokenNames: Record<string, string> = {
-      'INJ': 'Injective Protocol',
+      'XFI': 'CrossFi',
+      'CROSSFI': 'CrossFi',
       'USDT': 'Tether USD',
       'ETH': 'Ethereum',
-      'LSK': 'Lisk',
-      'LISK': 'Lisk',
       'AGENT': 'Agent Token',
       'BTC': 'Bitcoin',
       'WETH': 'Wrapped Ethereum'
@@ -359,8 +352,8 @@ export default function AstraChatPage() {
         // Fallback to mock price for unsupported tokens
         const mockPrices: Record<string, number> = {
           'AGENT': 0.50,
-          'LSK': 1.50,
-          'LISK': 1.50,
+          'XFI': 0.85,
+          'CROSSFI': 0.85,
           'OSMO': 0.80
         }
         const price = mockPrices[symbol] || 0
@@ -384,8 +377,8 @@ export default function AstraChatPage() {
       const mockPrices: Record<string, number> = {
         'USDT': 1.00,
         'ETH': 3200.00,
-        'LSK': 1.50, // Lisk price
-        'LISK': 1.50, // Alternative Lisk symbol
+        'XFI': 0.85, // CrossFi price
+        'CROSSFI': 0.85, // Alternative CrossFi symbol
         'AGENT': 0.50,
         'BTC': 45000.00,
         'WETH': 3200.00,
@@ -401,11 +394,10 @@ export default function AstraChatPage() {
 
   const getTokenIcon = (symbol: string): string => {
     const tokenIcons: Record<string, string> = {
-      'INJ': '⚡',
+      'XFI': '/crossfi.svg', // CrossFi logo
+      'CROSSFI': '/crossfi.svg', // Alternative CrossFi symbol
       'USDT': '💎',
       'ETH': '/eth.svg', // Ethereum icon (blue diamond)
-      'LSK': '/lisk.svg', // Lisk logo
-      'LISK': '/lisk.svg', // Alternative Lisk symbol
       'AGENT': '🤖',
       'BTC': '₿',
       'WETH': '🔶'
@@ -517,9 +509,9 @@ export default function AstraChatPage() {
   const formatTransactionValue = (value: string): string => {
     if (!value) return '0'
     try {
-      // Convert wei to ETH (divide by 10^18)
-      const ethValue = parseFloat(value) / Math.pow(10, 18)
-      return ethValue.toFixed(6) + ' ETH'
+      // Convert wei to XFI (divide by 10^18)
+      const xfiValue = parseFloat(value) / Math.pow(10, 18)
+      return xfiValue.toFixed(6) + ' XFI'
     } catch {
       return value
     }
@@ -592,7 +584,7 @@ export default function AstraChatPage() {
       {
         id: "1",
         role: "assistant",
-        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps, and even generate images or diagrams. What would you like to explore today?",
+        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on CrossFi, and even generate images or diagrams. What would you like to explore today?",
         timestamp: Date.now(),
       },
     ])
@@ -1112,7 +1104,7 @@ export default function AstraChatPage() {
                             <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                               <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Chain ID</div>
                               <div className="text-black dark:text-white font-medium flex items-center">
-                                <img src="/lisk.svg" alt="Lisk" className="w-4 h-4 mr-2" />
+                                <img src="/crossfi.svg" alt="CrossFi" className="w-4 h-4 mr-2" />
                                 {message.transactionData.chainId}
                               </div>
                             </div>
@@ -1229,12 +1221,12 @@ export default function AstraChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://sepolia-blockscout.lisk.com/tx/0x${message.transactionData!.hash}`}
+                            href={`https://test.xfiscan.com/tx/0x${message.transactionData!.hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View on Lisk Explorer ↗
+                            View on CrossFi Explorer ↗
                           </a>
                         </div>
                       </div>

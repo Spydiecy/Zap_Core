@@ -21,7 +21,7 @@
   <rect width="800" height="600" fill="#F8FAFC"/>
   
   <!-- Title -->
-  <text x="400" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1E293B">Astra Lisk Architecture</text>
+  <text x="400" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1E293B">Astra CrossFi Architecture</text>
   
   <!-- User Interface Layer -->
   <g transform="translate(50, 80)">
@@ -81,7 +81,7 @@
     <text x="350" y="-10" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#374151">Blockchain & Storage</text>
     
     <rect x="80" y="10" width="140" height="60" rx="8" fill="#FF6B35" filter="url(#shadow)"/>
-    <text x="150" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Lisk Network</text>
+    <text x="150" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">CrossFi Network</text>
     <text x="150" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">L2 Blockchain</text>
     
     <rect x="250" y="10" width="140" height="60" rx="8" fill="#FF6B35" filter="url(#shadow)"/>
@@ -144,5 +144,5 @@
   <line x1="580" y1="450" x2="580" y2="480" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
   
   <!-- Subtitle -->
-  <text x="400" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" style="font-style:italic" fill="#1E293B">AI-Powered Blockchain Agent Architecture for Lisk Network</text>
+  <text x="400" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" style="font-style:italic" fill="#1E293B">AI-Powered Blockchain Agent Architecture for CrossFi Network</text>
 </svg>

@@ -203,7 +203,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
           )}>
             <h3 className="text-lg font-medium mb-2">Premium Access Required</h3>
             <p className={cn("text-sm mb-4", isDark ? "text-gray-400" : "text-gray-600")}>
-              Access to Astra AI Assistant requires a one-time payment of 0.01 ETH on Lisk Sepolia Testnet.
+              Access to Astra AI Assistant requires a one-time payment of 0.1 XFI on CrossFi Testnet.
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -211,7 +211,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
             </div>
             <div className="flex items-center space-x-2 text-sm mt-1">
               <div className={cn("w-2 h-2 rounded-full", isDark ? "bg-gray-400" : "bg-gray-600")}></div>
-              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Lisk Sepolia Testnet</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>CrossFi Testnet</span>
             </div>
           </div>
 
@@ -300,7 +300,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
               ? "text-gray-500 bg-gray-900/30 border-gray-800" 
               : "text-gray-600 bg-gray-100/30 border-gray-300"
           )}>
-            <p>Make sure you're connected to Lisk Sepolia Testnet</p>
+            <p>Make sure you're connected to CrossFi Testnet</p>
             <p className="mt-1">Contract: {CONTRACT_ADDRESS}</p>
           </div>
         </div>

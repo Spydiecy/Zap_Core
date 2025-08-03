@@ -70,11 +70,11 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         )}>
           <div className={cn("flex items-center gap-2", !open && "hidden")}>
             <img 
-              src="/lisk.svg" 
-              alt="Lisk" 
+              src="/crossfi.svg" 
+              alt="CrossFi" 
               className="w-6 h-6 object-contain" 
             />
-            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA LISK</span>
+            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA CROSSFI</span>
             <span className={cn(
               "text-xs ml-2 px-2 py-1 rounded",
               isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"
@@ -123,10 +123,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           </button>
         </div>
         
-        {/* Docs Button - Updated for Lisk */}
+        {/* Docs Button - Updated for CrossFi */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
           <a 
-            href="https://github.com/Spydiecy/Astra_Lisk/blob/main/README.md"
+            href="https://github.com/Spydiecy/Astra_CrossFi/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -170,11 +170,11 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                 "text-xs space-y-1",
                 isDark ? "text-gray-400" : "text-gray-600"
               )}>
-                <div>Network: Lisk Sepolia</div>
-                <div>Chain ID: 4202</div>
-                <div>Currency: ETH</div>
-                <div className="break-all">RPC: rpc.sepolia-api.lisk.com</div>
-                <div className="break-all">Explorer: sepolia-blockscout.lisk.com</div>
+                <div>Network: CrossFi Testnet</div>
+                <div>Chain ID: 4157</div>
+                <div>Currency: XFI</div>
+                <div className="break-all">RPC: rpc.testnet.ms</div>
+                <div className="break-all">Explorer: test.xfiscan.com</div>
               </div>
             </div>
           )}
@@ -184,7 +184,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
               <div className={cn(
                 "w-3 h-3 rounded-full",
                 isDark ? "bg-green-500" : "bg-green-600"
-              )} title="Connected to Lisk Sepolia" />
+              )} title="Connected to CrossFi Testnet" />
             </div>
           )}
         </div>

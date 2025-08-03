@@ -5,31 +5,31 @@ import { injected, metaMask, safe, walletConnect } from 'wagmi/connectors'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'default-project-id'
 
-// Lisk Sepolia Testnet configuration
-const liskSepolia = {
-  id: 4202,
-  name: 'Lisk Sepolia',
+// CrossFi Testnet configuration
+const crossfiTestnet = {
+  id: 4157,
+  name: 'CrossFi Testnet',
   nativeCurrency: {
     decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
+    name: 'CrossFi',
+    symbol: 'XFI',
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.sepolia-api.lisk.com'],
+      http: ['https://rpc.testnet.ms'],
     },
   },
   blockExplorers: {
     default: {
-      name: 'Lisk Sepolia Explorer',
-      url: 'https://sepolia-blockscout.lisk.com',
+      name: 'CrossFi Explorer',
+      url: 'https://test.xfiscan.com',
     },
   },
   testnet: true,
 } as const
 
 export const config = createConfig({
-  chains: [liskSepolia],
+  chains: [crossfiTestnet],
   connectors: [
     injected(),
     walletConnect({ projectId }),
@@ -37,7 +37,7 @@ export const config = createConfig({
     safe(),
   ],
   transports: {
-    [liskSepolia.id]: http(),
+    [crossfiTestnet.id]: http(),
   },
 })
 
