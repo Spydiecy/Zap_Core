@@ -209,6 +209,47 @@ export default function AstraChatPage() {
       return false // Don't show balance card for swap operations
     }
     
+    // Check if this is a send/transfer operation - if so, don't show balance card
+    const sendTransferKeywords = ['send', 'transfer', 'pay', 'transmit']
+    const isSendTransferQuery = sendTransferKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
+    if (isSendTransferQuery) {
+      return false // Don't show balance card for send/transfer operations
+    }
+    
+    // Check if this is a transaction details response - if so, don't show balance card
+    const transactionIndicators = [
+      'transaction details',
+      'details for transaction',
+      'transaction hash',
+      'from address',
+      'to address',
+      'gas used:',
+      'gas price:',
+      'block number:',
+      '**from:**',
+      '**to:**',
+      '**value:**',
+      '**gas used:**',
+      '**gas price:**',
+      '**block number:**',
+      'transaction sent',
+      'transaction successful',
+      'transaction completed',
+      'sent successfully',
+      'transfer successful',
+      'transfer completed'
+    ]
+    const isTransactionResponse = transactionIndicators.some(indicator => 
+      lowerText.includes(indicator)
+    )
+    
+    if (isTransactionResponse) {
+      return false // Don't show balance card for transaction responses
+    }
+    
     // Check for specific balance response patterns
     const balanceKeywords = [
       'wallet balance is',
@@ -227,21 +268,11 @@ export default function AstraChatPage() {
     
     const hasBalanceKeyword = balanceKeywords.some(keyword => lowerText.includes(keyword))
     
-    // Also check for token-specific balance patterns
-    const tokenBalancePattern = (
-      lowerText.includes("balance") || 
-      lowerText.includes("wallet") ||
-      lowerText.includes("tokens") ||
-      lowerText.includes("hbar") ||
-      lowerText.includes("hedera") ||
-      lowerText.includes("hedera token") ||
-      lowerText.includes("agent")
-    )
-    
-    // Check for numerical values that look like balances
+    // Only check for broader patterns if we have specific balance keywords
+    // and it's not a transaction response
     const hasNumericValue = /[\d.]+/.test(text)
     
-    return (hasBalanceKeyword || tokenBalancePattern) && hasNumericValue
+    return hasBalanceKeyword && hasNumericValue
   }
 
   const parseBalanceData = async (text: string, userInput?: string) => {
@@ -482,6 +513,12 @@ export default function AstraChatPage() {
       return false // Don't show transaction card for swap operations
     }
     
+    // Check for send/transfer operations in user input - these should show transaction cards
+    const sendTransferKeywords = ['send', 'transfer', 'pay', 'transmit']
+    const isSendTransferQuery = sendTransferKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
     // Check for transaction-related keywords including markdown bold format
     const transactionKeywords = [
       'transaction',
@@ -504,7 +541,13 @@ export default function AstraChatPage() {
       '**value:**',
       'tx hash',
       'txn hash',
-      'transaction details'
+      'transaction details',
+      'transaction sent',
+      'transaction successful',
+      'transaction completed',
+      'sent successfully',
+      'transfer successful',
+      'transfer completed'
     ]
     
     const hasTransactionKeyword = transactionKeywords.some(keyword => lowerText.includes(keyword))
@@ -519,17 +562,23 @@ export default function AstraChatPage() {
     const hasTransactionPhrase = lowerText.includes('details for the transaction') || 
                                  lowerText.includes('transaction with hash') ||
                                  lowerText.includes('here are the details') ||
-                                 lowerText.includes('transaction information')
+                                 lowerText.includes('transaction information') ||
+                                 lowerText.includes('sent successfully') ||
+                                 lowerText.includes('transfer completed') ||
+                                 lowerText.includes('transaction completed')
     
-    // More lenient detection - if we have transaction keywords AND any identifying data
-    // BUT only if it's not a block info or swap query
-    const result = hasTransactionKeyword && (hasTransactionHash || hasAddress || hasTransactionPhrase)
+    // Enhanced detection logic:
+    // 1. If user asked to send/transfer AND we have transaction keywords OR hash, show card
+    // 2. If we have transaction keywords AND any identifying data, show card
+    const result = (isSendTransferQuery && (hasTransactionKeyword || hasTransactionHash)) || 
+                   (hasTransactionKeyword && (hasTransactionHash || hasAddress || hasTransactionPhrase))
     
     console.log('Transaction detection debug:', {
       hasTransactionKeyword,
       hasTransactionHash,
       hasAddress,
       hasTransactionPhrase,
+      isSendTransferQuery,
       isBlockInfoQuery,
       isSwapQuery,
       result,
@@ -541,15 +590,15 @@ export default function AstraChatPage() {
 
   const parseTransactionData = (text: string) => {
     const patterns = {
-      hash: /(?:\*\*Hash:\*\*|\*\*Transaction Hash:\*\*|hash|transaction\s+with\s+hash|tx\s*hash|txn\s*hash)[\s:`"]*([a-fA-F0-9x]{64,66})/i,
+      hash: /(?:\*\*Hash:\*\*|\*\*Transaction Hash:\*\*|hash|transaction\s+(?:hash\s+)?(?:is\s+)?|tx\s*hash|txn\s*hash|transaction\s+([a-fA-F0-9x]{64,66})|sent\s+successfully.*?([a-fA-F0-9x]{64,66})|transaction\s+completed.*?([a-fA-F0-9x]{64,66}))[\s:`"]*([a-fA-F0-9x]{64,66})/i,
       blockHash: /(?:\*\*Block\s+Hash:\*\*|block\s+hash)[\s:`"]*([a-fA-F0-9x]+)/i,
       blockNumber: /(?:\*\*Block\s+Number:\*\*|block\s+number)[\s:`"]*[#]?(\d+)/i,
       chainId: /(?:\*\*Chain\s+ID:\*\*|chain\s+id)[\s:`"]*(\d+)/i,
       from: /(?:\*\*From[\s\w]*:\*\*|from[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
       to: /(?:\*\*To[\s\w]*:\*\*|to[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
-      value: /(?:\*\*Value:\*\*|value)[\s:`"]*(\d+)/i,
+      value: /(?:\*\*Value:\*\*|value|amount)[\s:`"]*(\d+(?:\.\d+)?\s*(?:HBAR|hbar|tinybars?)?|\d+)/i,
       gasUsed: /(?:\*\*Gas\s+Used:\*\*|gas\s+used)[\s:`"]*(\d+)/i,
-      gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)/i,
+      gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)\s*(?:tinybars?|gwei)?/i,
       nonce: /(?:\*\*Nonce:\*\*|nonce)[\s:`"]*(\d+)/i,
       transactionIndex: /(?:\*\*Transaction\s+Index:\*\*|transaction\s+index)[\s:`"]*(\d+)/i,
       type: /(?:\*\*Type:\*\*|type)[\s:`"]*(\d+)/i
@@ -560,7 +609,41 @@ export default function AstraChatPage() {
     for (const [key, pattern] of Object.entries(patterns)) {
       const match = text.match(pattern)
       if (match) {
-        result[key] = match[1]
+        if (key === 'hash') {
+          // For hash, find the actual hash value from all capture groups
+          for (let i = match.length - 1; i >= 1; i--) {
+            if (match[i] && /^0x[a-fA-F0-9]{64}$/.test(match[i])) {
+              result[key] = match[i]
+              break
+            }
+          }
+          // If no proper hash found, take the last capture group
+          if (!result[key] && match[match.length - 1]) {
+            result[key] = match[match.length - 1]
+          }
+        } else {
+          result[key] = match[1]
+        }
+      }
+    }
+
+    // Additional hash detection patterns for send/transfer operations
+    if (!result.hash) {
+      const hashPatterns = [
+        /transaction\s+hash:\s*([a-fA-F0-9x]{64,66})/i,
+        /hash:\s*([a-fA-F0-9x]{64,66})/i,
+        /sent.*?([a-fA-F0-9x]{64,66})/i,
+        /transfer.*?([a-fA-F0-9x]{64,66})/i,
+        /transaction.*?([a-fA-F0-9x]{64,66})/i,
+        /([a-fA-F0-9x]{64,66})/i  // Fallback: any 64-66 character hex string
+      ]
+      
+      for (const pattern of hashPatterns) {
+        const match = text.match(pattern)
+        if (match && match[1]) {
+          result.hash = match[1]
+          break
+        }
       }
     }
 
@@ -581,9 +664,26 @@ export default function AstraChatPage() {
   const formatTransactionValue = (value: string): string => {
     if (!value) return '0'
     try {
-      // Convert wei to HBAR (divide by 10^18)
-      const hbarValue = parseFloat(value) / Math.pow(10, 18)
-      return hbarValue.toFixed(6) + ' HBAR'
+      // Check if the value already includes HBAR or is in HBAR format
+      if (value.toLowerCase().includes('hbar')) {
+        const numericValue = parseFloat(value.replace(/[^\d.]/g, ''))
+        return numericValue.toFixed(6) + ' HBAR'
+      }
+      
+      // Check if it's tinybars (very large number)
+      const numericValue = parseFloat(value)
+      if (numericValue > 1000000000) {
+        // Likely tinybars - convert to HBAR (divide by 10^8 for Hedera)
+        const hbarValue = numericValue / Math.pow(10, 8)
+        return hbarValue.toFixed(6) + ' HBAR'
+      } else if (numericValue > 1000000) {
+        // Likely wei - convert to HBAR (divide by 10^18)
+        const hbarValue = numericValue / Math.pow(10, 18)
+        return hbarValue.toFixed(6) + ' HBAR'
+      } else {
+        // Already in HBAR
+        return numericValue.toFixed(6) + ' HBAR'
+      }
     } catch {
       return value
     }
@@ -592,9 +692,28 @@ export default function AstraChatPage() {
   const formatGasPrice = (gasPrice: string): string => {
     if (!gasPrice) return '0'
     try {
-      // Convert wei to Gwei (divide by 10^9)
-      const gweiValue = parseFloat(gasPrice) / Math.pow(10, 9)
-      return gweiValue.toFixed(2) + ' Gwei'
+      const numericValue = parseFloat(gasPrice)
+      
+      // For Hedera, gas prices are typically in tinybars
+      // 1 HBAR = 100,000,000 tinybars (10^8)
+      if (numericValue >= 100000000) {
+        // Large number - likely tinybars, convert to a reasonable display format
+        if (numericValue >= 1000000000000) {
+          // Very large number (like 360000000000) - show in Gwei equivalent
+          const gweiValue = numericValue / Math.pow(10, 9)
+          return gweiValue.toFixed(2) + ' Gwei'
+        } else {
+          // Moderate large number - show in tinybars
+          return numericValue.toLocaleString() + ' tinybars'
+        }
+      } else if (numericValue >= 1000000) {
+        // Medium number - could be wei, convert to Gwei
+        const gweiValue = numericValue / Math.pow(10, 9)
+        return gweiValue.toFixed(2) + ' Gwei'
+      } else {
+        // Small number - show as is with tinybars unit
+        return numericValue.toLocaleString() + ' tinybars'
+      }
     } catch {
       return gasPrice
     }
@@ -1026,46 +1145,14 @@ export default function AstraChatPage() {
                     </div>
                   ) : (
                     <>
-                      {/* Always show the AI response text */}
-                      <div className={cn(
-                        "whitespace-pre-wrap",
-                        message.role === "user" 
-                          ? "text-white dark:text-black" 
-                          : "text-gray-800 dark:text-gray-100"
-                      )}>{message.content}</div>
-                      
-                      {/* Show brief messages for special response types */}
-                      {message.balanceData && (
+                      {/* Only show the AI response text if no cards are being displayed */}
+                      {!message.balanceData && !message.transactionData && !message.blockData && (
                         <div className={cn(
-                          "text-sm mt-2 pt-2 border-t border-gray-300 dark:border-gray-700",
+                          "whitespace-pre-wrap",
                           message.role === "user" 
                             ? "text-white dark:text-black" 
-                            : "text-gray-600 dark:text-gray-400"
-                        )}>
-                          Wallet balance details:
-                        </div>
-                      )}
-                      
-                      {message.transactionData && (
-                        <div className={cn(
-                          "text-sm mt-2 pt-2 border-t border-gray-300 dark:border-gray-700",
-                          message.role === "user" 
-                            ? "text-white dark:text-black" 
-                            : "text-gray-600 dark:text-gray-400"
-                        )}>
-                          Transaction details:
-                        </div>
-                      )}
-
-                      {message.blockData && (
-                        <div className={cn(
-                          "text-sm mt-2 pt-2 border-t border-gray-300 dark:border-gray-700",
-                          message.role === "user" 
-                            ? "text-white dark:text-black" 
-                            : "text-gray-600 dark:text-gray-400"
-                        )}>
-                          Block information:
-                        </div>
+                            : "text-gray-800 dark:text-gray-100"
+                        )}>{message.content}</div>
                       )}
                     </>
                   )}
@@ -1325,7 +1412,7 @@ export default function AstraChatPage() {
                   {message.role === "assistant" && message.blockData && (
                     <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800">
                       <h3 className="text-sm font-medium text-black dark:text-white mb-4 flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center mr-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-800 dark:bg-white flex items-center justify-center mr-3">
                           📦
                         </div>
                         Block Information
@@ -1334,9 +1421,9 @@ export default function AstraChatPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Block Number */}
                         {message.blockData.blockNumber && (
-                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <div className="text-xs text-blue-600 dark:text-blue-300 mb-1">Block Number</div>
-                            <div className="text-black dark:text-white font-bold text-lg">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Number</div>
+                            <div className="text-black dark:text-white font-medium">
                               #{message.blockData.blockNumber}
                             </div>
                           </div>
@@ -1344,9 +1431,9 @@ export default function AstraChatPage() {
 
                         {/* Transaction Count */}
                         {message.blockData.transactionCount && (
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                            <div className="text-xs text-green-600 dark:text-green-300 mb-1">Transactions</div>
-                            <div className="text-black dark:text-white font-bold text-lg">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Transactions</div>
+                            <div className="text-black dark:text-white font-medium">
                               {parseInt(message.blockData.transactionCount).toLocaleString()}
                             </div>
                           </div>
@@ -1363,27 +1450,23 @@ export default function AstraChatPage() {
                         )}
 
                         {/* Gas Information */}
-                        <div className="space-y-3">
-                          {message.blockData.gasUsed && (
-                            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-                              <div className="text-xs text-orange-600 dark:text-orange-300 mb-1">Gas Used</div>
-                              <div className="text-black dark:text-white font-medium">
-                                {parseInt(message.blockData.gasUsed).toLocaleString()}
-                              </div>
+                        {message.blockData.gasUsed && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Gas Used</div>
+                            <div className="text-black dark:text-white font-medium">
+                              {parseInt(message.blockData.gasUsed).toLocaleString()}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
-                        <div className="space-y-3">
-                          {message.blockData.gasLimit && (
-                            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                              <div className="text-xs text-purple-600 dark:text-purple-300 mb-1">Gas Limit</div>
-                              <div className="text-black dark:text-white font-medium">
-                                {parseInt(message.blockData.gasLimit).toLocaleString()}
-                              </div>
+                        {message.blockData.gasLimit && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Gas Limit</div>
+                            <div className="text-black dark:text-white font-medium">
+                              {parseInt(message.blockData.gasLimit).toLocaleString()}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
                         {/* Block Hash */}
                         {message.blockData.blockHash && (
@@ -1402,36 +1485,51 @@ export default function AstraChatPage() {
                         )}
 
                         {/* Additional Information */}
-                        {(message.blockData.miner || message.blockData.difficulty || message.blockData.size) && (
-                          <div className="grid grid-cols-1 gap-3 col-span-1 md:col-span-2">
-                            {message.blockData.miner && (
-                              <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
-                                <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Validator/Miner</div>
-                                <div className="text-black dark:text-white font-mono text-sm break-all">
-                                  {message.blockData.miner}
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="grid grid-cols-2 gap-3">
-                              {message.blockData.difficulty && (
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
-                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Difficulty</div>
-                                  <div className="text-black dark:text-white font-medium">
-                                    {message.blockData.difficulty}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {message.blockData.size && (
-                                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
-                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Size</div>
-                                  <div className="text-black dark:text-white font-medium">
-                                    {message.blockData.size}
-                                  </div>
-                                </div>
-                              )}
+                        {message.blockData.miner && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Validator/Miner</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.blockData.miner}
                             </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.blockData!.miner!)}
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                              Copy Address
+                            </button>
+                          </div>
+                        )}
+                        
+                        {message.blockData.difficulty && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Difficulty</div>
+                            <div className="text-black dark:text-white font-medium">
+                              {parseInt(message.blockData.difficulty).toLocaleString()}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {message.blockData.size && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Size</div>
+                            <div className="text-black dark:text-white font-medium">
+                              {message.blockData.size}
+                            </div>
+                          </div>
+                        )}
+
+                        {message.blockData.parentHash && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Parent Hash</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.blockData.parentHash}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.blockData!.parentHash!)}
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                              Copy Hash
+                            </button>
                           </div>
                         )}
 
@@ -1441,9 +1539,9 @@ export default function AstraChatPage() {
                             href={`https://hashscan.io/testnet/block/${message.blockData.blockNumber || message.blockData.blockHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                            className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View Block on Hedera Explorer ↗
+                            View on Hedera Explorer ↗
                           </a>
                         </div>
                       </div>
