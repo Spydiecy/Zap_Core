@@ -121,7 +121,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         {/* Docs Button - Moved here, right below New Chat */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
           <a 
-            href="https://github.com/Spydiecy/Astra_CrossFi/blob/main/README.md"
+            href="https://github.com/Spydiecy/Astra_Hedera/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

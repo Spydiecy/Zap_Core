@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         // Add any required headers like API keys
       },
       body: JSON.stringify({
-        "appName":"crossFi_agent", // hardcoded 
+        "appName":"hedera_agent", // hardcoded 
         userId,
         sessionId,
         newMessage,

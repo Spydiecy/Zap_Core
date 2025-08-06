@@ -12,7 +12,7 @@ from CoinGecko import CoinGeckoToken
 schedule_engine = BackgroundScheduler()
 schedule_engine.start()
 
-token_reference = CoinGeckoToken("crossfi")
+token_reference = CoinGeckoToken("hedera-hashgraph")
 
 cached_tokens = {}
 with open("tokensList.json") as f:
@@ -20,10 +20,10 @@ with open("tokensList.json") as f:
 
 runtime = datetime.now()
 network = {
-        "chain_id": 4157,
-    "rpc": "https://rpc.testnet.ms/",
-    "name": "CrossFi Testnet",
-    "explorer": "https://test.xfiscan.com/",
+        "chain_id": 296,
+    "rpc": "https://testnet.hashio.io/api",
+    "name": "Hedera Testnet",
+    "explorer": "https://hashscan.io/testnet/",
     "api": "YourBlockscoutAPIKey"
 }
 

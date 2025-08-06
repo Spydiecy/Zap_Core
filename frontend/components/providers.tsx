@@ -20,24 +20,24 @@ import '@rainbow-me/rainbowkit/styles.css'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'astra-default-project-id'
 
-// CrossFi Testnet configuration
-const crossfiTestnet = {
-  id: 4157,
-  name: 'CrossFi Testnet',
+// Hedera Testnet configuration
+const hederaTestnet = {
+  id: 296,
+  name: 'Hedera Testnet',
   nativeCurrency: {
     decimals: 18,
-    name: 'CrossFi',
-    symbol: 'XFI',
+    name: 'HBAR',
+    symbol: 'HBAR',
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.testnet.ms'],
+      http: ['https://testnet.hashio.io/api'],
     },
   },
   blockExplorers: {
     default: {
-      name: 'CrossFi Explorer',
-      url: 'https://test.xfiscan.com',
+      name: 'Hedera Explorer',
+      url: 'https://hashscan.io/testnet',
     },
   },
   testnet: true,
@@ -71,10 +71,10 @@ const connectors = connectorsForWallets(
 )
 
 const config = createConfig({
-  chains: [crossfiTestnet],
+  chains: [hederaTestnet],
   connectors,
   transports: {
-    [crossfiTestnet.id]: http(),
+    [hederaTestnet.id]: http(),
   },
 }) as any // Type assertion to resolve compatibility issue
 

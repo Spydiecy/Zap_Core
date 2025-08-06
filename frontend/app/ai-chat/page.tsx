@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { uploadFileToIPFS } from "@/lib/pinata"
 import { useCredentials } from "@/contexts/CredentialsContext"
 import { AccessControlModal } from "@/components/access-control-modal"
-import { useAccount, useReadContract } from 'wagmi'
+import { useAccount } from 'wagmi'
 
 interface Message {
   id: string
@@ -48,6 +48,18 @@ interface Message {
     status?: string
     timestamp?: string
   }
+  blockData?: {
+    blockNumber: string
+    blockHash: string
+    timestamp: string
+    transactionCount: string
+    gasUsed: string
+    gasLimit: string
+    miner?: string
+    difficulty?: string
+    size?: string
+    parentHash?: string
+  }
 }
 
 interface FileUpload {
@@ -56,30 +68,6 @@ interface FileUpload {
   mimeType: string
   data: string
 }
-
-// Access Control Constants
-const CONTRACT_ADDRESS = '0x753720b82E83826Db0024ae5Ee8d1F2b31105B02'
-const CONTRACT_ABI = [
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "hasPaid",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-]
 
 export default function AstraChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -97,18 +85,6 @@ export default function AstraChatPage() {
   
   // Wallet connection
   const { address, isConnected } = useAccount()
-
-  // Check if user has paid for access
-  const { data: hasPaid } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: 'hasPaid',
-    args: address ? [address] : undefined,
-    query: {
-      enabled: !!address,
-      refetchInterval: 5000,
-    },
-  }) as { data: boolean | undefined }
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -149,8 +125,89 @@ export default function AstraChatPage() {
     return ipfsStorageKeywords.some((keyword) => lowerText.includes(keyword))
   }
 
-  const isBalanceResponse = (text: string): boolean => {
+  const isBlockResponse = (text: string, userInput?: string): boolean => {
     const lowerText = text.toLowerCase()
+    const lowerUserInput = userInput?.toLowerCase() || ''
+    
+    // Check for block information keywords
+    const blockKeywords = [
+      'latest block', 'recent block', 'current block', 'block information',
+      'block details', 'newest block', 'last block', 'block height',
+      'block number', 'block data', 'block info', 'block hash',
+      'block timestamp', 'block size', 'block miner'
+    ]
+    
+    const hasBlockKeyword = blockKeywords.some(keyword => 
+      lowerUserInput.includes(keyword) || lowerText.includes(keyword)
+    )
+    
+    // Check for block-specific patterns in the response
+    const hasBlockPattern = (
+      lowerText.includes('block #') ||
+      lowerText.includes('block number:') ||
+      lowerText.includes('block hash:') ||
+      lowerText.includes('timestamp:') ||
+      lowerText.includes('transaction count:') ||
+      lowerText.includes('gas used:') ||
+      lowerText.includes('gas limit:')
+    )
+    
+    // Check for numerical values that look like block data
+    const hasBlockData = /block\s*#?\s*\d+|timestamp.*\d+|gas.*\d+/i.test(text)
+    
+    return hasBlockKeyword && (hasBlockPattern || hasBlockData)
+  }
+
+  const parseBlockData = (text: string) => {
+    const patterns = {
+      blockNumber: /(?:block\s*#?\s*|block\s+number\s*:?\s*)(\d+)/i,
+      blockHash: /(?:block\s+hash\s*:?\s*|hash\s*:?\s*)([a-fA-F0-9x]{64,66})/i,
+      timestamp: /(?:timestamp\s*:?\s*|time\s*:?\s*)([^\n,]+)/i,
+      transactionCount: /(?:transaction\s+count\s*:?\s*|transactions\s*:?\s*)(\d+)/i,
+      gasUsed: /(?:gas\s+used\s*:?\s*)([0-9,]+)/i,
+      gasLimit: /(?:gas\s+limit\s*:?\s*)([0-9,]+)/i,
+      miner: /(?:miner\s*:?\s*|validator\s*:?\s*)([a-fA-F0-9x]{40,42})/i,
+      difficulty: /(?:difficulty\s*:?\s*)([0-9,]+)/i,
+      size: /(?:size\s*:?\s*)([0-9,]+\s*bytes?)/i,
+      parentHash: /(?:parent\s+hash\s*:?\s*)([a-fA-F0-9x]{64,66})/i
+    }
+
+    const result: any = {}
+    
+    for (const [key, pattern] of Object.entries(patterns)) {
+      const match = text.match(pattern)
+      if (match) {
+        result[key] = match[1].trim()
+      }
+    }
+
+    console.log('Block parsing debug:', {
+      foundFields: Object.keys(result),
+      result,
+      textSample: text.substring(0, 300)
+    })
+
+    // Return if we have at least block number or hash
+    if (result.blockNumber || result.blockHash || Object.keys(result).length >= 2) {
+      return result
+    }
+
+    return null
+  }
+
+  const isBalanceResponse = (text: string, userInput?: string): boolean => {
+    const lowerText = text.toLowerCase()
+    const lowerUserInput = userInput?.toLowerCase() || ''
+    
+    // Check if this is a swap-related query - if so, don't show balance card
+    const swapKeywords = ['swap', 'trade', 'exchange', 'convert', 'sell', 'buy']
+    const isSwapQuery = swapKeywords.some(keyword => 
+      lowerUserInput.includes(keyword) || lowerText.includes(`swap `) || lowerText.includes(`trade `)
+    )
+    
+    if (isSwapQuery) {
+      return false // Don't show balance card for swap operations
+    }
     
     // Check for specific balance response patterns
     const balanceKeywords = [
@@ -160,9 +217,9 @@ export default function AstraChatPage() {
       'current balance',
       'account balance',
       'balance:',
-      'xfi balance',
-      'crossfi balance',
-      'crossfi token balance',
+      'hbar balance',
+      'hedera balance',
+      'hedera token balance',
       'show balance',
       'check balance',
       'my balance'
@@ -175,9 +232,9 @@ export default function AstraChatPage() {
       lowerText.includes("balance") || 
       lowerText.includes("wallet") ||
       lowerText.includes("tokens") ||
-      lowerText.includes("xfi") ||
-      lowerText.includes("crossfi") ||
-      lowerText.includes("crossfi token") ||
+      lowerText.includes("hbar") ||
+      lowerText.includes("hedera") ||
+      lowerText.includes("hedera token") ||
       lowerText.includes("agent")
     )
     
@@ -215,14 +272,14 @@ export default function AstraChatPage() {
       /([\d.,]+)\s+(\w+)/gi,
       // Pattern: "balance: 0.619957302943058765"
       /balance:\s*([\d.,]+)/gi,
-      // Pattern: "XFI balance is 0.1" or "CrossFi balance is 0.1"
-      /(?:xfi|crossfi)\s+balance\s+is\s*([\d.,]+)/gi,
-      // Pattern: "Your XFI balance: 0.1"
-      /(?:your\s+)?(?:xfi|crossfi)\s+balance:\s*([\d.,]+)/gi
+      // Pattern: "HBAR balance is 0.1" or "Hedera balance is 0.1"
+      /(?:hbar|hedera)\s+balance\s+is\s*([\d.,]+)/gi,
+      // Pattern: "Your HBAR balance: 0.1"
+      /(?:your\s+)?(?:hbar|hedera)\s+balance:\s*([\d.,]+)/gi
     ]
     
     // Common token symbols to look for
-    const tokenSymbols = ['XFI', 'CROSSFI', 'USDT', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    const tokenSymbols = ['HBAR', 'USDT', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
     
     let foundTokens = new Set() // To avoid duplicates
     
@@ -259,19 +316,19 @@ export default function AstraChatPage() {
             const lowerText = text.toLowerCase()
             const userInputLower = userInput?.toLowerCase() || ''
             
-            // Check for CrossFi-related keywords first (from user input or AI response)
-            if (lowerText.includes('crossfi') || lowerText.includes('xfi') || 
-                lowerText.includes('crossfi token') || lowerText.includes('crossfi balance') ||
-                lowerText.includes('show xfi') || lowerText.includes('tell my balance') ||
-                lowerText.includes('my crossfi') || lowerText.includes('my xfi') ||
-                userInputLower.includes('crossfi') || userInputLower.includes('xfi') ||
-                userInputLower.includes('crossfi token') || userInputLower.includes('crossfi balance')) {
-              tokenSymbol = 'XFI'
+            // Check for Hedera-related keywords first (from user input or AI response)
+            if (lowerText.includes('hedera') || lowerText.includes('hbar') || 
+                lowerText.includes('hedera token') || lowerText.includes('hedera balance') ||
+                lowerText.includes('show hbar') || lowerText.includes('tell my balance') ||
+                lowerText.includes('my hedera') || lowerText.includes('my hbar') ||
+                userInputLower.includes('hedera') || userInputLower.includes('hbar') ||
+                userInputLower.includes('hedera token') || userInputLower.includes('hedera balance')) {
+              tokenSymbol = 'HBAR'
             }
             // Check for other specific token contexts
-            else if (lowerText.includes('crossfi') || lowerText.includes('xfi') || text.includes('0x') ||
-                     userInputLower.includes('crossfi') || userInputLower.includes('xfi')) {
-              tokenSymbol = 'XFI'
+            else if (lowerText.includes('hedera') || lowerText.includes('hbar') || text.includes('0x') ||
+                     userInputLower.includes('hedera') || userInputLower.includes('hbar')) {
+              tokenSymbol = 'HBAR'
             } else if (lowerText.includes('usdt') || lowerText.includes('tether') ||
                        userInputLower.includes('usdt') || userInputLower.includes('tether')) {
               tokenSymbol = 'USDT'
@@ -279,13 +336,13 @@ export default function AstraChatPage() {
                        userInputLower.includes('bitcoin') || userInputLower.includes('btc')) {
               tokenSymbol = 'BTC'
             } else {
-              // For simple "Wallet Balance" or "Balance:" responses, default to XFI since this is a CrossFi project
+              // For simple "Wallet Balance" or "Balance:" responses, default to HBAR since this is a Hedera project
               if (patternIndex === 0 || patternIndex === 1 || patternIndex === 2 || 
                   text.trim().startsWith('Balance:') || text.trim().startsWith('Wallet Balance')) {
-                tokenSymbol = 'XFI'
+                tokenSymbol = 'HBAR'
               } else {
                 // Default fallback
-                tokenSymbol = 'XFI'
+                tokenSymbol = 'HBAR'
               }
             }
           }
@@ -323,8 +380,7 @@ export default function AstraChatPage() {
 
   const getTokenFullName = (symbol: string): string => {
     const tokenNames: Record<string, string> = {
-      'XFI': 'CrossFi',
-      'CROSSFI': 'CrossFi',
+      'HBAR': 'Hedera',
       'USDT': 'Tether USD',
       'AGENT': 'Agent Token',
       'BTC': 'Bitcoin',
@@ -337,6 +393,7 @@ export default function AstraChatPage() {
     try {
       // Map token symbols to Coinbase API symbols
       const coinbaseSymbols: Record<string, string> = {
+        'HBAR': 'HBAR-USD',
         'USDT': 'USDT-USD',
         'BTC': 'BTC-USD',
         'WETH': 'ETH-USD', // Use ETH price for WETH
@@ -347,11 +404,9 @@ export default function AstraChatPage() {
       const coinbaseSymbol = coinbaseSymbols[symbol]
       
       if (!coinbaseSymbol) {
-        // Fallback to mock price for unsupported tokens
+        // Fallback to mock price for unsupported tokens only
         const mockPrices: Record<string, number> = {
           'AGENT': 0.50,
-          'XFI': 0.85,
-          'CROSSFI': 0.85,
           'OSMO': 0.80
         }
         const price = mockPrices[symbol] || 0
@@ -374,8 +429,7 @@ export default function AstraChatPage() {
       // Fallback to mock prices if API fails
       const mockPrices: Record<string, number> = {
         'USDT': 1.00,
-        'XFI': 0.85, // CrossFi price
-        'CROSSFI': 0.85, // Alternative CrossFi symbol
+        'HBAR': 0.24, // Fallback HBAR price
         'AGENT': 0.50,
         'BTC': 45000.00,
         'WETH': 3200.00,
@@ -391,8 +445,7 @@ export default function AstraChatPage() {
 
   const getTokenIcon = (symbol: string): string => {
     const tokenIcons: Record<string, string> = {
-      'XFI': '/xfi.svg', // CrossFi logo
-      'CROSSFI': '/xfi.svg', // Alternative CrossFi symbol
+      'HBAR': '/hedera.svg', // Hedera logo
       'USDT': '💎',
       'AGENT': '🤖',
       'BTC': '₿',
@@ -401,15 +454,38 @@ export default function AstraChatPage() {
     return tokenIcons[symbol] || '🪙'
   }
 
-  const isTransactionResponse = (text: string): boolean => {
+  const isTransactionResponse = (text: string, userInput?: string): boolean => {
     const lowerText = text.toLowerCase()
+    const lowerUserInput = userInput?.toLowerCase() || ''
+    
+    // Check if this is a block information query - if so, don't show transaction card
+    const blockInfoKeywords = [
+      'latest block', 'recent block', 'current block', 'block information', 
+      'block details', 'newest block', 'last block', 'block height',
+      'block number', 'block data', 'block info'
+    ]
+    const isBlockInfoQuery = blockInfoKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
+    if (isBlockInfoQuery) {
+      return false // Don't show transaction card for block information queries
+    }
+    
+    // Check if this is a swap-related query - if so, don't show transaction card
+    const swapKeywords = ['swap', 'trade', 'exchange', 'convert', 'sell', 'buy']
+    const isSwapQuery = swapKeywords.some(keyword => 
+      lowerUserInput.includes(keyword) || lowerText.includes(`swap `) || lowerText.includes(`trade `)
+    )
+    
+    if (isSwapQuery) {
+      return false // Don't show transaction card for swap operations
+    }
     
     // Check for transaction-related keywords including markdown bold format
     const transactionKeywords = [
       'transaction',
       'transaction hash',
-      'block hash',
-      'block number',
       'gas used',
       'gas price',
       'transaction index',
@@ -417,9 +493,6 @@ export default function AstraChatPage() {
       'to address',
       'chain id',
       'nonce',
-      '**block hash:**',
-      '**block number:**',
-      '**chain id:**',
       '**from address:**',
       '**to address:**',
       '**gas used:**',
@@ -449,6 +522,7 @@ export default function AstraChatPage() {
                                  lowerText.includes('transaction information')
     
     // More lenient detection - if we have transaction keywords AND any identifying data
+    // BUT only if it's not a block info or swap query
     const result = hasTransactionKeyword && (hasTransactionHash || hasAddress || hasTransactionPhrase)
     
     console.log('Transaction detection debug:', {
@@ -456,6 +530,8 @@ export default function AstraChatPage() {
       hasTransactionHash,
       hasAddress,
       hasTransactionPhrase,
+      isBlockInfoQuery,
+      isSwapQuery,
       result,
       textSample: lowerText.substring(0, 200)
     })
@@ -505,9 +581,9 @@ export default function AstraChatPage() {
   const formatTransactionValue = (value: string): string => {
     if (!value) return '0'
     try {
-      // Convert wei to XFI (divide by 10^18)
-      const xfiValue = parseFloat(value) / Math.pow(10, 18)
-      return xfiValue.toFixed(6) + ' XFI'
+      // Convert wei to HBAR (divide by 10^18)
+      const hbarValue = parseFloat(value) / Math.pow(10, 18)
+      return hbarValue.toFixed(6) + ' HBAR'
     } catch {
       return value
     }
@@ -525,15 +601,15 @@ export default function AstraChatPage() {
   }
 
   useEffect(() => {
-    // Check access when wallet connects or payment status changes
-    if (isConnected && hasPaid) {
+    // Check access when wallet connects
+    if (isConnected && address) {
       setHasAccess(true)
       setShowAccessModal(false)
-    } else if (isConnected && hasPaid === false) {
+    } else {
       setHasAccess(false)
       setShowAccessModal(true)
     }
-  }, [isConnected, hasPaid])
+  }, [isConnected, address])
 
   useEffect(() => {
     const storedSessionId = localStorage.getItem("sessionId")
@@ -580,7 +656,7 @@ export default function AstraChatPage() {
       {
         id: "1",
         role: "assistant",
-        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on CrossFi, and even generate images or diagrams. What would you like to explore today?",
+        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on Hedera, and even generate images or diagrams. What would you like to explore today?",
         timestamp: Date.now(),
       },
     ])
@@ -804,16 +880,23 @@ export default function AstraChatPage() {
         }
       }
 
+      // Check if this is a block response and parse the data
+      const isBlock = isBlockResponse(content, currentInput)
+      console.log('Is block response:', isBlock)
+      
+      const blockData = isBlock ? parseBlockData(content) : null
+      console.log('Parsed block data:', blockData)
+
       // Check if this is a balance response and parse the data
       console.log('AI Response content:', content)
-      const isBalance = isBalanceResponse(content)
+      const isBalance = isBalanceResponse(content, currentInput)
       console.log('Is balance response:', isBalance)
       
       const balanceData = isBalance ? await parseBalanceData(content, currentInput) : null
       console.log('Parsed balance data:', balanceData)
 
       // Check if this is a transaction response and parse the data
-      const isTransaction = isTransactionResponse(content)
+      const isTransaction = isTransactionResponse(content, currentInput)
       console.log('Is transaction response:', isTransaction)
       console.log('Full AI response content for debugging:', content)
       
@@ -831,6 +914,7 @@ export default function AstraChatPage() {
           generatedImage: generatedImage,
           balanceData: balanceData || undefined,
           transactionData: transactionData || undefined,
+          blockData: blockData || undefined,
         }
         return [...filtered, assistantMessage]
       })
@@ -887,7 +971,7 @@ export default function AstraChatPage() {
         <div className="h-full bg-white dark:bg-black text-black dark:text-white flex items-center justify-center transition-colors duration-300">
           <div className="text-center">
             <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">Premium access required to continue</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Connect your wallet to continue</p>
           </div>
         </div>
       </>
@@ -942,37 +1026,45 @@ export default function AstraChatPage() {
                     </div>
                   ) : (
                     <>
-                      {/* Only show text content if this isn't a balance or transaction response */}
-                      {!message.balanceData && !message.transactionData && (
-                        <div className={cn(
-                          "whitespace-pre-wrap",
-                          message.role === "user" 
-                            ? "text-white dark:text-black" 
-                            : "text-gray-800 dark:text-gray-100"
-                        )}>{message.content}</div>
-                      )}
+                      {/* Always show the AI response text */}
+                      <div className={cn(
+                        "whitespace-pre-wrap",
+                        message.role === "user" 
+                          ? "text-white dark:text-black" 
+                          : "text-gray-800 dark:text-gray-100"
+                      )}>{message.content}</div>
                       
-                      {/* Show a brief message for balance responses */}
+                      {/* Show brief messages for special response types */}
                       {message.balanceData && (
                         <div className={cn(
-                          "text-sm",
+                          "text-sm mt-2 pt-2 border-t border-gray-300 dark:border-gray-700",
                           message.role === "user" 
                             ? "text-white dark:text-black" 
                             : "text-gray-600 dark:text-gray-400"
                         )}>
-                          Here's your wallet balance information:
+                          Wallet balance details:
                         </div>
                       )}
                       
-                      {/* Show a brief message for transaction responses */}
                       {message.transactionData && (
                         <div className={cn(
-                          "text-sm",
+                          "text-sm mt-2 pt-2 border-t border-gray-300 dark:border-gray-700",
                           message.role === "user" 
                             ? "text-white dark:text-black" 
                             : "text-gray-600 dark:text-gray-400"
                         )}>
-                          Here are the transaction details:
+                          Transaction details:
+                        </div>
+                      )}
+
+                      {message.blockData && (
+                        <div className={cn(
+                          "text-sm mt-2 pt-2 border-t border-gray-300 dark:border-gray-700",
+                          message.role === "user" 
+                            ? "text-white dark:text-black" 
+                            : "text-gray-600 dark:text-gray-400"
+                        )}>
+                          Block information:
                         </div>
                       )}
                     </>
@@ -1100,7 +1192,7 @@ export default function AstraChatPage() {
                             <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                               <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Chain ID</div>
                               <div className="text-black dark:text-white font-medium flex items-center">
-                                <img src="/xfi.svg" alt="CrossFi" className="w-4 h-4 mr-2" />
+                                <img src="/hedera.svg" alt="Hedera" className="w-4 h-4 mr-2" />
                                 {message.transactionData.chainId}
                               </div>
                             </div>
@@ -1217,12 +1309,141 @@ export default function AstraChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://test.xfiscan.com/tx/${message.transactionData.hash}`}
+                            href={`https://hashscan.io/testnet/transaction/${message.transactionData.hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View on CrossFi Explorer ↗
+                            View on Hedera Explorer ↗
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show block data for assistant messages */}
+                  {message.role === "assistant" && message.blockData && (
+                    <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800">
+                      <h3 className="text-sm font-medium text-black dark:text-white mb-4 flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center mr-3">
+                          📦
+                        </div>
+                        Block Information
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Block Number */}
+                        {message.blockData.blockNumber && (
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="text-xs text-blue-600 dark:text-blue-300 mb-1">Block Number</div>
+                            <div className="text-black dark:text-white font-bold text-lg">
+                              #{message.blockData.blockNumber}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Transaction Count */}
+                        {message.blockData.transactionCount && (
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                            <div className="text-xs text-green-600 dark:text-green-300 mb-1">Transactions</div>
+                            <div className="text-black dark:text-white font-bold text-lg">
+                              {parseInt(message.blockData.transactionCount).toLocaleString()}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Timestamp */}
+                        {message.blockData.timestamp && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Timestamp</div>
+                            <div className="text-black dark:text-white font-medium">
+                              {message.blockData.timestamp}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Gas Information */}
+                        <div className="space-y-3">
+                          {message.blockData.gasUsed && (
+                            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                              <div className="text-xs text-orange-600 dark:text-orange-300 mb-1">Gas Used</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {parseInt(message.blockData.gasUsed).toLocaleString()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-3">
+                          {message.blockData.gasLimit && (
+                            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                              <div className="text-xs text-purple-600 dark:text-purple-300 mb-1">Gas Limit</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {parseInt(message.blockData.gasLimit).toLocaleString()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Block Hash */}
+                        {message.blockData.blockHash && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Hash</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.blockData.blockHash}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.blockData!.blockHash)}
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                              Copy Hash
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Additional Information */}
+                        {(message.blockData.miner || message.blockData.difficulty || message.blockData.size) && (
+                          <div className="grid grid-cols-1 gap-3 col-span-1 md:col-span-2">
+                            {message.blockData.miner && (
+                              <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                                <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Validator/Miner</div>
+                                <div className="text-black dark:text-white font-mono text-sm break-all">
+                                  {message.blockData.miner}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-3">
+                              {message.blockData.difficulty && (
+                                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Difficulty</div>
+                                  <div className="text-black dark:text-white font-medium">
+                                    {message.blockData.difficulty}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {message.blockData.size && (
+                                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Block Size</div>
+                                  <div className="text-black dark:text-white font-medium">
+                                    {message.blockData.size}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Explorer Link */}
+                        <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
+                          <a 
+                            href={`https://hashscan.io/testnet/block/${message.blockData.blockNumber || message.blockData.blockHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                          >
+                            View Block on Hedera Explorer ↗
                           </a>
                         </div>
                       </div>

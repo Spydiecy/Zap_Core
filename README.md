@@ -1,9 +1,9 @@
 # Astra 🚀
-## AI-Powered Blockchain Agent for CrossFi Network
+## AI-Powered Blockchain Agent for Hedera Network
 
 > Transform blockchain interactions with simple chat commands. Deploy contracts, send tokens, create NFTs - all with natural language.
 
-[![CrossFi Network](https://img.shields.io/badge/CrossFi-Network-blue)](https://crossfi.org)
+[![Hedera Network](https://img.shields.io/badge/Hedera-Network-purple)](https://hedera.com)
 [![AI Powered](https://img.shields.io/badge/AI-Gemini-green)](https://ai.google.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
 
@@ -21,7 +21,7 @@
 
 ### 💬 Smart Chat Interface
 ```
-You: "Send 100 XFI to alice"
+You: "Send 100 HBAR to alice"
 Astra: ✅ Sent! Hash: 0xabc123...
 ```
 - Natural language commands
@@ -39,7 +39,7 @@ Astra: 🚀 Token deployed! Contract: 0xdef456...
 
 ### 📅 Payment Scheduling & Automation
 ```
-You: "Schedule $1000 XFI salary to john_doe monthly"
+You: "Schedule $1000 HBAR salary to john_doe monthly"
 Astra: ✅ Recurring payment set! Next: Feb 1st
 ```
 - **Salary Automation**: Monthly/weekly employee payments
@@ -110,7 +110,7 @@ flowchart LR
 <td>
 
 **Blockchain** ⛓️
-- CrossFi Network (L2)
+- Hedera Network
 - Solidity contracts
 - Web3.py + Ethers.js
 
@@ -133,14 +133,14 @@ flowchart LR
 
 ### Example Commands
 ```
-💰 "Send 50 XFI to john_doe"
+💰 "Send 50 HBAR to john_doe"
 🪙 "Create MoonCoin token with 1M supply"
 🖼️ "Deploy CyberPunks NFT collection"
-📊 "Show me XFI price trends"
+📊 "Show me HBAR price trends"
 ⚙️ "Generate voting contract workflow"
-📅 "Schedule $2000 XFI salary to alice monthly"
-🎉 "Set birthday bonus of 100 XFI for bob on March 15th"
-⏰ "Pay rent of 500 XFI every 1st of month"
+📅 "Schedule $2000 HBAR salary to alice monthly"
+🎉 "Set birthday bonus of 100 HBAR for bob on March 15th"
+⏰ "Pay rent of 500 HBAR every 1st of month"
 ```
 
 ---
@@ -156,7 +156,7 @@ flowchart LR
 
 ## 🏆 Why Choose Astra?
 
-✅ **First AI agent on CrossFi** with single-command blockchain operations  
+✅ **First AI agent on Hedera** with single-command blockchain operations  
 ✅ **Unique credential system** for autonomous wallet access  
 ✅ **Professional UI** with light/dark mode  
 ✅ **Advanced workflows** with interactive diagrams  
@@ -172,7 +172,7 @@ flowchart LR
 
 <div align="center">
 
-**Built with ❤️ for the CrossFi Ecosystem**
+**Built with ❤️ for the Hedera Ecosystem**
 
 *Where AI Meets Blockchain Innovation* ✨
 
