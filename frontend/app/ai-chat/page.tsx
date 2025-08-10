@@ -9,6 +9,8 @@ import { uploadFileToIPFS } from "@/lib/pinata"
 import { useCredentials } from "@/contexts/CredentialsContext"
 import { AccessControlModal } from "@/components/access-control-modal"
 import { useAccount } from 'wagmi'
+import CandlestickChart from "@/components/ui/candlestick-chart"
+import TokenListCard from "@/components/ui/token-list-card"
 
 interface Message {
   id: string
@@ -31,6 +33,25 @@ interface Message {
       icon?: string
     }>
     totalUsdValue?: string
+  }
+  candlestickData?: {
+    symbol: string
+    data: Array<{
+      timestamp: number
+      open: number
+      high: number
+      low: number
+      close: number
+      volume: number
+    }>
+  }
+  tokenListData?: {
+    tokens: Array<{
+      symbol: string
+      name: string
+      address: string
+      icon?: string
+    }>
   }
   transactionData?: {
     hash: string
@@ -494,6 +515,185 @@ export default function AstraChatPage() {
       'WBTC': '/wbtc.png'
     }
     return tokenIcons[symbol] || '🪙'
+  }
+
+  const isCandlestickResponse = (text: string, userInput?: string): boolean => {
+    const lowerText = text.toLowerCase()
+    const lowerUserInput = userInput?.toLowerCase() || ''
+    
+    // Check for candlestick-related keywords in user input
+    const candlestickKeywords = [
+      'candlestick', 'candle', 'ohlc', 'price chart', 'chart', 'price data',
+      'price history', 'historical price', 'price movement'
+    ]
+    
+    const hasCandlestickKeyword = candlestickKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
+    // Check if response contains structured price data
+    const hasPriceData = (
+      lowerText.includes('open') && 
+      lowerText.includes('high') && 
+      lowerText.includes('low') && 
+      lowerText.includes('close') &&
+      lowerText.includes('volume')
+    )
+    
+    // Check for tabular data format
+    const hasTabularData = (
+      text.includes('Date') && 
+      text.includes('Open') && 
+      text.includes('High') && 
+      text.includes('Low') && 
+      text.includes('Close') &&
+      text.includes('Volume')
+    )
+    
+    return hasCandlestickKeyword && (hasPriceData || hasTabularData)
+  }
+
+  const parseCandlestickData = (text: string, userInput?: string) => {
+    try {
+      // Extract symbol from user input
+      const symbolMatch = userInput?.match(/(?:candlestick|chart|price).*?(?:of|for)\s+(\w+)/i) ||
+                          userInput?.match(/(\w+).*?(?:candlestick|chart|price)/i)
+      const symbol = symbolMatch ? symbolMatch[1].toUpperCase() : 'UNKNOWN'
+      
+      // Parse markdown table data
+      const lines = text.split('\n').filter(line => line.trim())
+      const data: Array<{
+        timestamp: number
+        open: number
+        high: number
+        low: number
+        close: number
+        volume: number
+      }> = []
+      
+      for (const line of lines) {
+        // Skip header lines, separator lines, and non-data lines
+        if (line.includes('Timestamp') || line.includes('---') || 
+            line.includes('Open') || line.includes('High') || 
+            !line.includes('|') || line.trim().startsWith('|---')) {
+          continue
+        }
+        
+        // Parse markdown table row: | Timestamp | Open | High | Low | Close | Volume | ... |
+        const parts = line.split('|').map(part => part.trim()).filter(part => part)
+        
+        if (parts.length >= 6) {
+          const timestamp = parseInt(parts[0])
+          const open = parseFloat(parts[1])
+          const high = parseFloat(parts[2])
+          const low = parseFloat(parts[3])
+          const close = parseFloat(parts[4])
+          const volume = parseFloat(parts[5]) // Volume could be in different columns
+          
+          if (!isNaN(timestamp) && !isNaN(open) && !isNaN(high) && 
+              !isNaN(low) && !isNaN(close) && !isNaN(volume)) {
+            data.push({ timestamp, open, high, low, close, volume })
+          }
+        }
+      }
+      
+      // Also try to parse the old format (space-separated values)
+      if (data.length === 0) {
+        for (const line of lines) {
+          // Skip header lines and non-data lines
+          if (line.includes('Date') || line.includes('---') || !line.match(/^\d/)) {
+            continue
+          }
+          
+          // Parse data line (expects: timestamp, open, high, low, close, volume)
+          const parts = line.trim().split(/\s+/)
+          if (parts.length >= 6) {
+            const timestamp = parseInt(parts[0])
+            const open = parseFloat(parts[1])
+            const high = parseFloat(parts[2])
+            const low = parseFloat(parts[3])
+            const close = parseFloat(parts[4])
+            const volume = parseFloat(parts[5])
+            
+            if (!isNaN(timestamp) && !isNaN(open) && !isNaN(high) && 
+                !isNaN(low) && !isNaN(close) && !isNaN(volume)) {
+              data.push({ timestamp, open, high, low, close, volume })
+            }
+          }
+        }
+      }
+      
+      console.log('Parsed candlestick data:', { symbol, dataLength: data.length, sampleData: data.slice(0, 3) })
+      
+      return data.length > 0 ? { symbol, data } : null
+    } catch (error) {
+      console.error('Error parsing candlestick data:', error)
+      return null
+    }
+  }
+
+  const isTokenListResponse = (text: string, userInput?: string): boolean => {
+    const lowerText = text.toLowerCase()
+    const lowerUserInput = userInput?.toLowerCase() || ''
+    
+    // Check for token list keywords in user input
+    const tokenListKeywords = [
+      'list tokens', 'all tokens', 'supported tokens', 'available tokens',
+      'token list', 'tokens on', 'what tokens', 'which tokens'
+    ]
+    
+    const hasTokenListKeyword = tokenListKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
+    // Check if response contains token information with addresses
+    const hasTokenData = (
+      lowerText.includes('token') && 
+      lowerText.includes('0x') &&
+      (lowerText.includes('usdt') || lowerText.includes('usdc') || lowerText.includes('okb'))
+    )
+    
+    // Check for supported tokens format
+    const hasSupportedTokensFormat = lowerText.includes('supported tokens')
+    
+    return hasTokenListKeyword && (hasTokenData || hasSupportedTokensFormat)
+  }
+
+  const parseTokenListData = (text: string, userInput?: string) => {
+    try {
+      const tokens: Array<{
+        symbol: string
+        name: string
+        address: string
+        icon?: string
+      }> = []
+      
+      // Parse markdown list format
+      const lines = text.split('\n').filter(line => line.trim())
+      
+      for (const line of lines) {
+        // Look for lines with token info: "* **Token Name (SYMBOL)** - 0x..."
+        const tokenMatch = line.match(/\*\s*\*\*([^(]+)\(([^)]+)\)\*\*\s*-\s*(0x[a-fA-F0-9]{40}|0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)/i)
+        
+        if (tokenMatch) {
+          const name = tokenMatch[1].trim()
+          const symbol = tokenMatch[2].trim()
+          const address = tokenMatch[3].trim()
+          
+          tokens.push({
+            symbol,
+            name,
+            address,
+            icon: getTokenIcon(symbol)
+          })
+        }
+      }
+      
+      return tokens.length > 0 ? { tokens } : null
+    } catch (error) {
+      console.error('Error parsing token list data:', error)
+      return null
+    }
   }
 
   const isTransactionResponse = (text: string, userInput?: string): boolean => {
@@ -1031,6 +1231,20 @@ export default function AstraChatPage() {
       const transactionData = isTransaction ? parseTransactionData(content) : null
       console.log('Parsed transaction data:', transactionData)
 
+      // Check if this is a candlestick response and parse the data
+      const isCandlestick = isCandlestickResponse(content, currentInput)
+      console.log('Is candlestick response:', isCandlestick)
+      
+      const candlestickData = isCandlestick ? parseCandlestickData(content, currentInput) : null
+      console.log('Parsed candlestick data:', candlestickData)
+
+      // Check if this is a token list response and parse the data
+      const isTokenList = isTokenListResponse(content, currentInput)
+      console.log('Is token list response:', isTokenList)
+      
+      const tokenListData = isTokenList ? parseTokenListData(content, currentInput) : null
+      console.log('Parsed token list data:', tokenListData)
+
       setMessages((prev) => {
         const filtered = prev.filter((msg) => !msg.isLoading)
         
@@ -1042,6 +1256,7 @@ export default function AstraChatPage() {
           generatedImage: generatedImage,
           balanceData: balanceData || undefined,
           transactionData: transactionData || undefined,
+          candlestickData: candlestickData || undefined,
           blockData: blockData || undefined,
         }
         return [...filtered, assistantMessage]
@@ -1154,7 +1369,7 @@ export default function AstraChatPage() {
                   ) : (
                     <>
                       {/* Only show the AI response text if no cards are being displayed */}
-                      {!message.balanceData && !message.transactionData && !message.blockData && (
+                      {!message.balanceData && !message.transactionData && !message.blockData && !message.candlestickData && (
                         <div className={cn(
                           "whitespace-pre-wrap",
                           message.role === "user" 
@@ -1553,6 +1768,17 @@ export default function AstraChatPage() {
                           </a>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Show candlestick data for assistant messages */}
+                  {message.role === "assistant" && message.candlestickData && (
+                    <div className="mt-4">
+                      <CandlestickChart
+                        data={message.candlestickData.data}
+                        symbol={message.candlestickData.symbol}
+                        className="w-full"
+                      />
                     </div>
                   )}
                 </div>
