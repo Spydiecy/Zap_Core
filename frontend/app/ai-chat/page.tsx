@@ -1257,6 +1257,7 @@ export default function AstraChatPage() {
           balanceData: balanceData || undefined,
           transactionData: transactionData || undefined,
           candlestickData: candlestickData || undefined,
+          tokenListData: tokenListData || undefined,
           blockData: blockData || undefined,
         }
         return [...filtered, assistantMessage]
@@ -1369,7 +1370,7 @@ export default function AstraChatPage() {
                   ) : (
                     <>
                       {/* Only show the AI response text if no cards are being displayed */}
-                      {!message.balanceData && !message.transactionData && !message.blockData && !message.candlestickData && (
+                      {!message.balanceData && !message.transactionData && !message.blockData && !message.candlestickData && !message.tokenListData && (
                         <div className={cn(
                           "whitespace-pre-wrap",
                           message.role === "user" 
@@ -1779,6 +1780,13 @@ export default function AstraChatPage() {
                         symbol={message.candlestickData.symbol}
                         className="w-full"
                       />
+                    </div>
+                  )}
+
+                  {/* Show token list for assistant messages */}
+                  {message.role === "assistant" && message.tokenListData && (
+                    <div className="mt-4">
+                      <TokenListCard tokens={message.tokenListData.tokens} />
                     </div>
                   )}
                 </div>
