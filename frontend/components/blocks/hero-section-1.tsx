@@ -83,7 +83,7 @@ export function HeroSection() {
                                     <Link
                                         href="#link"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                                        <span className="text-foreground text-sm">Introducing X Layer Network Support</span>
+                                        <span className="text-foreground text-sm">🚀 ASTRA now supports X Layer Network with OKB</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                                         <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -100,11 +100,11 @@ export function HeroSection() {
                         
                                     <h1
                                         className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                                        Your AI Agent for X Layer Network
+                                        <span className="text-blue-400">ASTRA</span> AI Agent for X Layer Network
                                     </h1>
                                     <p
                                         className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                        Deploy contracts, create tokens, schedule payments, and interact with X Layer blockchain using simple chat commands. Powered by Google Gemini AI.
+                                        ASTRA transforms blockchain interactions through intelligent conversation. Deploy contracts, create tokens, schedule payments, and manage your digital assets on X Layer Network using natural language commands powered by Google Gemini AI.
                                     </p>
                                 </AnimatedGroup>
 
@@ -189,9 +189,9 @@ export function HeroSection() {
                 <section id="features" className="bg-background pb-16 pt-32">
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="mb-16 text-center">
-                            <h2 className="mb-4 text-4xl font-bold md:text-5xl">Core Features</h2>
+                            <h2 className="mb-4 text-4xl font-bold md:text-5xl">ASTRA Core Features</h2>
                             <p className="mx-auto max-w-2xl text-muted-foreground">
-                                Powerful AI capabilities that revolutionize blockchain interactions
+                                Powerful AI capabilities that revolutionize your X Layer Network experience
                             </p>
                         </div>
                         
@@ -283,9 +283,9 @@ export function HeroSection() {
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="grid items-center gap-12 lg:grid-cols-2">
                             <div>
-                                <h2 className="mb-4 text-4xl font-bold md:text-5xl">Powered by Advanced AI</h2>
+                                <h2 className="mb-4 text-4xl font-bold md:text-5xl">ASTRA Technology Stack</h2>
                                 <p className="mb-6 text-muted-foreground">
-                                    Astra X Layer employs cutting-edge technology designed for performance, security, and seamless blockchain interactions on X Layer Network.
+                                    ASTRA leverages cutting-edge AI and blockchain technology designed for performance, security, and seamless X Layer Network interactions with intuitive conversational interfaces.
                                 </p>
                                 
                                 <ul className="space-y-4">

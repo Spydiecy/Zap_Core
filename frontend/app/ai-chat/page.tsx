@@ -77,11 +77,17 @@ export default function AstraChatPage() {
   const [userId, setUserId] = useState<string>("")
   const [appName, setAppName] = useState<string>("")
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([])
-  const [hasAccess, setHasAccess] = useState(false)
   const [showAccessModal, setShowAccessModal] = useState(true)
 
-  // Get credentials from context
-  const { publicKey, privateKey, hasCredentials, isConfirmed } = useCredentials()
+  // Get credentials from context (includes subscription access check)
+  const { 
+    publicKey, 
+    privateKey, 
+    hasCredentials, 
+    isConfirmed, 
+    hasAccess, 
+    isCheckingAccess 
+  } = useCredentials()
   
   // Wallet connection
   const { address, isConnected } = useAccount()
@@ -725,15 +731,13 @@ export default function AstraChatPage() {
   }
 
   useEffect(() => {
-    // Check access when wallet connects
-    if (isConnected && address) {
-      setHasAccess(true)
+    // Check access based on subscription status
+    if (isConnected && address && hasAccess) {
       setShowAccessModal(false)
     } else {
-      setHasAccess(false)
       setShowAccessModal(true)
     }
-  }, [isConnected, address])
+  }, [isConnected, address, hasAccess])
 
   useEffect(() => {
     const storedSessionId = localStorage.getItem("sessionId")
@@ -1061,7 +1065,6 @@ export default function AstraChatPage() {
   }
 
   const handleAccessGranted = () => {
-    setHasAccess(true)
     setShowAccessModal(false)
     
     // Initialize session if not already done

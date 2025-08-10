@@ -1,57 +1,150 @@
-// Access Control Configuration for X Layer Testnet
+// Access Control Contract Configuration
 export const ACCESS_CONTROL_CONFIG = {
-  // New access control contract address
-  contractAddress: "0x44CEb2bEc4a921E383f269000A50560317C0Ef5B",
-  
-  // Access fee in wei (0.01 OKB = 0.01 ETH = 10000000000000000 wei)
-  accessFee: "10000000000000000", // 0.01 OKB
-  
-  // X Layer Testnet configuration
-  chainId: 195,
-  chainName: "X Layer Testnet",
-  nativeCurrency: {
-    name: "OKB",
-    symbol: "OKB",
-    decimals: 18,
-  },
-  rpcUrl: "https://xlayertestrpc.okx.com",
-  explorerUrl: "https://www.oklink.com/xlayer-test",
+  contractAddress: '0x44CEb2bEc4a921E383f269000A50560317C0Ef5B',
+  subscriptionFee: '10000000000000000', // 0.01 OKB in wei (0.01 * 10^18)
+  chainId: 195, // X Layer Testnet
+  gasLimit: BigInt(100000), // Set reasonable gas limit
 }
 
-// Access Control ABI (basic functions for checking access and paying fees)
+// Simplified ABI for the access control contractalr
 export const ACCESS_CONTROL_ABI = [
-  {
-    "inputs": [],
-    "name": "payAccessFee",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
-    "name": "hasAccess",
-    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "accessFee",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
+	{
+		"inputs": [],
+		"name": "pay",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "hasPaid",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "paid",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
 ] as const
 
-// Helper function to format OKB amounts
-export function formatOKB(wei: string | bigint): string {
-  const value = typeof wei === 'string' ? BigInt(wei) : wei
-  return (Number(value) / 1e18).toFixed(6).replace(/\.?0+$/, '')
+export interface SubscriptionStatus {
+  hasAccess: boolean
+  isLoading: boolean
 }
 
-// Helper function to check if user has access
-export async function checkUserAccess(userAddress: string): Promise<boolean> {
-  // This would typically make a contract call
-  // For now, return true if wallet is connected
-  return !!userAddress
+/**
+ * Check if a user has active subscription
+ * @param address User's wallet address
+ * @param readContract Function to read from contract
+ * @returns SubscriptionStatus
+ */
+export async function checkSubscriptionStatus(
+  address: `0x${string}`,
+  readContract: (config: any) => Promise<any>
+): Promise<SubscriptionStatus> {
+  try {
+    const hasAccess = await readContract({
+      address: ACCESS_CONTROL_CONFIG.contractAddress as `0x${string}`,
+      abi: ACCESS_CONTROL_ABI,
+      functionName: 'hasPaid',
+      args: [address],
+    })
+
+    return {
+      hasAccess: Boolean(hasAccess),
+      isLoading: false
+    }
+  } catch (error) {
+    console.error('Error checking subscription status:', error)
+    return {
+      hasAccess: false,
+      isLoading: false
+    }
+  }
+}
+
+/**
+ * Subscribe to the platform
+ * @param writeContract Function to write to contract
+ * @returns Transaction hash
+ */
+export async function subscribeToAccess(
+  writeContract: (config: any) => Promise<any>
+): Promise<string> {
+  try {
+    const txHash = await writeContract({
+      address: ACCESS_CONTROL_CONFIG.contractAddress as `0x${string}`,
+      abi: ACCESS_CONTROL_ABI,
+      functionName: 'pay',
+      value: BigInt(ACCESS_CONTROL_CONFIG.subscriptionFee),
+      gas: ACCESS_CONTROL_CONFIG.gasLimit,
+    })
+
+    return txHash
+  } catch (error) {
+    console.error('Error subscribing:', error)
+    throw error
+  }
+}
+
+/**
+ * Format OKB amount for display
+ */
+export function formatOKB(wei: string | bigint): string {
+  const value = typeof wei === 'string' ? BigInt(wei) : wei
+  const okb = Number(value) / 10**18
+  return okb.toFixed(4)
 }

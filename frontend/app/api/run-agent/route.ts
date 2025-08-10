@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         // Add any required headers like API keys
       },
       body: JSON.stringify({
-        "appName":"xLayer_agent", // hardcoded 
+        "appName":"xLayer_agent", // Updated to xlayer_agent
         userId,
         sessionId,
         newMessage,
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Agent run error:", error)
     return NextResponse.json(
-      { error: "Internal server error while running agent" },
+      { error: "Internal server error" },
       { status: 500 }
     )
   }

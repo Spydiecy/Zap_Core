@@ -5,9 +5,14 @@ import { useTheme } from 'next-themes'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount } from 'wagmi'
-import { Wallet, Shield, CheckCircle } from 'lucide-react'
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { Wallet, Shield, CheckCircle, Clock, CreditCard, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { 
+  ACCESS_CONTROL_CONFIG,
+  ACCESS_CONTROL_ABI,
+  type SubscriptionStatus 
+} from '@/lib/accessControl'
 
 interface AccessControlModalProps {
   isOpen: boolean
@@ -18,25 +23,87 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
   const { theme } = useTheme()
   const { address, isConnected } = useAccount()
   const [mounted, setMounted] = useState(false)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
+  const [isSubscribing, setIsSubscribing] = useState(false)
 
   const isDark = theme === 'dark'
+
+  // Contract read hook
+  const { data: hasAccess, refetch: refetchAccess, isLoading: isLoadingAccess } = useReadContract({
+    address: ACCESS_CONTROL_CONFIG.contractAddress as `0x${string}`,
+    abi: ACCESS_CONTROL_ABI,
+    functionName: 'hasPaid',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    }
+  })
+
+  // Contract write hook
+  const { writeContract, data: txHash, isPending: isWritePending } = useWriteContract()
+
+  // Transaction receipt hook
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash: txHash,
+  })
+
+  // Update subscription status when contract data changes
+  useEffect(() => {
+    if (address && hasAccess !== undefined) {
+      const status: SubscriptionStatus = {
+        hasAccess: Boolean(hasAccess),
+        isLoading: isLoadingAccess
+      }
+      
+      setSubscriptionStatus(status)
+      
+      // Grant access if user has valid subscription
+      if (status.hasAccess) {
+        onAccessGranted()
+      }
+    }
+  }, [hasAccess, isLoadingAccess, address, onAccessGranted])
+
+  // Handle successful subscription
+  useEffect(() => {
+    if (isSuccess) {
+      setIsSubscribing(false)
+      // Refetch access status after successful transaction
+      setTimeout(() => {
+        refetchAccess()
+      }, 2000) // Wait 2 seconds for blockchain confirmation
+    }
+  }, [isSuccess, refetchAccess])
+
+  const handleSubscribe = async () => {
+    if (!address) return
+    
+    setIsSubscribing(true)
+    try {
+      await writeContract({
+        address: ACCESS_CONTROL_CONFIG.contractAddress as `0x${string}`,
+        abi: ACCESS_CONTROL_ABI,
+        functionName: 'pay',
+        value: BigInt(ACCESS_CONTROL_CONFIG.subscriptionFee),
+        gas: ACCESS_CONTROL_CONFIG.gasLimit,
+      })
+    } catch (error) {
+      console.error('Subscription failed:', error)
+      setIsSubscribing(false)
+    }
+  }
 
   // Ensure component is mounted before rendering to avoid hydration issues
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Check access when wallet connects
-  useEffect(() => {
-    if (isConnected && address) {
-      onAccessGranted()
-    }
-  }, [isConnected, address, onAccessGranted])
-
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
     return null
   }
+
+  const isProcessing = isSubscribing || isWritePending || isConfirming
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
@@ -61,13 +128,13 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
               ? "bg-gray-900/50 border-gray-700" 
               : "bg-gray-100/50 border-gray-300"
           )}>
-            <h3 className="text-lg font-medium mb-2">Wallet Connection Required</h3>
+            <h3 className="text-lg font-medium mb-2">Subscription Required</h3>
             <p className={cn("text-sm mb-4", isDark ? "text-gray-400" : "text-gray-600")}>
-              Connect your wallet to access Astra AI Assistant on X Layer Testnet.
+              Subscribe to access Astra AI Assistant on X Layer Testnet.
             </p>
             <div className="flex items-center space-x-2 text-sm">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Access fee: 0.01 OKB</span>
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>0.01 OKB monthly subscription</span>
             </div>
             <div className="flex items-center space-x-2 text-sm mt-1">
               <div className={cn("w-2 h-2 rounded-full", isDark ? "bg-gray-400" : "bg-gray-600")}></div>
@@ -104,16 +171,110 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
                 </span>
               </div>
 
-              {/* Access Granted */}
-              <div className={cn(
-                "flex items-center justify-center space-x-2 p-3 rounded-lg border",
-                isDark 
-                  ? "bg-green-900/20 border-green-700" 
-                  : "bg-green-100/50 border-green-300"
-              )}>
-                <CheckCircle className="w-5 h-5 text-green-400" />
-                <span className="text-green-400">Access granted! Redirecting...</span>
-              </div>
+              {/* Subscription Status */}
+              {isConnected && isLoadingAccess && !subscriptionStatus && (
+                <div className={cn(
+                  "flex items-center justify-center p-4 rounded-lg border",
+                  isDark 
+                    ? "bg-gray-900/50 border-gray-700" 
+                    : "bg-gray-100/50 border-gray-300"
+                )}>
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  <span>Checking subscription status...</span>
+                </div>
+              )}
+              
+              {subscriptionStatus && (
+                <div className={cn(
+                  "p-4 rounded-lg border",
+                  isDark 
+                    ? "bg-gray-900/50 border-gray-700" 
+                    : "bg-gray-100/50 border-gray-300"
+                )}>
+                  {subscriptionStatus.hasAccess ? (
+                    // Active Subscription
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="w-5 h-5 text-green-400" />
+                        <span className="font-medium text-green-400">Active Subscription</span>
+                      </div>
+                      <p className={cn("text-sm", isDark ? "text-gray-400" : "text-gray-600")}>
+                        You have access to Astra AI Assistant
+                      </p>
+                    </div>
+                  ) : (
+                    // No Active Subscription
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-5 h-5 text-orange-400" />
+                        <span className="font-medium">No Active Subscription</span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className={cn(isDark ? "text-gray-400" : "text-gray-600")}>Monthly Fee:</span>
+                          <span className="font-mono">0.01 OKB</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className={cn(isDark ? "text-gray-400" : "text-gray-600")}>Duration:</span>
+                          <span>30 days</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleSubscribe}
+                        disabled={isProcessing}
+                        className={cn(
+                          "w-full flex items-center justify-center space-x-2",
+                          "bg-blue-600 hover:bg-blue-700 text-white"
+                        )}
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>
+                              {isWritePending || isSubscribing ? 'Subscribing...' : 
+                               isConfirming ? 'Confirming...' : 'Processing...'}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="w-4 h-4" />
+                            <span>Subscribe for 0.01 OKB</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Transaction Status */}
+              {txHash && (
+                <div className={cn(
+                  "p-3 rounded-lg border text-sm",
+                  isDark 
+                    ? "bg-blue-900/20 border-blue-700 text-blue-300" 
+                    : "bg-blue-100/50 border-blue-300 text-blue-700"
+                )}>
+                  <div className="flex items-center space-x-2">
+                    {isConfirming ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isSuccess ? (
+                      <CheckCircle className="w-4 h-4" />
+                    ) : (
+                      <Clock className="w-4 h-4" />
+                    )}
+                    <span>
+                      {isConfirming ? 'Confirming transaction...' : 
+                       isSuccess ? 'Subscription activated!' : 'Transaction submitted'}
+                    </span>
+                  </div>
+                  <div className="mt-1 font-mono text-xs opacity-75">
+                    {txHash.slice(0, 10)}...{txHash.slice(-8)}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

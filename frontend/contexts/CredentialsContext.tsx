@@ -1,6 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useAccount, useReadContract } from 'wagmi'
+import { ACCESS_CONTROL_CONFIG, ACCESS_CONTROL_ABI } from '@/lib/accessControl'
 
 interface CredentialsContextType {
   publicKey: string
@@ -10,6 +12,8 @@ interface CredentialsContextType {
   hasCredentials: boolean
   isConfirmed: boolean
   confirmCredentials: () => void
+  hasAccess: boolean
+  isCheckingAccess: boolean
 }
 
 const CredentialsContext = createContext<CredentialsContextType | undefined>(undefined)
@@ -18,6 +22,26 @@ export function CredentialsProvider({ children }: { children: ReactNode }) {
   const [publicKey, setPublicKeyState] = useState<string>("")
   const [privateKey, setPrivateKeyState] = useState<string>("")
   const [isConfirmed, setIsConfirmed] = useState<boolean>(false)
+  
+  const { address, isConnected } = useAccount()
+
+  // Check access control subscription
+  const { 
+    data: contractHasAccess, 
+    isLoading: isCheckingAccess, 
+    refetch: refetchAccess 
+  } = useReadContract({
+    address: ACCESS_CONTROL_CONFIG.contractAddress as `0x${string}`,
+    abi: ACCESS_CONTROL_ABI,
+    functionName: 'hasPaid',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && isConnected,
+      refetchInterval: 30000, // Refetch every 30 seconds
+    }
+  })
+
+  const hasAccess = Boolean(contractHasAccess)
 
   // Load credentials from localStorage on mount
   useEffect(() => {
@@ -29,6 +53,13 @@ export function CredentialsProvider({ children }: { children: ReactNode }) {
     if (storedPrivateKey) setPrivateKeyState(storedPrivateKey)
     if (storedConfirmed === "true") setIsConfirmed(true)
   }, [])
+
+  // Refetch access when wallet connects/disconnects
+  useEffect(() => {
+    if (address) {
+      refetchAccess()
+    }
+  }, [address, refetchAccess])
 
   // Save to localStorage whenever keys change
   const setPublicKey = (key: string) => {
@@ -65,7 +96,9 @@ export function CredentialsProvider({ children }: { children: ReactNode }) {
         setPrivateKey,
         hasCredentials,
         isConfirmed,
-        confirmCredentials
+        confirmCredentials,
+        hasAccess,
+        isCheckingAccess
       }}
     >
       {children}
