@@ -90,7 +90,7 @@ interface FileUpload {
   data: string
 }
 
-export default function AstraChatPage() {
+export default function ZapChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -959,7 +959,7 @@ export default function AstraChatPage() {
       const { sessionId: newSessionId, userId: newUserId } = event.detail
       setSessionId(newSessionId)
       setUserId(newUserId)
-      setAppName(localStorage.getItem("appName") || "astra-assistant")
+      setAppName(localStorage.getItem("appName") || "zap-assistant")
       setMessages([]) // Clear existing messages
       initializeChat()
     }
@@ -984,7 +984,7 @@ export default function AstraChatPage() {
       {
         id: "1",
         role: "assistant",
-        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on X Layer, and even generate images or diagrams. What would you like to explore today?",
+        content: "Hello! I'm your ZAP AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on X Layer, and even generate images or diagrams. What would you like to explore today?",
         timestamp: Date.now(),
       },
     ])
@@ -1313,7 +1313,7 @@ export default function AstraChatPage() {
         />
         <div className="h-full bg-white dark:bg-black text-black dark:text-white flex items-center justify-center transition-colors duration-300">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
+            <h1 className="text-2xl font-semibold mb-4">ZAP AI Assistant</h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">Connect your wallet to continue</p>
           </div>
         </div>
@@ -1325,7 +1325,7 @@ export default function AstraChatPage() {
     return (
       <div className="h-full bg-white dark:bg-black text-black dark:text-white flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-4">Astra AI Assistant</h1>
+          <h1 className="text-2xl font-semibold mb-4">ZAP AI Assistant</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">Please create a session using the "New Session" button in the header</p>
         </div>
       </div>
@@ -1826,7 +1826,7 @@ export default function AstraChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Message Astra..."
+              placeholder="Message ZAP..."
               className="w-full bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-500 pr-20 py-4 text-base rounded-lg focus:border-gray-500 dark:focus:border-gray-600 focus:ring-0"
               disabled={isLoading}
             />

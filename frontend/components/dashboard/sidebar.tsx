@@ -69,7 +69,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           isDark ? "border-gray-800" : "border-gray-300"
         )}>
           <div className={cn("flex items-center", !open && "hidden")}>
-            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA</span>
+            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>Zap</span>
             <span className={cn(
               "text-xs ml-2 px-2 py-1 rounded",
               isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"
@@ -121,7 +121,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         {/* Docs Button - Moved here, right below New Chat */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
           <a 
-            href="https://github.com/Spydiecy/Okx/blob/main/README.md"
+            href="https://github.com/Spydiecy/Zap_Okx/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

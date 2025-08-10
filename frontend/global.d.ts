@@ -1,2 +1,1 @@
-// Import the Solana TypeScript declarations
-/// <reference path="../types/solana.d.ts" />
+// Global type declarations for X Layer blockchain interactions

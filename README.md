@@ -1,4 +1,4 @@
-# Astra 🚀
+# ZAP 🚀
 ## AI-Powered Blockchain Agent for X Layer Network
 
 > Transform blockchain interactions with simple chat commands. Deploy contracts, send tokens, create NFTs, execute swaps - all with natural language.
@@ -9,7 +9,7 @@
 
 ---
 
-## ✨ What Makes Astra Special?
+## ✨ What Makes ZAP Special?
 
 | 🤖 **AI-First** | 💰 **One Command** | 🔐 **Secure** |
 |:---:|:---:|:---:|
@@ -22,7 +22,7 @@
 ### 💬 Smart Chat Interface
 ```
 You: "Send 100 OKB to alice"
-Astra: ✅ Sent! Hash: 0xabc123...
+ZAP: ✅ Sent! Hash: 0xabc123...
 ```
 - Natural language commands
 - Voice & text input
@@ -31,7 +31,7 @@ Astra: ✅ Sent! Hash: 0xabc123...
 ### ⚡ One-Command Operations
 ```
 You: "Create XLayer token, 1B supply"
-Astra: 🚀 Token deployed! Contract: 0xdef456...
+ZAP: 🚀 Token deployed! Contract: 0xdef456...
 ```
 - Deploy smart contracts instantly
 - Create tokens & NFT collections
@@ -40,7 +40,7 @@ Astra: 🚀 Token deployed! Contract: 0xdef456...
 ### � OKX DEX Integration & Trading
 ```
 You: "Swap 1000 USDT to OKB"
-Astra: 🔄 Swap executed! Rate: 22.5 OKB received
+ZAP: 🔄 Swap executed! Rate: 22.5 OKB received
 ```
 - **OKX DEX API**: Access to liquidity pools and best rates
 - **Multi-Token Support**: OKB, USDT, USDC, DAI, ETH, WBTC, EURC
@@ -51,7 +51,7 @@ Astra: 🔄 Swap executed! Rate: 22.5 OKB received
 ### 📊 Blockchain Explorer & Analytics
 ```
 You: "Show latest X Layer blocks"
-Astra: 📦 Block #482,391 - 15 transactions, 0.002 OKB fees
+ZAP: 📦 Block #482,391 - 15 transactions, 0.002 OKB fees
 ```
 - **Block Information**: Latest blocks, transactions, gas usage
 - **Transaction Tracking**: Detailed tx history and status
@@ -165,7 +165,7 @@ flowchart LR
 
 ---
 
-## 🏆 Why Choose Astra?
+## 🏆 Why Choose ZAP?
 
 ✅ **First AI agent on X Layer** with single-command blockchain operations  
 ✅ **OKX DEX integration** for seamless trading and swaps  

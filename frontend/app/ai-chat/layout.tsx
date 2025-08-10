@@ -41,7 +41,7 @@ export default function AiChatLayout({
   const handleSessionCreated = (newSessionId: string, newUserId: string) => {
     setSessionId(newSessionId)
     setUserId(newUserId)
-    setAppName(localStorage.getItem("appName") || "astra-assistant")
+    setAppName(localStorage.getItem("appName") || "zap-assistant")
     
     // Trigger a custom event to notify the AI chat page to reset
     window.dispatchEvent(new CustomEvent('newSessionCreated', {
@@ -67,7 +67,7 @@ export default function AiChatLayout({
         {/* Top Header */}
         <header className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white/90 dark:bg-black/90 backdrop-blur-sm transition-colors duration-300">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold">Astra</h1>
+            <h1 className="text-xl font-bold">Zap</h1>
             <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-1 rounded border border-gray-200 dark:border-gray-700 transition-colors duration-300">
               Testnet
             </span>

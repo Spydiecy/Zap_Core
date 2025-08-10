@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/ui/theme-provider"
 import { RainbowKitProvider, getDefaultWallets, connectorsForWallets } from '@rainbow-me/rainbowkit'
 import { WagmiProvider, createConfig, http } from 'wagmi'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains'
 import { 
   metaMaskWallet,
   injectedWallet,
@@ -18,7 +17,7 @@ import {
 } from '@rainbow-me/rainbowkit/wallets'
 import '@rainbow-me/rainbowkit/styles.css'
 
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'astra-default-project-id'
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'zap-default-project-id'
 
 // X Layer Testnet configuration
 const xLayerTestnet = {
@@ -65,7 +64,7 @@ const connectors = connectorsForWallets(
     },
   ],
   {
-    appName: 'Astra AI Assistant',
+    appName: 'ZAP AI Assistant',
     projectId,
   }
 )

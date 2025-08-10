@@ -130,7 +130,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
           )}>
             <h3 className="text-lg font-medium mb-2">Subscription Required</h3>
             <p className={cn("text-sm mb-4", isDark ? "text-gray-400" : "text-gray-600")}>
-              Subscribe to access Astra AI Assistant on X Layer Testnet.
+                            Subscribe to access ZAP AI Assistant on X Layer Testnet.
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
@@ -199,7 +199,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
                         <span className="font-medium text-green-400">Active Subscription</span>
                       </div>
                       <p className={cn("text-sm", isDark ? "text-gray-400" : "text-gray-600")}>
-                        You have access to Astra AI Assistant
+                                                You have access to ZAP AI Assistant
                       </p>
                     </div>
                   ) : (

@@ -74,7 +74,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
               alt="X Layer" 
               className="w-6 h-6 object-contain" 
             />
-            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA X LAYER</span>
+            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ZAP X LAYER</span>
             <span className={cn(
               "text-xs ml-2 px-2 py-1 rounded",
               isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"
@@ -123,10 +123,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           </button>
         </div>
         
-        {/* Docs Button - Updated for CrossFi */}
+        {/* Docs Button - Updated for X Layer */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
           <a 
-            href="https://github.com/Spydiecy/Astra_CrossFi/blob/main/README.md"
+            href="https://github.com/Spydiecy/Zap_Okx/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

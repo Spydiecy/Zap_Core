@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Astra - AI-powered DeFi Trading on Solana",
-  description: "Astra is an intelligent trading assistant that harnesses the power of artificial intelligence and Solana's high-performance blockchain to transform your DeFi experience.",
+  title: "Zap - AI-powered DeFi Trading on XLayer",
+  description: "ZAP is an intelligent blockchain assistant that harnesses the power of artificial intelligence and X Layer's high-performance blockchain to transform your DeFi experience.",
 };
 
 export default function RootLayout({

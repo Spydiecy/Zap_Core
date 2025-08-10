@@ -1,4 +1,4 @@
-// Chat storage utilities for localStorage
+// Chat storage utilities for loconst CHAT_HISTORY_KEY = 'zap_chat_history'alStorage
 
 export interface ChatSession {
   id: string
@@ -28,9 +28,9 @@ export interface ChatHistory {
   messageCount: number
 }
 
-const STORAGE_KEY = 'astra_recent_chats'
-const MESSAGES_STORAGE_KEY = 'astra_chat_messages'
-const CHAT_HISTORY_KEY = 'astra_chat_history'
+const STORAGE_KEY = 'zap_recent_chats'
+const MESSAGES_STORAGE_KEY = 'zap_chat_messages'
+const CHAT_HISTORY_KEY = 'Zap_chat_history'
 const MAX_RECENT_CHATS = 10
 const MAX_TITLE_LENGTH = 50
 const MAX_MESSAGES_PER_CHAT = 20 // Store last 20 messages per chat to keep it light
