@@ -1,7 +1,10 @@
-import { HeroSection } from "@/components/blocks/hero-section-1"
+import { HeroSection, HomeSections } from "@/components/blocks/hero-section-1"
 
 export default function Home() {
   return (
-    <HeroSection />
+    <div>
+      <HeroSection />
+      <HomeSections />
+    </div>
   );
 }

@@ -63,15 +63,15 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
           )}>
             <h3 className="text-lg font-medium mb-2">Wallet Connection Required</h3>
             <p className={cn("text-sm mb-4", isDark ? "text-gray-400" : "text-gray-600")}>
-              Connect your wallet to access Astra AI Assistant on Hedera Testnet.
+              Connect your wallet to access Astra AI Assistant on X Layer Testnet.
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Free access</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Access fee: 0.01 OKB</span>
             </div>
             <div className="flex items-center space-x-2 text-sm mt-1">
               <div className={cn("w-2 h-2 rounded-full", isDark ? "bg-gray-400" : "bg-gray-600")}></div>
-              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Hedera Testnet</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>X Layer Testnet</span>
             </div>
           </div>
 
@@ -124,7 +124,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
               ? "text-gray-500 bg-gray-900/30 border-gray-800" 
               : "text-gray-600 bg-gray-100/30 border-gray-300"
           )}>
-            <p>Make sure you're connected to Hedera Testnet</p>
+            <p>Make sure you're connected to X Layer Testnet</p>
           </div>
         </div>
       </DialogContent>

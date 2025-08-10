@@ -258,9 +258,10 @@ export default function AstraChatPage() {
       'current balance',
       'account balance',
       'balance:',
-      'hbar balance',
-      'hedera balance',
-      'hedera token balance',
+      'okb balance',
+      'x layer balance',
+      'xlayer balance',
+      'x layer token balance',
       'show balance',
       'check balance',
       'my balance'
@@ -303,14 +304,14 @@ export default function AstraChatPage() {
       /([\d.,]+)\s+(\w+)/gi,
       // Pattern: "balance: 0.619957302943058765"
       /balance:\s*([\d.,]+)/gi,
-      // Pattern: "HBAR balance is 0.1" or "Hedera balance is 0.1"
-      /(?:hbar|hedera)\s+balance\s+is\s*([\d.,]+)/gi,
-      // Pattern: "Your HBAR balance: 0.1"
-      /(?:your\s+)?(?:hbar|hedera)\s+balance:\s*([\d.,]+)/gi
+      // Pattern: "OKB balance is 0.1" or "X Layer balance is 0.1"
+      /(?:okb|x\s?layer)\s+balance\s+is\s*([\d.,]+)/gi,
+      // Pattern: "Your OKB balance: 0.1"
+      /(?:your\s+)?(?:okb|x\s?layer)\s+balance:\s*([\d.,]+)/gi
     ]
     
     // Common token symbols to look for
-    const tokenSymbols = ['HBAR', 'USDT', 'AGENT', 'BTC', 'WETH', 'MATIC', 'ATOM', 'OSMO']
+    const tokenSymbols = ['OKB', 'USDT', 'DAI', 'ETH', 'EURC', 'USDC', 'WBTC']
     
     let foundTokens = new Set() // To avoid duplicates
     
@@ -347,33 +348,33 @@ export default function AstraChatPage() {
             const lowerText = text.toLowerCase()
             const userInputLower = userInput?.toLowerCase() || ''
             
-            // Check for Hedera-related keywords first (from user input or AI response)
-            if (lowerText.includes('hedera') || lowerText.includes('hbar') || 
-                lowerText.includes('hedera token') || lowerText.includes('hedera balance') ||
-                lowerText.includes('show hbar') || lowerText.includes('tell my balance') ||
-                lowerText.includes('my hedera') || lowerText.includes('my hbar') ||
-                userInputLower.includes('hedera') || userInputLower.includes('hbar') ||
-                userInputLower.includes('hedera token') || userInputLower.includes('hedera balance')) {
-              tokenSymbol = 'HBAR'
+            // Check for X Layer-related keywords first (from user input or AI response)
+            if (lowerText.includes('xlayer') || lowerText.includes('okb') || 
+                lowerText.includes('x layer token') || lowerText.includes('okb balance') ||
+                lowerText.includes('show okb') || lowerText.includes('tell my balance') ||
+                lowerText.includes('my xlayer') || lowerText.includes('my okb') ||
+                userInputLower.includes('xlayer') || userInputLower.includes('okb') ||
+                userInputLower.includes('x layer token') || userInputLower.includes('okb balance')) {
+              tokenSymbol = 'OKB'
             }
             // Check for other specific token contexts
-            else if (lowerText.includes('hedera') || lowerText.includes('hbar') || text.includes('0x') ||
-                     userInputLower.includes('hedera') || userInputLower.includes('hbar')) {
-              tokenSymbol = 'HBAR'
+            else if (lowerText.includes('xlayer') || lowerText.includes('okb') || text.includes('0x') ||
+                     userInputLower.includes('xlayer') || userInputLower.includes('okb')) {
+              tokenSymbol = 'OKB'
             } else if (lowerText.includes('usdt') || lowerText.includes('tether') ||
                        userInputLower.includes('usdt') || userInputLower.includes('tether')) {
               tokenSymbol = 'USDT'
-            } else if (lowerText.includes('bitcoin') || lowerText.includes('btc') ||
-                       userInputLower.includes('bitcoin') || userInputLower.includes('btc')) {
-              tokenSymbol = 'BTC'
+            } else if (lowerText.includes('ethereum') || lowerText.includes('eth') ||
+                       userInputLower.includes('ethereum') || userInputLower.includes('eth')) {
+              tokenSymbol = 'ETH'
             } else {
-              // For simple "Wallet Balance" or "Balance:" responses, default to HBAR since this is a Hedera project
+              // For simple "Wallet Balance" or "Balance:" responses, default to OKB since this is an X Layer project
               if (patternIndex === 0 || patternIndex === 1 || patternIndex === 2 || 
                   text.trim().startsWith('Balance:') || text.trim().startsWith('Wallet Balance')) {
-                tokenSymbol = 'HBAR'
+                tokenSymbol = 'OKB'
               } else {
                 // Default fallback
-                tokenSymbol = 'HBAR'
+                tokenSymbol = 'OKB'
               }
             }
           }
@@ -411,11 +412,13 @@ export default function AstraChatPage() {
 
   const getTokenFullName = (symbol: string): string => {
     const tokenNames: Record<string, string> = {
-      'HBAR': 'Hedera',
+      'OKB': 'OKB Token',
+      'DAI': 'Dai Stablecoin',
+      'ETH': 'Ethereum',
+      'EURC': 'Euro Coin',
+      'USDC': 'USD Coin',
       'USDT': 'Tether USD',
-      'AGENT': 'Agent Token',
-      'BTC': 'Bitcoin',
-      'WETH': 'Wrapped Ethereum'
+      'WBTC': 'Wrapped Bitcoin'
     }
     return tokenNames[symbol] || symbol
   }
@@ -424,12 +427,13 @@ export default function AstraChatPage() {
     try {
       // Map token symbols to Coinbase API symbols
       const coinbaseSymbols: Record<string, string> = {
-        'HBAR': 'HBAR-USD',
+        'OKB': 'OKB-USD',
+        'DAI': 'DAI-USD',
+        'ETH': 'ETH-USD',
+        'EURC': 'EURC-USD',
+        'USDC': 'USDC-USD',
         'USDT': 'USDT-USD',
-        'BTC': 'BTC-USD',
-        'WETH': 'ETH-USD', // Use ETH price for WETH
-        'MATIC': 'MATIC-USD',
-        'ATOM': 'ATOM-USD'
+        'WBTC': 'BTC-USD'
       }
       
       const coinbaseSymbol = coinbaseSymbols[symbol]
@@ -460,13 +464,12 @@ export default function AstraChatPage() {
       // Fallback to mock prices if API fails
       const mockPrices: Record<string, number> = {
         'USDT': 1.00,
-        'HBAR': 0.24, // Fallback HBAR price
-        'AGENT': 0.50,
-        'BTC': 45000.00,
-        'WETH': 3200.00,
-        'MATIC': 1.20,
-        'ATOM': 8.50,
-        'OSMO': 0.80
+        'OKB': 45.00, // Fallback OKB price
+        'ETH': 3200.00,
+        'DAI': 1.00,
+        'EURC': 1.08,
+        'USDC': 1.00,
+        'WBTC': 45000.00
       }
       
       const price = mockPrices[symbol] || 0
@@ -476,11 +479,13 @@ export default function AstraChatPage() {
 
   const getTokenIcon = (symbol: string): string => {
     const tokenIcons: Record<string, string> = {
-      'HBAR': '/hedera.svg', // Hedera logo
-      'USDT': '💎',
-      'AGENT': '🤖',
-      'BTC': '₿',
-      'WETH': '🔶'
+      'OKB': '/okb.png',
+      'DAI': '/dai.png', 
+      'ETH': '/eth.svg',
+      'EURC': '/eurc.png',
+      'USDC': '/usdc.png',
+      'USDT': '/usdt.png',
+      'WBTC': '/wbtc.png'
     }
     return tokenIcons[symbol] || '🪙'
   }
@@ -596,9 +601,9 @@ export default function AstraChatPage() {
       chainId: /(?:\*\*Chain\s+ID:\*\*|chain\s+id)[\s:`"]*(\d+)/i,
       from: /(?:\*\*From[\s\w]*:\*\*|from[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
       to: /(?:\*\*To[\s\w]*:\*\*|to[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
-      value: /(?:\*\*Value:\*\*|value|amount)[\s:`"]*(\d+(?:\.\d+)?\s*(?:HBAR|hbar|tinybars?)?|\d+)/i,
+      value: /(?:\*\*Value:\*\*|value|amount)[\s:`"]*(\d+(?:\.\d+)?\s*(?:OKB|okb|wei?)?|\d+)/i,
       gasUsed: /(?:\*\*Gas\s+Used:\*\*|gas\s+used)[\s:`"]*(\d+)/i,
-      gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)\s*(?:tinybars?|gwei)?/i,
+      gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)\s*(?:wei?|gwei)?/i,
       nonce: /(?:\*\*Nonce:\*\*|nonce)[\s:`"]*(\d+)/i,
       transactionIndex: /(?:\*\*Transaction\s+Index:\*\*|transaction\s+index)[\s:`"]*(\d+)/i,
       type: /(?:\*\*Type:\*\*|type)[\s:`"]*(\d+)/i
@@ -664,25 +669,25 @@ export default function AstraChatPage() {
   const formatTransactionValue = (value: string): string => {
     if (!value) return '0'
     try {
-      // Check if the value already includes HBAR or is in HBAR format
-      if (value.toLowerCase().includes('hbar')) {
+      // Check if the value already includes OKB or is in OKB format
+      if (value.toLowerCase().includes('okb')) {
         const numericValue = parseFloat(value.replace(/[^\d.]/g, ''))
-        return numericValue.toFixed(6) + ' HBAR'
+        return numericValue.toFixed(6) + ' OKB'
       }
       
-      // Check if it's tinybars (very large number)
+      // Check if it's wei (very large number) - X Layer uses standard 18 decimals
       const numericValue = parseFloat(value)
-      if (numericValue > 1000000000) {
-        // Likely tinybars - convert to HBAR (divide by 10^8 for Hedera)
-        const hbarValue = numericValue / Math.pow(10, 8)
-        return hbarValue.toFixed(6) + ' HBAR'
+      if (numericValue > 1000000000000000000) {
+        // Likely wei - convert to OKB (divide by 10^18 for X Layer)
+        const okbValue = numericValue / Math.pow(10, 18)
+        return okbValue.toFixed(6) + ' OKB'
       } else if (numericValue > 1000000) {
-        // Likely wei - convert to HBAR (divide by 10^18)
-        const hbarValue = numericValue / Math.pow(10, 18)
-        return hbarValue.toFixed(6) + ' HBAR'
+        // Medium large number - convert to OKB
+        const okbValue = numericValue / Math.pow(10, 18)
+        return okbValue.toFixed(6) + ' OKB'
       } else {
-        // Already in HBAR
-        return numericValue.toFixed(6) + ' HBAR'
+        // Already in OKB
+        return numericValue.toFixed(6) + ' OKB'
       }
     } catch {
       return value
@@ -694,25 +699,25 @@ export default function AstraChatPage() {
     try {
       const numericValue = parseFloat(gasPrice)
       
-      // For Hedera, gas prices are typically in tinybars
-      // 1 HBAR = 100,000,000 tinybars (10^8)
-      if (numericValue >= 100000000) {
-        // Large number - likely tinybars, convert to a reasonable display format
-        if (numericValue >= 1000000000000) {
-          // Very large number (like 360000000000) - show in Gwei equivalent
+      // For X Layer, gas prices are typically in wei
+      // 1 OKB = 10^18 wei
+      if (numericValue >= 1000000000000000000) {
+        // Large number - likely wei, convert to a reasonable display format
+        if (numericValue >= 1000000000000000000000) {
+          // Very large number - show in Gwei equivalent
           const gweiValue = numericValue / Math.pow(10, 9)
           return gweiValue.toFixed(2) + ' Gwei'
         } else {
-          // Moderate large number - show in tinybars
-          return numericValue.toLocaleString() + ' tinybars'
+          // Moderate large number - show in wei
+          return numericValue.toLocaleString() + ' wei'
         }
       } else if (numericValue >= 1000000) {
         // Medium number - could be wei, convert to Gwei
         const gweiValue = numericValue / Math.pow(10, 9)
         return gweiValue.toFixed(2) + ' Gwei'
       } else {
-        // Small number - show as is with tinybars unit
-        return numericValue.toLocaleString() + ' tinybars'
+        // Small number - show as is with wei unit
+        return numericValue.toLocaleString() + ' wei'
       }
     } catch {
       return gasPrice
@@ -775,7 +780,7 @@ export default function AstraChatPage() {
       {
         id: "1",
         role: "assistant",
-        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on Hedera, and even generate images or diagrams. What would you like to explore today?",
+        content: "Hello! I'm your Astra AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on X Layer, and even generate images or diagrams. What would you like to explore today?",
         timestamp: Date.now(),
       },
     ])
@@ -1279,7 +1284,7 @@ export default function AstraChatPage() {
                             <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                               <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Chain ID</div>
                               <div className="text-black dark:text-white font-medium flex items-center">
-                                <img src="/hedera.svg" alt="Hedera" className="w-4 h-4 mr-2" />
+                                <img src="/okb.png" alt="X Layer" className="w-4 h-4 mr-2" />
                                 {message.transactionData.chainId}
                               </div>
                             </div>
@@ -1396,12 +1401,12 @@ export default function AstraChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://hashscan.io/testnet/transaction/${message.transactionData.hash}`}
+                            href={`https://www.oklink.com/xlayer-test/tx/${message.transactionData.hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View on Hedera Explorer ↗
+                            View on X Layer Explorer ↗
                           </a>
                         </div>
                       </div>
@@ -1536,12 +1541,12 @@ export default function AstraChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://hashscan.io/testnet/block/${message.blockData.blockNumber || message.blockData.blockHash}`}
+                            href={`https://www.oklink.com/xlayer-test/block/${message.blockData.blockNumber || message.blockData.blockHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View on Hedera Explorer ↗
+                            View on X Layer Explorer ↗
                           </a>
                         </div>
                       </div>

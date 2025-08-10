@@ -12,7 +12,7 @@ from CoinGecko import CoinGeckoToken
 schedule_engine = BackgroundScheduler()
 schedule_engine.start()
 
-token_reference = CoinGeckoToken("hedera-hashgraph")
+token_reference = CoinGeckoToken("okb")
 
 cached_tokens = {}
 with open("tokensList.json") as f:
@@ -20,11 +20,11 @@ with open("tokensList.json") as f:
 
 runtime = datetime.now()
 network = {
-        "chain_id": 296,
-    "rpc": "https://testnet.hashio.io/api",
-    "name": "Hedera Testnet",
-    "explorer": "https://hashscan.io/testnet/",
-    "api": "YourBlockscoutAPIKey"
+        "chain_id": 195,
+    "rpc": "https://xlayertestrpc.okx.com",
+    "name": "X Layer Testnet",
+    "explorer": "https://www.oklink.com/xlayer-test/",
+    "api": "YourOKLinkAPIKey"
 }
 
 handler = EVMTokenSender(network, "0x89E4228D216Ff8ae567f6CA5D5dbeB9231d18F9C")

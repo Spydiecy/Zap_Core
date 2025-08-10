@@ -83,7 +83,7 @@ export function HeroSection() {
                                     <Link
                                         href="#link"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                                        <span className="text-foreground text-sm">Introducing Hedera Network Support</span>
+                                        <span className="text-foreground text-sm">Introducing X Layer Network Support</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                                         <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -100,11 +100,11 @@ export function HeroSection() {
                         
                                     <h1
                                         className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                                        Your AI Agent for Hedera Network
+                                        Your AI Agent for X Layer Network
                                     </h1>
                                     <p
                                         className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                        Deploy contracts, create tokens, schedule payments, and interact with Hedera blockchain using simple chat commands. Powered by Google Gemini AI.
+                                        Deploy contracts, create tokens, schedule payments, and interact with X Layer blockchain using simple chat commands. Powered by Google Gemini AI.
                                     </p>
                                 </AnimatedGroup>
 
@@ -206,7 +206,7 @@ export function HeroSection() {
                                     </svg>
                                 </div>
                                 <h3 className="mb-2 text-xl font-semibold">One-Command Operations</h3>
-                                <p className="text-muted-foreground">Deploy smart contracts, create tokens, and mint NFTs with simple chat commands on Hedera Network.</p>
+                                <p className="text-muted-foreground">Deploy smart contracts, create tokens, and mint NFTs with simple chat commands on X Layer Network.</p>
                             </div>
                             
                             {/* Feature 2 */}
@@ -246,7 +246,7 @@ export function HeroSection() {
                                     </svg>
                                 </div>
                                 <h3 className="mb-2 text-xl font-semibold">Real-time Market Data</h3>
-                                <p className="text-muted-foreground">Access live XFI prices and market insights powered by Coinbase API integration.</p>
+                                <p className="text-muted-foreground">Access live OKB prices and market insights powered by Coinbase API integration.</p>
                             </div>
                             
                             {/* Feature 5 */}
@@ -285,7 +285,7 @@ export function HeroSection() {
                             <div>
                                 <h2 className="mb-4 text-4xl font-bold md:text-5xl">Powered by Advanced AI</h2>
                                 <p className="mb-6 text-muted-foreground">
-                                    Astra Hedera employs cutting-edge technology designed for performance, security, and seamless blockchain interactions on Hedera Network.
+                                    Astra X Layer employs cutting-edge technology designed for performance, security, and seamless blockchain interactions on X Layer Network.
                                 </p>
                                 
                                 <ul className="space-y-4">
@@ -314,7 +314,7 @@ export function HeroSection() {
                                                 <polyline points="22 4 12 14.01 9 11.01"/>
                                             </svg>
                                         </div>
-                                        <span><strong>Blockchain:</strong> Hedera Network with Solidity smart contracts</span>
+                                        <span><strong>Blockchain:</strong> X Layer Network with Solidity smart contracts</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <div className="flex-shrink-0 text-primary">
@@ -371,7 +371,7 @@ export function HeroSection() {
                                         <span className="text-4xl font-bold">0.01 ETH</span>
                                         <span className="text-muted-foreground ml-2">one-time</span>
                                     </div>
-                                    <p className="text-muted-foreground">Full platform access on Hedera testnet</p>
+                                    <p className="text-muted-foreground">Full platform access on X Layer testnet</p>
                                 </div>
                                 
                                 <ul className="mb-8 space-y-3 text-sm">
@@ -446,17 +446,17 @@ export function HeroSection() {
                         handle: "@sarahdev",
                         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face"
                       },
-                      text: "Astra Hedera has completely transformed how I interact with smart contracts. Deploying an NFT collection used to take hours, now it's done in minutes with a simple chat command!",
+                      text: "Astra X Layer has completely transformed how I interact with smart contracts. Deploying an NFT collection used to take hours, now it's done in minutes with a simple chat command!",
                       href: "https://twitter.com/sarahdev"
                     },
                     {
                       author: {
                         name: "Marcus Thompson",
-                        handle: "@marcushedera",
+                        handle: "@marcusxlayer",
                         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
                       },
                       text: "The payment scheduling feature is a game-changer for our DAO. Setting up monthly salary payments for 50+ contributors takes just one command. Incredible efficiency!",
-                      href: "https://twitter.com/marcuscrossfi"
+                      href: "https://twitter.com/marcusxlayer"
                     },
                     {
                       author: {
@@ -476,7 +476,7 @@ export function HeroSection() {
                             <div className="md:col-span-2">
                                 <Logo className="mb-4" />
                                 <p className="mb-4 max-w-xs text-muted-foreground">
-                                    Your AI agent for seamless blockchain interactions on Hedera Network.
+                                    Your AI agent for seamless blockchain interactions on X Layer Network.
                                 </p>
                                 <div className="flex space-x-4">
                                     <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -523,7 +523,7 @@ export function HeroSection() {
                         
                         <div className="mt-10 border-t pt-6">
                             <p className="text-center text-xs text-muted-foreground">
-                                © {new Date().getFullYear()} Astra Hedera. All rights reserved. Built for Hedera Network with ❤️
+                                © {new Date().getFullYear()} Astra X Layer. All rights reserved. Built for X Layer Network with ❤️
                             </p>
                         </div>
                     </div>
@@ -624,12 +624,12 @@ const Logo = ({ className }: { className?: string }) => {
     return (
         <div className={cn('flex items-center gap-2', className)}>
             <img 
-                src="/hedera.svg" 
-                alt="Hedera" 
+                src="/okb.png" 
+                alt="X Layer" 
                 className="w-8 h-8 object-contain" 
             />
             <div className="font-bold text-xl bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent dark:from-white dark:to-gray-400">
-                ASTRA HEDERA
+                ASTRA X LAYER
             </div>
         </div>
     )

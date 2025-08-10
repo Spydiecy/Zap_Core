@@ -70,11 +70,11 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         )}>
           <div className={cn("flex items-center gap-2", !open && "hidden")}>
             <img 
-              src="/crossfi.svg" 
-              alt="CrossFi" 
+              src="/okb.png" 
+              alt="X Layer" 
               className="w-6 h-6 object-contain" 
             />
-            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA CROSSFI</span>
+            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ASTRA X LAYER</span>
             <span className={cn(
               "text-xs ml-2 px-2 py-1 rounded",
               isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"
@@ -170,11 +170,11 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                 "text-xs space-y-1",
                 isDark ? "text-gray-400" : "text-gray-600"
               )}>
-                <div>Network: CrossFi Testnet</div>
-                <div>Chain ID: 4157</div>
-                <div>Currency: XFI</div>
-                <div className="break-all">RPC: rpc.testnet.ms</div>
-                <div className="break-all">Explorer: test.xfiscan.com</div>
+                <div>Network: X Layer Testnet</div>
+                <div>Chain ID: 195</div>
+                <div>Currency: OKB</div>
+                <div className="break-all">RPC: xlayertestrpc.okx.com</div>
+                <div className="break-all">Explorer: oklink.com/xlayer-test</div>
               </div>
             </div>
           )}
@@ -184,7 +184,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
               <div className={cn(
                 "w-3 h-3 rounded-full",
                 isDark ? "bg-green-500" : "bg-green-600"
-              )} title="Connected to CrossFi Testnet" />
+              )} title="Connected to X Layer Testnet" />
             </div>
           )}
         </div>

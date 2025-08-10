@@ -1,9 +1,9 @@
 # Astra 🚀
-## AI-Powered Blockchain Agent for Hedera Network
+## AI-Powered Blockchain Agent for X Layer Network
 
-> Transform blockchain interactions with simple chat commands. Deploy contracts, send tokens, create NFTs - all with natural language.
+> Transform blockchain interactions with simple chat commands. Deploy contracts, send tokens, create NFTs, execute swaps - all with natural language.
 
-[![Hedera Network](https://img.shields.io/badge/Hedera-Network-purple)](https://hedera.com)
+[![X Layer Network](https://img.shields.io/badge/X%20Layer-Network-blue)](https://www.okx.com/xlayer)
 [![AI Powered](https://img.shields.io/badge/AI-Gemini-green)](https://ai.google.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
 
@@ -15,13 +15,13 @@
 |:---:|:---:|:---:|
 | Chat with your blockchain | Deploy contracts instantly | Military-grade encryption |
 | Natural language processing | Create tokens & NFTs | Secure credential system |
-| Smart transaction routing | Automated salary payments | Premium subscription model |
+| Smart transaction routing | OKX DEX integration | Premium subscription model |
 
 ## 🎯 Core Features
 
 ### 💬 Smart Chat Interface
 ```
-You: "Send 100 HBAR to alice"
+You: "Send 100 OKB to alice"
 Astra: ✅ Sent! Hash: 0xabc123...
 ```
 - Natural language commands
@@ -30,23 +30,33 @@ Astra: ✅ Sent! Hash: 0xabc123...
 
 ### ⚡ One-Command Operations
 ```
-You: "Create CrossDoge token, 1B supply"
+You: "Create XLayer token, 1B supply"
 Astra: 🚀 Token deployed! Contract: 0xdef456...
 ```
 - Deploy smart contracts instantly
 - Create tokens & NFT collections
 - Automated transaction processing
 
-### 📅 Payment Scheduling & Automation
+### � OKX DEX Integration & Trading
 ```
-You: "Schedule $1000 HBAR salary to john_doe monthly"
-Astra: ✅ Recurring payment set! Next: Feb 1st
+You: "Swap 1000 USDT to OKB"
+Astra: 🔄 Swap executed! Rate: 22.5 OKB received
 ```
-- **Salary Automation**: Monthly/weekly employee payments
-- **Event-Based Payments**: Birthday, holiday bonuses
-- **Recurring Transfers**: Custom schedules (daily, weekly, monthly)
-- **Bulk Distributions**: Mass payments to multiple addresses
-- **Smart Reminders**: Automated payment notifications
+- **OKX DEX API**: Access to liquidity pools and best rates
+- **Multi-Token Support**: OKB, USDT, USDC, DAI, ETH, WBTC, EURC
+- **Smart Routing**: Automatic best price discovery
+- **Market Data**: Real-time prices and trading analytics
+- **Slippage Protection**: Configurable tolerance levels
+
+### 📊 Blockchain Explorer & Analytics
+```
+You: "Show latest X Layer blocks"
+Astra: 📦 Block #482,391 - 15 transactions, 0.002 OKB fees
+```
+- **Block Information**: Latest blocks, transactions, gas usage
+- **Transaction Tracking**: Detailed tx history and status
+- **Address Analytics**: Balance tracking and transaction history
+- **Network Stats**: Gas prices, network health, validator info
 
 ### 🔧 Developer Tools
 - **Workflow Visualization**: Interactive Mermaid diagrams
@@ -110,7 +120,7 @@ flowchart LR
 <td>
 
 **Blockchain** ⛓️
-- Hedera Network
+- XLayer Network
 - Solidity contracts
 - Web3.py + Ethers.js
 
@@ -133,14 +143,15 @@ flowchart LR
 
 ### Example Commands
 ```
-💰 "Send 50 HBAR to john_doe"
+💰 "Send 50 OKB to john_doe"
 🪙 "Create MoonCoin token with 1M supply"
 🖼️ "Deploy CyberPunks NFT collection"
-📊 "Show me HBAR price trends"
+📊 "Show me OKB price trends"
+💱 "Swap 1000 USDT to OKB"
 ⚙️ "Generate voting contract workflow"
-📅 "Schedule $2000 HBAR salary to alice monthly"
-🎉 "Set birthday bonus of 100 HBAR for bob on March 15th"
-⏰ "Pay rent of 500 HBAR every 1st of month"
+� "Show latest X Layer blocks"
+🔍 "Check transaction 0xabc123..."
+💹 "Show OKX market data for ETH/USDT"
 ```
 
 ---
@@ -156,8 +167,8 @@ flowchart LR
 
 ## 🏆 Why Choose Astra?
 
-✅ **First AI agent on Hedera** with single-command blockchain operations  
-✅ **Unique credential system** for autonomous wallet access  
+✅ **First AI agent on X Layer** with single-command blockchain operations  
+✅ **OKX DEX integration** for seamless trading and swaps  
 ✅ **Professional UI** with light/dark mode  
 ✅ **Advanced workflows** with interactive diagrams  
 ✅ **Secure subscriptions** via RainbowKit  
@@ -172,7 +183,7 @@ flowchart LR
 
 <div align="center">
 
-**Built with ❤️ for the Hedera Ecosystem**
+**Built with ❤️ for the X Layer Ecosystem**
 
 *Where AI Meets Blockchain Innovation* ✨
 

@@ -5,31 +5,31 @@ import { injected, metaMask, safe, walletConnect } from 'wagmi/connectors'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'default-project-id'
 
-// Hedera Testnet configuration
-const hederaTestnet = {
-  id: 296,
-  name: 'Hedera Testnet',
+// X Layer Testnet configuration
+const xLayerTestnet = {
+  id: 195,
+  name: 'X Layer Testnet',
   nativeCurrency: {
     decimals: 18,
-    name: 'HBAR',
-    symbol: 'HBAR',
+    name: 'OKB',
+    symbol: 'OKB',
   },
   rpcUrls: {
     default: {
-      http: ['https://testnet.hashio.io/api'],
+      http: ['https://xlayertestrpc.okx.com'],
     },
   },
   blockExplorers: {
     default: {
-      name: 'Hedera Explorer',
-      url: 'https://hashscan.io/testnet',
+      name: 'OKLink Explorer',
+      url: 'https://www.oklink.com/xlayer-test',
     },
   },
   testnet: true,
 } as const
 
 export const config = createConfig({
-  chains: [hederaTestnet],
+  chains: [xLayerTestnet],
   connectors: [
     injected(),
     walletConnect({ projectId }),
@@ -37,7 +37,7 @@ export const config = createConfig({
     safe(),
   ],
   transports: {
-    [hederaTestnet.id]: http(),
+    [xLayerTestnet.id]: http(),
   },
 })
 
