@@ -1,4 +1,4 @@
-# X Layer Explorer Module
+# Core Explorer Module
 from typing import List, Dict
 from datetime import datetime, timedelta
 import random

@@ -12,7 +12,7 @@ from CoinGecko import CoinGeckoToken
 schedule_engine = BackgroundScheduler()
 schedule_engine.start()
 
-token_reference = CoinGeckoToken("okb")
+token_reference = CoinGeckoToken("core")
 
 cached_tokens = {}
 with open("tokensList.json") as f:
@@ -21,9 +21,9 @@ with open("tokensList.json") as f:
 runtime = datetime.now()
 network = {
         "chain_id": 195,
-    "rpc": "https://xlayertestrpc.okx.com",
-    "name": "X Layer Testnet",
-    "explorer": "https://www.oklink.com/xlayer-test/",
+    "rpc": "https://rpc.test2.btcs.network",
+    "name": "Core Testnet 2",
+    "explorer": "https://scan.test2.btcs.network/",
     "api": "YourOKLinkAPIKey"
 }
 
