@@ -3,7 +3,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Paperclip, Send, Bot, User, Plus, Zap, ImageIcon, Wallet } from "lucide-react"
+import { Paperclip, Send, Bot, User, Plus, Zap, ImageIcon, Wallet, Mic, MicOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { uploadFileToIPFS } from "@/lib/pinata"
 import { useCredentials } from "@/contexts/CredentialsContext"
@@ -99,6 +99,7 @@ export default function ZapChatPage() {
   const [appName, setAppName] = useState<string>("")
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([])
   const [showAccessModal, setShowAccessModal] = useState(true)
+  const [isRecording, setIsRecording] = useState(false)
 
   // Get credentials from context (includes subscription access check)
   const { 
@@ -1073,6 +1074,15 @@ export default function ZapChatPage() {
     scrollToBottom()
   }, [messages])
 
+  // Cleanup effect for voice recording
+  useEffect(() => {
+    return () => {
+      if (isRecording) {
+        setIsRecording(false)
+      }
+    }
+  }, [isRecording])
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -1425,6 +1435,113 @@ The diagram should help developers understand how the contract works at a glance
       setUserId(storedUserId)
       setAppName(storedAppName)
       initializeChat()
+    }
+  }
+
+  const startRecording = async () => {
+    try {
+      // Use Web Speech API directly for simpler implementation
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        startWebSpeechRecognition()
+      } else {
+        alert('Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.')
+      }
+    } catch (error) {
+      console.error('Error starting recording:', error)
+      alert('Could not access speech recognition. Please check your browser permissions.')
+    }
+  }
+
+  const stopRecording = () => {
+    setIsRecording(false)
+    // Speech recognition will stop automatically
+  }
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    // This function is no longer needed with direct Web Speech API usage
+    console.log('Audio blob received but using Web Speech API instead')
+  }
+
+  const startWebSpeechRecognition = () => {
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+    
+    if (!SpeechRecognition) {
+      alert('Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+    recognition.maxAlternatives = 1
+
+    setIsRecording(true)
+
+    recognition.onstart = () => {
+      console.log('Speech recognition started')
+      setIsRecording(true)
+    }
+
+    recognition.onresult = (event: any) => {
+      let transcript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript
+        }
+      }
+      
+      if (transcript) {
+        // Replace existing input or append based on preference
+        setInput(prev => prev + (prev ? ' ' : '') + transcript)
+      }
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error)
+      setIsRecording(false)
+      
+      switch (event.error) {
+        case 'no-speech':
+          alert('No speech was detected. Please try again.')
+          break
+        case 'audio-capture':
+          alert('No microphone was found. Please check your microphone settings.')
+          break
+        case 'not-allowed':
+          alert('Permission to use microphone was denied. Please allow microphone access and try again.')
+          break
+        case 'network':
+          alert('Network error occurred. Please check your internet connection.')
+          break
+        case 'aborted':
+          console.log('Speech recognition was aborted')
+          break
+        default:
+          alert(`Speech recognition error: ${event.error}. Please try again.`)
+          break
+      }
+    }
+
+    recognition.onend = () => {
+      console.log('Speech recognition ended')
+      setIsRecording(false)
+    }
+
+    try {
+      recognition.start()
+    } catch (error) {
+      console.error('Failed to start recognition:', error)
+      setIsRecording(false)
+      alert('Failed to start speech recognition. Please try again.')
+    }
+  }
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
     }
   }
 
@@ -1984,6 +2101,25 @@ The diagram should help developers understand how the contract works at a glance
                 disabled={isLoading}
               >
                 <Paperclip className="w-4 h-4" />
+              </button>
+              <button
+                onClick={toggleRecording}
+                className={`p-2 transition-all duration-200 rounded-md ${
+                  isRecording 
+                    ? 'text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-950 ring-2 ring-red-200 dark:ring-red-800 animate-pulse' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+                disabled={isLoading}
+                title={isRecording ? 'Stop recording (listening...)' : 'Start voice recording'}
+              >
+                {isRecording ? (
+                  <div className="relative">
+                    <MicOff className="w-4 h-4" />
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                  </div>
+                ) : (
+                  <Mic className="w-4 h-4" />
+                )}
               </button>
               <Button
                 onClick={sendMessage}
