@@ -130,15 +130,15 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
           )}>
             <h3 className="text-lg font-medium mb-2">Subscription Required</h3>
             <p className={cn("text-sm mb-4", isDark ? "text-gray-400" : "text-gray-600")}>
-                            Subscribe to access ZAP AI Assistant on X Layer Testnet.
+                            Subscribe to access ZAP AI Assistant on Core Testnet 2.
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>0.01 OKB monthly subscription</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>0.1 tCORE2 subscription</span>
             </div>
             <div className="flex items-center space-x-2 text-sm mt-1">
               <div className={cn("w-2 h-2 rounded-full", isDark ? "bg-gray-400" : "bg-gray-600")}></div>
-              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>X Layer Testnet</span>
+              <span className={cn(isDark ? "text-gray-300" : "text-gray-700")}>Core Testnet 2</span>
             </div>
           </div>
 
@@ -213,7 +213,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className={cn(isDark ? "text-gray-400" : "text-gray-600")}>Monthly Fee:</span>
-                          <span className="font-mono">0.01 OKB</span>
+                          <span className="font-mono">0.1 tCORE2</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className={cn(isDark ? "text-gray-400" : "text-gray-600")}>Duration:</span>
@@ -240,7 +240,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
                         ) : (
                           <>
                             <CreditCard className="w-4 h-4" />
-                            <span>Subscribe for 0.01 OKB</span>
+                            <span>Subscribe for 0.1 tCORE2</span>
                           </>
                         )}
                       </Button>
@@ -285,7 +285,7 @@ export function AccessControlModal({ isOpen, onAccessGranted }: AccessControlMod
               ? "text-gray-500 bg-gray-900/30 border-gray-800" 
               : "text-gray-600 bg-gray-100/30 border-gray-300"
           )}>
-            <p>Make sure you're connected to X Layer Testnet</p>
+            <p>Make sure you're connected to Core Testnet 2</p>
           </div>
         </div>
       </DialogContent>

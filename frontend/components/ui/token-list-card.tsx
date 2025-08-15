@@ -35,8 +35,8 @@ const TokenListCard: React.FC<TokenListCardProps> = ({ tokens, className }) => {
     const tokenIcons: Record<string, string> = {
       'USDT': '/usdt.png',
       'USDC': '/usdc.png',
-      'OKB': '/okb.png',
-      'WOKB': '/okb.png',
+      'tCORE2': '/core.svg',
+      'CORE': '/core.svg',
       'crvUSD': '/crv.png',
       'DAI': '/dai.png',
       'DMCX': '/dmcx.png',
@@ -63,7 +63,7 @@ const TokenListCard: React.FC<TokenListCardProps> = ({ tokens, className }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Coins className="w-5 h-5" />
-          Supported Tokens on X Layer
+          Supported Tokens on Core
           <span className="ml-auto text-sm font-normal text-muted-foreground">
             {tokens.length} tokens
           </span>
@@ -129,7 +129,7 @@ const TokenListCard: React.FC<TokenListCardProps> = ({ tokens, className }) => {
 
                 {/* Explorer Link */}
                 <a
-                  href={`https://www.oklink.com/xlayer-test/address/${token.address}`}
+                  href={`https://scan.test2.btcs.network/address/${token.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -145,7 +145,7 @@ const TokenListCard: React.FC<TokenListCardProps> = ({ tokens, className }) => {
         {/* Footer Info */}
         <div className="mt-6 pt-4 border-t">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Network: X Layer Testnet</span>
+            <span>Network: Core Testnet 2</span>
             <span>Chain ID: 195</span>
           </div>
         </div>

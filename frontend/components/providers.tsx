@@ -19,24 +19,24 @@ import '@rainbow-me/rainbowkit/styles.css'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'zap-default-project-id'
 
-// X Layer Testnet configuration
-const xLayerTestnet = {
-  id: 195,
-  name: 'X Layer Testnet',
+// Core Testnet 2 configuration
+const coreTestnet = {
+  id: 1114,
+  name: 'Core Blockchain Testnet2',
   nativeCurrency: {
     decimals: 18,
-    name: 'OKB',
-    symbol: 'OKB',
+    name: 'tCORE2',
+    symbol: 'tCORE2',
   },
   rpcUrls: {
     default: {
-      http: ['https://xlayertestrpc.okx.com'],
+      http: ['https://rpc.test2.btcs.network'],
     },
   },
   blockExplorers: {
     default: {
-      name: 'OKLink Explorer',
-      url: 'https://www.oklink.com/xlayer-test',
+      name: 'Core Scan',
+      url: 'https://scan.test2.btcs.network',
     },
   },
   testnet: true,
@@ -70,10 +70,10 @@ const connectors = connectorsForWallets(
 )
 
 const config = createConfig({
-  chains: [xLayerTestnet],
+  chains: [coreTestnet],
   connectors,
   transports: {
-    [xLayerTestnet.id]: http(),
+    [coreTestnet.id]: http(),
   },
 }) as any // Type assertion to resolve compatibility issue
 

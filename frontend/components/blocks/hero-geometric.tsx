@@ -102,7 +102,7 @@ function HeroGeometric({
     };
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#030303]">
+        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#030303] py-8 md:py-4">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-rose-500/[0.05] blur-3xl" />
 
             <div className="absolute inset-0 overflow-hidden">
@@ -195,7 +195,7 @@ function HeroGeometric({
                         animate="visible"
                     >
                         <p className="text-base sm:text-lg md:text-xl text-white/40 mb-8 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4">
-                            Deploy contracts, create tokens, schedule payments, interact with X Layer chain & Okx Dex using simple chat commands. Built with MCP Servers & ADK.
+                            Deploy contracts, create tokens, schedule payments, and interact with Core Blockchain using simple chat commands. Built with MCP Servers & ADK.
                         </p>
                     </motion.div>
 
@@ -215,7 +215,7 @@ function HeroGeometric({
                             Launch ZAP AI Assistant
                         </motion.a>
                         <motion.a
-                            href="https://github.com/Spydiecy/Zap_Okx/blob/main/README.md"
+                            href="https://github.com/Spydiecy/Zap_Core/blob/main/README.md"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/5 transition-all duration-300"

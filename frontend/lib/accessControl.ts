@@ -1,8 +1,8 @@
 // Access Control Contract Configuration
 export const ACCESS_CONTROL_CONFIG = {
-  contractAddress: '0x44CEb2bEc4a921E383f269000A50560317C0Ef5B',
-  subscriptionFee: '10000000000000000', // 0.01 OKB in wei (0.01 * 10^18)
-  chainId: 195, // X Layer Testnet
+  contractAddress: '0xCa36dD890F987EDcE1D6D7C74Fb9df627c216BF6',
+  subscriptionFee: '100000000000000000', // 0.1 tCORE2 in wei (0.1 * 10^18)
+  chainId: 1114, // Core Testnet 2
   gasLimit: BigInt(100000), // Set reasonable gas limit
 }
 
@@ -141,10 +141,10 @@ export async function subscribeToAccess(
 }
 
 /**
- * Format OKB amount for display
+ * Format tCORE2 amount for display
  */
-export function formatOKB(wei: string | bigint): string {
+export function formatCore(wei: string | bigint): string {
   const value = typeof wei === 'string' ? BigInt(wei) : wei
-  const okb = Number(value) / 10**18
-  return okb.toFixed(4)
+  const core = Number(value) / 10**18
+  return core.toFixed(4)
 }

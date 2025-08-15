@@ -226,16 +226,6 @@ export default function ZapChatPage() {
     const lowerText = text.toLowerCase()
     const lowerUserInput = userInput?.toLowerCase() || ''
     
-    // Check if this is a swap-related query - if so, don't show balance card
-    const swapKeywords = ['swap', 'trade', 'exchange', 'convert', 'sell', 'buy']
-    const isSwapQuery = swapKeywords.some(keyword => 
-      lowerUserInput.includes(keyword) || lowerText.includes(`swap `) || lowerText.includes(`trade `)
-    )
-    
-    if (isSwapQuery) {
-      return false // Don't show balance card for swap operations
-    }
-    
     // Check if this is a send/transfer operation - if so, don't show balance card
     const sendTransferKeywords = ['send', 'transfer', 'pay', 'transmit']
     const isSendTransferQuery = sendTransferKeywords.some(keyword => 
@@ -285,10 +275,10 @@ export default function ZapChatPage() {
       'current balance',
       'account balance',
       'balance:',
-      'okb balance',
-      'x layer balance',
-      'xlayer balance',
-      'x layer token balance',
+      'tcore2 balance',
+      'core balance',
+      'core testnet balance',
+      'core token balance',
       'show balance',
       'check balance',
       'my balance'
@@ -331,14 +321,14 @@ export default function ZapChatPage() {
       /([\d.,]+)\s+(\w+)/gi,
       // Pattern: "balance: 0.619957302943058765"
       /balance:\s*([\d.,]+)/gi,
-      // Pattern: "OKB balance is 0.1" or "X Layer balance is 0.1"
-      /(?:okb|x\s?layer)\s+balance\s+is\s*([\d.,]+)/gi,
-      // Pattern: "Your OKB balance: 0.1"
-      /(?:your\s+)?(?:okb|x\s?layer)\s+balance:\s*([\d.,]+)/gi
+      // Pattern: "tCORE2 balance is 0.1" or "Core balance is 0.1"
+      /(?:tcore2|core)\s+balance\s+is\s*([\d.,]+)/gi,
+      // Pattern: "Your tCORE2 balance: 0.1"
+      /(?:your\s+)?(?:tcore2|core)\s+balance:\s*([\d.,]+)/gi
     ]
     
     // Common token symbols to look for
-    const tokenSymbols = ['OKB', 'USDT', 'DAI', 'ETH', 'EURC', 'USDC', 'WBTC']
+    const tokenSymbols = ['tCORE2', 'USDT', 'DAI', 'ETH', 'EURC', 'USDC', 'WBTC']
     
     let foundTokens = new Set() // To avoid duplicates
     
@@ -375,19 +365,19 @@ export default function ZapChatPage() {
             const lowerText = text.toLowerCase()
             const userInputLower = userInput?.toLowerCase() || ''
             
-            // Check for X Layer-related keywords first (from user input or AI response)
-            if (lowerText.includes('xlayer') || lowerText.includes('okb') || 
-                lowerText.includes('x layer token') || lowerText.includes('okb balance') ||
-                lowerText.includes('show okb') || lowerText.includes('tell my balance') ||
-                lowerText.includes('my xlayer') || lowerText.includes('my okb') ||
-                userInputLower.includes('xlayer') || userInputLower.includes('okb') ||
-                userInputLower.includes('x layer token') || userInputLower.includes('okb balance')) {
-              tokenSymbol = 'OKB'
+            // Check for Core-related keywords first (from user input or AI response)
+            if (lowerText.includes('core') || lowerText.includes('tcore2') || 
+                lowerText.includes('core token') || lowerText.includes('tcore2 balance') ||
+                lowerText.includes('show tcore2') || lowerText.includes('tell my balance') ||
+                lowerText.includes('my core') || lowerText.includes('my tcore2') ||
+                userInputLower.includes('core') || userInputLower.includes('tcore2') ||
+                userInputLower.includes('core token') || userInputLower.includes('tcore2 balance')) {
+              tokenSymbol = 'tCORE2'
             }
             // Check for other specific token contexts
-            else if (lowerText.includes('xlayer') || lowerText.includes('okb') || text.includes('0x') ||
-                     userInputLower.includes('xlayer') || userInputLower.includes('okb')) {
-              tokenSymbol = 'OKB'
+            else if (lowerText.includes('core') || lowerText.includes('tcore2') || text.includes('0x') ||
+                     userInputLower.includes('core') || userInputLower.includes('tcore2')) {
+              tokenSymbol = 'tCORE2'
             } else if (lowerText.includes('usdt') || lowerText.includes('tether') ||
                        userInputLower.includes('usdt') || userInputLower.includes('tether')) {
               tokenSymbol = 'USDT'
@@ -395,13 +385,13 @@ export default function ZapChatPage() {
                        userInputLower.includes('ethereum') || userInputLower.includes('eth')) {
               tokenSymbol = 'ETH'
             } else {
-              // For simple "Wallet Balance" or "Balance:" responses, default to OKB since this is an X Layer project
+              // For simple "Wallet Balance" or "Balance:" responses, default to tCORE2 since this is a Core project
               if (patternIndex === 0 || patternIndex === 1 || patternIndex === 2 || 
                   text.trim().startsWith('Balance:') || text.trim().startsWith('Wallet Balance')) {
-                tokenSymbol = 'OKB'
+                tokenSymbol = 'tCORE2'
               } else {
                 // Default fallback
-                tokenSymbol = 'OKB'
+                tokenSymbol = 'tCORE2'
               }
             }
           }
@@ -439,10 +429,9 @@ export default function ZapChatPage() {
 
   const getTokenFullName = (symbol: string): string => {
     const tokenNames: Record<string, string> = {
-      'OKB': 'OKB Token',
+      'tCORE2': 'Core Testnet Token',
       'DAI': 'Dai Stablecoin',
       'ETH': 'Ethereum',
-      'EURC': 'Euro Coin',
       'USDC': 'USD Coin',
       'USDT': 'Tether USD',
       'WBTC': 'Wrapped Bitcoin'
@@ -454,7 +443,7 @@ export default function ZapChatPage() {
     try {
       // Map token symbols to Coinbase API symbols
       const coinbaseSymbols: Record<string, string> = {
-        'OKB': 'OKB-USD',
+        'tCORE2': 'CORE-USD', // Map tCORE2 to CORE price
         'DAI': 'DAI-USD',
         'ETH': 'ETH-USD',
         'EURC': 'EURC-USD',
@@ -491,7 +480,7 @@ export default function ZapChatPage() {
       // Fallback to mock prices if API fails
       const mockPrices: Record<string, number> = {
         'USDT': 1.00,
-        'OKB': 45.00, // Fallback OKB price
+        'tCORE2': 1.50, // Fallback tCORE2 price
         'ETH': 3200.00,
         'DAI': 1.00,
         'EURC': 1.08,
@@ -506,10 +495,9 @@ export default function ZapChatPage() {
 
   const getTokenIcon = (symbol: string): string => {
     const tokenIcons: Record<string, string> = {
-      'OKB': '/okb.png',
+      'tCORE2': '/core.svg',
       'DAI': '/dai.png', 
       'ETH': '/eth.svg',
-      'EURC': '/eurc.png',
       'USDC': '/usdc.png',
       'USDT': '/usdt.png',
       'WBTC': '/wbtc.png'
@@ -650,7 +638,7 @@ export default function ZapChatPage() {
     const hasTokenData = (
       lowerText.includes('token') && 
       lowerText.includes('0x') &&
-      (lowerText.includes('usdt') || lowerText.includes('usdc') || lowerText.includes('okb'))
+      (lowerText.includes('usdt') || lowerText.includes('usdc') || lowerText.includes('tcore2'))
     )
     
     // Check for supported tokens format
@@ -712,16 +700,6 @@ export default function ZapChatPage() {
     
     if (isBlockInfoQuery) {
       return false // Don't show transaction card for block information queries
-    }
-    
-    // Check if this is a swap-related query - if so, don't show transaction card
-    const swapKeywords = ['swap', 'trade', 'exchange', 'convert', 'sell', 'buy']
-    const isSwapQuery = swapKeywords.some(keyword => 
-      lowerUserInput.includes(keyword) || lowerText.includes(`swap `) || lowerText.includes(`trade `)
-    )
-    
-    if (isSwapQuery) {
-      return false // Don't show transaction card for swap operations
     }
     
     // Check for send/transfer operations in user input - these should show transaction cards
@@ -791,7 +769,6 @@ export default function ZapChatPage() {
       hasTransactionPhrase,
       isSendTransferQuery,
       isBlockInfoQuery,
-      isSwapQuery,
       result,
       textSample: lowerText.substring(0, 200)
     })
@@ -807,7 +784,7 @@ export default function ZapChatPage() {
       chainId: /(?:\*\*Chain\s+ID:\*\*|chain\s+id)[\s:`"]*(\d+)/i,
       from: /(?:\*\*From[\s\w]*:\*\*|from[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
       to: /(?:\*\*To[\s\w]*:\*\*|to[\s\w]*address)[\s:`"]*([a-fA-F0-9x]{40,42})/i,
-      value: /(?:\*\*Value:\*\*|value|amount)[\s:`"]*(\d+(?:\.\d+)?\s*(?:OKB|okb|wei?)?|\d+)/i,
+      value: /(?:\*\*Value:\*\*|value|amount)[\s:`"]*(\d+(?:\.\d+)?\s*(?:tCORE2|core|wei?)?|\d+)/i,
       gasUsed: /(?:\*\*Gas\s+Used:\*\*|gas\s+used)[\s:`"]*(\d+)/i,
       gasPrice: /(?:\*\*Gas\s+Price:\*\*|gas\s+price)[\s:`"]*(\d+)\s*(?:wei?|gwei)?/i,
       nonce: /(?:\*\*Nonce:\*\*|nonce)[\s:`"]*(\d+)/i,
@@ -875,25 +852,25 @@ export default function ZapChatPage() {
   const formatTransactionValue = (value: string): string => {
     if (!value) return '0'
     try {
-      // Check if the value already includes OKB or is in OKB format
-      if (value.toLowerCase().includes('okb')) {
+      // Check if the value already includes tCORE2 or is in tCORE2 format
+      if (value.toLowerCase().includes('tcore2') || value.toLowerCase().includes('core')) {
         const numericValue = parseFloat(value.replace(/[^\d.]/g, ''))
-        return numericValue.toFixed(6) + ' OKB'
+        return numericValue.toFixed(6) + ' tCORE2'
       }
       
-      // Check if it's wei (very large number) - X Layer uses standard 18 decimals
+      // Check if it's wei (very large number) - Core uses standard 18 decimals
       const numericValue = parseFloat(value)
       if (numericValue > 1000000000000000000) {
-        // Likely wei - convert to OKB (divide by 10^18 for X Layer)
-        const okbValue = numericValue / Math.pow(10, 18)
-        return okbValue.toFixed(6) + ' OKB'
+        // Likely wei - convert to tCORE2 (divide by 10^18 for Core)
+        const coreValue = numericValue / Math.pow(10, 18)
+        return coreValue.toFixed(6) + ' tCORE2'
       } else if (numericValue > 1000000) {
-        // Medium large number - convert to OKB
-        const okbValue = numericValue / Math.pow(10, 18)
-        return okbValue.toFixed(6) + ' OKB'
+        // Medium large number - convert to tCORE2
+        const coreValue = numericValue / Math.pow(10, 18)
+        return coreValue.toFixed(6) + ' tCORE2'
       } else {
-        // Already in OKB
-        return numericValue.toFixed(6) + ' OKB'
+        // Already in tCORE2
+        return numericValue.toFixed(6) + ' tCORE2'
       }
     } catch {
       return value
@@ -905,8 +882,8 @@ export default function ZapChatPage() {
     try {
       const numericValue = parseFloat(gasPrice)
       
-      // For X Layer, gas prices are typically in wei
-      // 1 OKB = 10^18 wei
+      // For Core, gas prices are typically in wei
+      // 1 tCORE2 = 10^18 wei
       if (numericValue >= 1000000000000000000) {
         // Large number - likely wei, convert to a reasonable display format
         if (numericValue >= 1000000000000000000000) {
@@ -984,7 +961,7 @@ export default function ZapChatPage() {
       {
         id: "1",
         role: "assistant",
-        content: "Hello! I'm your ZAP AI assistant. I can help you with portfolio analysis, transaction details, block exploration, cryptocurrency swaps on X Layer, and even generate images or diagrams. What would you like to explore today?",
+        content: "Hello! I'm your ZAP AI assistant. I can help you with portfolio analysis, transaction details, block exploration, and cryptocurrency operations on Core Blockchain, and even generate images or diagrams. What would you like to explore today?",
         timestamp: Date.now(),
       },
     ])
@@ -1503,7 +1480,7 @@ export default function ZapChatPage() {
                             <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                               <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Chain ID</div>
                               <div className="text-black dark:text-white font-medium flex items-center">
-                                <img src="/okb.png" alt="X Layer" className="w-4 h-4 mr-2" />
+                                <img src="/core.svg" alt="Core" className="w-4 h-4 mr-2" />
                                 {message.transactionData.chainId}
                               </div>
                             </div>
@@ -1620,12 +1597,12 @@ export default function ZapChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://www.oklink.com/xlayer-test/tx/${message.transactionData.hash}`}
+                            href={`https://scan.test2.btcs.network/tx/${message.transactionData.hash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View on X Layer Explorer ↗
+                            View on Core Explorer ↗
                           </a>
                         </div>
                       </div>
@@ -1760,12 +1737,12 @@ export default function ZapChatPage() {
                         {/* Explorer Link */}
                         <div className="col-span-1 md:col-span-2 pt-3 border-t border-gray-300 dark:border-gray-800">
                           <a 
-                            href={`https://www.oklink.com/xlayer-test/block/${message.blockData.blockNumber || message.blockData.blockHash}`}
+                            href={`https://scan.test2.btcs.network/block/${message.blockData.blockNumber || message.blockData.blockHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-gray-800 dark:text-gray-200 hover:underline text-sm"
                           >
-                            View on X Layer Explorer ↗
+                            View on Core Explorer ↗
                           </a>
                         </div>
                       </div>

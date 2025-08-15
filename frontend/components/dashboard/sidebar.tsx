@@ -121,7 +121,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         {/* Docs Button - Moved here, right below New Chat */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
           <a 
-            href="https://github.com/Spydiecy/Zap_Okx/blob/main/README.md"
+            href="https://github.com/Spydiecy/Zap_Core/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

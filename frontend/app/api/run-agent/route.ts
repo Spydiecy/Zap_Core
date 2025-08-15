@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         // Add any required headers like API keys
       },
       body: JSON.stringify({
-        "appName":"xLayer_agent", // Updated to xlayer_agent
+        "appName":"core_agent", // Updated to core_agent
         userId,
         sessionId,
         newMessage,

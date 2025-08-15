@@ -70,11 +70,11 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
         )}>
           <div className={cn("flex items-center gap-2", !open && "hidden")}>
             <img 
-              src="/okb.png" 
-              alt="X Layer" 
+              src="/core.svg" 
+              alt="Core" 
               className="w-6 h-6 object-contain" 
             />
-            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ZAP X LAYER</span>
+            <span className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>ZAP CORE</span>
             <span className={cn(
               "text-xs ml-2 px-2 py-1 rounded",
               isDark ? "bg-gray-800 text-gray-300" : "bg-gray-200 text-gray-700"
@@ -123,10 +123,10 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
           </button>
         </div>
         
-        {/* Docs Button - Updated for X Layer */}
+        {/* Docs Button - Updated for Core */}
         <div className={cn("px-4 pb-4", !open && "px-2")}>
           <a 
-            href="https://github.com/Spydiecy/Zap_Okx/blob/main/README.md"
+            href="https://github.com/Spydiecy/Zap_Core/blob/main/README.md"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
@@ -170,11 +170,11 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
                 "text-xs space-y-1",
                 isDark ? "text-gray-400" : "text-gray-600"
               )}>
-                <div>Network: X Layer Testnet</div>
-                <div>Chain ID: 195</div>
-                <div>Currency: OKB</div>
-                <div className="break-all">RPC: xlayertestrpc.okx.com</div>
-                <div className="break-all">Explorer: oklink.com/xlayer-test</div>
+                <div>Network: Core Testnet 2</div>
+                <div>Chain ID: 1114</div>
+                <div>Currency: tCORE2</div>
+                <div className="break-all">RPC: rpc.test2.btcs.network</div>
+                <div className="break-all">Explorer: scan.test2.btcs.network</div>
               </div>
             </div>
           )}
@@ -184,7 +184,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
               <div className={cn(
                 "w-3 h-3 rounded-full",
                 isDark ? "bg-green-500" : "bg-green-600"
-              )} title="Connected to X Layer Testnet" />
+              )} title="Connected to Core Testnet 2" />
             </div>
           )}
         </div>

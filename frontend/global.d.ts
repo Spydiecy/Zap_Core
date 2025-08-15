@@ -1,1 +1,1 @@
-// Global type declarations for X Layer blockchain interactions
+// Global type declarations for Core blockchain interactions
