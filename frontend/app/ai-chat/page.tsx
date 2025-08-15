@@ -81,6 +81,18 @@ interface Message {
     size?: string
     parentHash?: string
   }
+  swapData?: {
+    id: string
+    status: string
+    fromCurrency: string
+    toCurrency: string
+    expectedSendAmount: string
+    expectedReceiveAmount: string
+    depositAddress: string
+    recipientAddress: string
+    createdAt: string
+    updatedAt?: string
+  }
 }
 
 interface FileUpload {
@@ -1029,6 +1041,84 @@ export default function ZapChatPage() {
     }
   }
 
+  const isSwapResponse = (text: string, userInput?: string): boolean => {
+    const lowerText = text.toLowerCase()
+    const lowerUserInput = userInput?.toLowerCase() || ''
+    
+    // Check for swap/exchange related keywords in user input
+    const swapKeywords = [
+      'swap', 'exchange', 'convert', 'trade',
+      'swap status', 'exchange status', 'swap id', 'exchange id'
+    ]
+    
+    const userAskedForSwap = swapKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
+    // Check if response contains swap/exchange data patterns
+    const hasSwapData = (
+      lowerText.includes('exchange with id') ||
+      lowerText.includes('swap with id') ||
+      (lowerText.includes('status:') && 
+       (lowerText.includes('from currency:') || lowerText.includes('to currency:'))) ||
+      (lowerText.includes('deposit address') && lowerText.includes('recipient address')) ||
+      (lowerText.includes('expected send amount') && lowerText.includes('expected receive amount'))
+    )
+    
+    return userAskedForSwap && hasSwapData
+  }
+
+  const parseSwapData = (text: string) => {
+    const patterns = {
+      id: /(?:exchange with id|swap with id|id)\s*[`"']?([a-zA-Z0-9]+)[`"']?/i,
+      status: /status:\s*([^\n\r*]+)/i,
+      fromCurrency: /from currency:\s*([^\n\r*]+)/i,
+      toCurrency: /to currency:\s*([^\n\r*]+)/i,
+      expectedSendAmount: /expected send amount:\s*([^\n\r*]+)/i,
+      expectedReceiveAmount: /expected receive amount:\s*([^\n\r*]+)/i,
+      depositAddress: /deposit address.*?:\s*[`"']?([a-fA-F0-9x]{40,42})[`"']?/i,
+      recipientAddress: /recipient address.*?:\s*[`"']?([a-fA-F0-9x]{40,42})[`"']?/i,
+      createdAt: /created at:\s*([^\n\r*]+)/i,
+      updatedAt: /updated at:\s*([^\n\r*]+)/i
+    }
+
+    const result: any = {}
+    
+    for (const [key, pattern] of Object.entries(patterns)) {
+      const match = text.match(pattern)
+      if (match) {
+        result[key] = match[1].trim()
+      }
+    }
+
+    console.log('Swap parsing debug:', {
+      foundFields: Object.keys(result),
+      result,
+      textSample: text.substring(0, 300)
+    })
+
+    // Return if we have essential swap data
+    if (result.id && (result.status || result.fromCurrency || result.toCurrency)) {
+      return result
+    }
+
+    return null
+  }
+
+  const getSwapStatusColor = (status: string): string => {
+    const lowerStatus = status.toLowerCase()
+    if (lowerStatus.includes('waiting') || lowerStatus.includes('pending')) {
+      return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+    } else if (lowerStatus.includes('processing') || lowerStatus.includes('confirming')) {
+      return 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
+    } else if (lowerStatus.includes('completed') || lowerStatus.includes('finished')) {
+      return 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
+    } else if (lowerStatus.includes('failed') || lowerStatus.includes('error')) {
+      return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+    }
+    return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+  }
+
   useEffect(() => {
     // Check access based on subscription status
     if (isConnected && address && hasAccess) {
@@ -1387,6 +1477,13 @@ The diagram should help developers understand how the contract works at a glance
       const tokenListData = isTokenList ? parseTokenListData(content, currentInput) : null
       console.log('Parsed token list data:', tokenListData)
 
+      // Check if this is a swap response and parse the data
+      const isSwap = isSwapResponse(content, currentInput)
+      console.log('Is swap response:', isSwap)
+      
+      const swapData = isSwap ? parseSwapData(content) : null
+      console.log('Parsed swap data:', swapData)
+
       setMessages((prev) => {
         const filtered = prev.filter((msg) => !msg.isLoading)
         
@@ -1401,6 +1498,7 @@ The diagram should help developers understand how the contract works at a glance
           candlestickData: candlestickData || undefined,
           tokenListData: tokenListData || undefined,
           blockData: blockData || undefined,
+          swapData: swapData || undefined,
         }
         return [...filtered, assistantMessage]
       })
@@ -1619,7 +1717,7 @@ The diagram should help developers understand how the contract works at a glance
                   ) : (
                     <>
                       {/* Only show the AI response text if no cards are being displayed */}
-                      {!message.balanceData && !message.transactionData && !message.blockData && !message.candlestickData && !message.tokenListData && (
+                      {!message.balanceData && !message.transactionData && !message.blockData && !message.candlestickData && !message.tokenListData && !message.swapData && (
                         <div className={cn(
                           "whitespace-pre-wrap",
                           message.role === "user" 
@@ -1714,6 +1812,121 @@ The diagram should help developers understand how the contract works at a glance
                           </div>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Show swap data for assistant messages */}
+                  {message.role === "assistant" && message.swapData && (
+                    <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800">
+                      <h3 className="text-sm font-medium text-black dark:text-white mb-4 flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-800 dark:bg-white flex items-center justify-center mr-3">
+                          🔄
+                        </div>
+                        Swap Details
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Swap ID */}
+                        {message.swapData.id && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800 col-span-1 md:col-span-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Swap ID</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.swapData.id}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.swapData!.id)}
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                              Copy ID
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Status and Currency Info */}
+                        <div className="space-y-3">
+                          {message.swapData.status && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Status</div>
+                              <div className={`inline-flex px-2 py-1 rounded text-sm font-medium ${getSwapStatusColor(message.swapData.status)}`}>
+                                {message.swapData.status}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.swapData.fromCurrency && message.swapData.toCurrency && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Swap Pair</div>
+                              <div className="text-black dark:text-white font-medium flex items-center">
+                                {message.swapData.fromCurrency} → {message.swapData.toCurrency}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Amount Information */}
+                        <div className="space-y-3">
+                          {message.swapData.expectedSendAmount && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Send Amount</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {message.swapData.expectedSendAmount}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {message.swapData.expectedReceiveAmount && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Receive Amount</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {message.swapData.expectedReceiveAmount}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Addresses */}
+                        {message.swapData.depositAddress && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Deposit Address</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.swapData.depositAddress}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.swapData!.depositAddress)}
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                              Copy Address
+                            </button>
+                          </div>
+                        )}
+
+                        {message.swapData.recipientAddress && (
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Recipient Address</div>
+                            <div className="text-black dark:text-white font-mono text-sm break-all">
+                              {message.swapData.recipientAddress}
+                            </div>
+                            <button 
+                              onClick={() => navigator.clipboard.writeText(message.swapData!.recipientAddress)}
+                              className="mt-2 text-xs text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                              Copy Address
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Timestamps */}
+                        <div className="grid grid-cols-1 gap-3 col-span-1 md:col-span-2">
+                          {message.swapData.createdAt && (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                              <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">Created At</div>
+                              <div className="text-black dark:text-white font-medium">
+                                {new Date(message.swapData.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 

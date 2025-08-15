@@ -252,11 +252,11 @@ export default function PaymentPortalPage() {
 
   const getStatusColor = () => {
     switch (paymentStatus) {
-      case "pending": return "bg-yellow-500/20 text-yellow-400 rounded-md px-3 py-1"
-      case "processing": return "bg-blue-500/20 text-blue-400 rounded-md px-3 py-1"
-      case "completed": return "bg-green-500/20 text-green-400 rounded-md px-3 py-1"
-      case "failed": return "bg-red-500/20 text-red-400 rounded-md px-3 py-1"
-      default: return "bg-yellow-500/20 text-yellow-400 rounded-md px-3 py-1"
+      case "pending": return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md px-3 py-1"
+      case "processing": return "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-md px-3 py-1"
+      case "completed": return "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-md px-3 py-1"
+      case "failed": return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md px-3 py-1"
+      default: return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md px-3 py-1"
     }
   }
 
@@ -266,54 +266,54 @@ export default function PaymentPortalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
+    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white p-4 transition-colors duration-300">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-yellow-400 mb-2">Payment Portal</h1>
-          <p className="text-gray-400">Smart Contract Payment System</p>
+          <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Payment Portal</h1>
+          <p className="text-gray-600 dark:text-gray-400">Smart Contract Payment System</p>
         </div>
 
-        <Card className="bg-gray-900 border-gray-800 p-6">
+        <Card className="bg-white dark:bg-black border-gray-300 dark:border-gray-800 p-6">
           <div className="space-y-4">
             <div className="flex justify-between items-start">
-              <span className="text-gray-400">Receiver Address:</span>
+              <span className="text-gray-600 dark:text-gray-400">Receiver Address:</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-mono break-all max-w-xs">{receiverAddress}</span>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(receiverAddress)} className="p-1 h-6 w-6">
+                <span className="text-sm font-mono break-all max-w-xs text-black dark:text-white">{receiverAddress}</span>
+                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(receiverAddress)} className="p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800">
                   <Copy className="h-3 w-3" />
                 </Button>
               </div>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-gray-400">Amount:</span>
-              <span className="font-semibold">{amount} ETH</span>
+              <span className="text-gray-600 dark:text-gray-400">Amount:</span>
+              <span className="font-semibold text-black dark:text-white">{amount} tCORE2</span>
             </div>
 
             <div className="flex justify-between items-start">
-              <span className="text-gray-400">Contract Address:</span>
+              <span className="text-gray-600 dark:text-gray-400">Contract Address:</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-mono break-all max-w-xs">{CONTRACT_ADDRESS}</span>
-                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(CONTRACT_ADDRESS)} className="p-1 h-6 w-6">
+                <span className="text-sm font-mono break-all max-w-xs text-black dark:text-white">{CONTRACT_ADDRESS}</span>
+                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(CONTRACT_ADDRESS)} className="p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800">
                   <Copy className="h-3 w-3" />
                 </Button>
               </div>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Status:</span>
+              <span className="text-gray-600 dark:text-gray-400">Status:</span>
               <span className={getStatusColor()}>{paymentStatus}</span>
             </div>
 
             {txHash && (
               <div className="flex justify-between items-start">
-                <span className="text-gray-400">Transaction Hash:</span>
+                <span className="text-gray-600 dark:text-gray-400">Transaction Hash:</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-mono break-all max-w-xs">{txHash}</span>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(txHash)} className="p-1 h-6 w-6">
+                  <span className="text-sm font-mono break-all max-w-xs text-black dark:text-white">{txHash}</span>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(txHash)} className="p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <Copy className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => window.open(`${NETWORK.blockExplorerUrls[0]}/tx/${txHash}`, '_blank')} className="p-1 h-6 w-6">
+                  <Button variant="ghost" size="sm" onClick={() => window.open(`${NETWORK.blockExplorerUrls[0]}/tx/${txHash}`, '_blank')} className="p-1 h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 </div>
@@ -323,9 +323,9 @@ export default function PaymentPortalPage() {
         </Card>
 
         {qrCodeUrl && (
-          <Card className="bg-gray-900 border-gray-800 p-6">
+          <Card className="bg-white dark:bg-black border-gray-300 dark:border-gray-800 p-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-4">Scan to Pay</h3>
+              <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">Scan to Pay</h3>
               <div className="flex justify-center">
                 <img src={qrCodeUrl} alt="Payment QR Code" className="rounded-lg" />
               </div>
@@ -336,13 +336,13 @@ export default function PaymentPortalPage() {
         <Button
           onClick={sendPaymentViaContract}
           disabled={isConnecting || isPaying || paymentStatus === "completed"}
-          className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-4 text-lg"
+          className="w-full bg-gray-800 dark:bg-white text-white dark:text-black hover:bg-gray-700 dark:hover:bg-gray-200 font-semibold py-4 text-lg border-0"
         >
           {isConnecting ? "Connecting Wallet..." : isPaying ? "Processing Payment..." : paymentStatus === "completed" ? "Payment Completed" : "Pay via Smart Contract"}
         </Button>
 
-        <Card className="bg-gray-900 border-gray-800 p-4">
-          <div className="text-center text-sm text-gray-400">
+        <Card className="bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-800 p-4">
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
             <p>This payment will be processed through our smart contract</p>
             <p>Network: {NETWORK.chainName}</p>
             <p>All transactions are recorded on the blockchain for transparency</p>
