@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         // Add any required headers like API keys
       },
       body: JSON.stringify({
-        "appName":"core_agent", // Updated to core_agent
+        "appName":"coreDao_agent",
         userId,
         sessionId,
         newMessage,

@@ -15,7 +15,7 @@ interface GoogleGenAI {
 const { GoogleGenAI, Modality } = await import("@google/genai")
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, type, isSmartContractWorkflow } = await request.json();
 
     if (!prompt) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
@@ -34,7 +34,11 @@ const contractKeywords = [
   "contract",
   "smart contract",
   "contract generation",
-  "contract creation"
+  "contract creation",
+  "solidity",
+  "pragma",
+  "function",
+  "workflow"
 ];
 
 const promptLower = prompt.toLowerCase();
@@ -47,7 +51,13 @@ const containsContract = contractKeywords.some(keyword =>
   promptLower.includes(keyword)
 );
 
-const isContractRelated = containsGenerate && containsContract;
+// Enhanced detection: use the frontend flag or detect contract patterns
+const isContractRelated = isSmartContractWorkflow || 
+                         (containsGenerate && containsContract) ||
+                         type === "workflow" ||
+                         promptLower.includes('pragma solidity') ||
+                         promptLower.includes('contract ') ||
+                         promptLower.includes('function ');
 
     let imageBase64: string | null = null;
     let responseText = "";
@@ -63,7 +73,7 @@ const isContractRelated = containsGenerate && containsContract;
       console.log("Contract-related prompt detected. Using Mermaid approach...");
       generationMethod = "mermaid";
 
-      mermaidCode = await generateValidatedMermaid(ai, prompt);
+      mermaidCode = await generateValidatedMermaid(ai, prompt, isSmartContractWorkflow);
       responseText = `Generated Mermaid code for contract flow: ${mermaidCode}`;
 
       // Step 2: Convert Mermaid to image using mermaid.ink API
@@ -186,17 +196,86 @@ function validateMermaidSyntax(mermaidCode: string): boolean {
   const requiredPatterns = [
     /flowchart\s+(TD|LR|TB|RL)\b/i, // Must start with flowchart direction
     /-->/i, // Must have at least one connection
-    /\[.*\]/, // Must have at least one node with label
+    /[\[\(\{].*[\]\)\}]/, // Must have at least one node with label (various shapes)
   ];
-  return requiredPatterns.every((pattern) => pattern.test(mermaidCode));
+  
+  // Additional patterns for smart contract elements
+  const smartContractPatterns = [
+    /\[\[.*\]\]/i, // Storage operations [[text]]
+    /\(\(.*\)\)/i, // Events ((text))
+    /\{.*\}/i,    // Decision nodes {text}
+    /\(\[.*\]\)/i // Start/end nodes ([text])
+  ];
+  
+  // Basic validation - must have required patterns
+  const hasBasicRequirements = requiredPatterns.every((pattern) => pattern.test(mermaidCode));
+  
+  // If it contains smart contract patterns, it's likely a contract workflow
+  const hasSmartContractElements = smartContractPatterns.some((pattern) => pattern.test(mermaidCode));
+  
+  // Additional syntax checks
+  const hasValidNodes = /[A-Z]\d*[\[\(\{]/.test(mermaidCode); // Node IDs like A[text] or B1{text}
+  const hasValidConnections = /[A-Z]\d*\s*-->/.test(mermaidCode); // Connections like A --> B
+  
+  return hasBasicRequirements && hasValidNodes && hasValidConnections;
 }
 
 // Enhanced Mermaid generation with validation
-async function generateValidatedMermaid(ai: any, prompt: string): Promise<string> {
+async function generateValidatedMermaid(ai: any, prompt: string, isSmartContractWorkflow: boolean = false): Promise<string> {
   const maxRetries = 3;
 
   for (let i = 0; i < maxRetries; i++) {
-    const mermaidPrompt = `Generate a valid Mermaid.js flowchart for: ${prompt}
+    let mermaidPrompt = "";
+    
+    if (isSmartContractWorkflow) {
+      // Specialized prompt for smart contract workflow generation
+      mermaidPrompt = `Analyze the following smart contract code and generate a comprehensive Mermaid.js flowchart that shows the contract workflow:
+
+${prompt}
+
+Create a detailed flowchart that includes:
+
+SMART CONTRACT ELEMENTS TO MAP:
+1. Contract constructor and initialization
+2. Main functions and their execution flow
+3. State variable changes and storage operations
+4. Modifier checks and access control
+5. Events and their emission points
+6. External contract calls and interactions
+7. Error handling and revert conditions
+8. User interaction points
+
+MERMAID SYNTAX REQUIREMENTS:
+1. Start with "flowchart TD" (top-down layout)
+2. Use format: NodeID[Label Text] --> NodeID2[Label Text]
+3. For decisions/conditions use: NodeID{Decision Text}
+4. For processes use: NodeID[Process Text]
+5. For start/end use: NodeID([Start/End Text])
+6. For events use: NodeID((Event Text))
+7. Keep labels concise but descriptive
+8. Use different shapes for different contract elements:
+   - [Process] for function calls
+   - {Decision} for require/modifier checks
+   - ((Event)) for event emissions
+   - [[Storage]] for state changes
+
+EXAMPLE STRUCTURE:
+flowchart TD
+    A([Contract Deploy]) --> B[Constructor]
+    B --> C[[Initialize State]]
+    C --> D([Ready])
+    D --> E[User Calls Function]
+    E --> F{Access Check}
+    F -->|Pass| G[Execute Logic]
+    F -->|Fail| H[Revert]
+    G --> I[[Update State]]
+    I --> J((Emit Event))
+    J --> K([Complete])
+
+Return ONLY the Mermaid syntax, no explanations or code blocks.`;
+    } else {
+      // Regular workflow generation prompt
+      mermaidPrompt = `Generate a valid Mermaid.js flowchart for: ${prompt}
 
 STRICT REQUIREMENTS:
 1. Start with "flowchart TD" or "flowchart LR"
@@ -216,6 +295,7 @@ flowchart TD
     E --> F
 
 Return ONLY the Mermaid syntax, no explanations.`;
+    }
 
     const response = await ai.models.generateContent({
       model: "gemini-1.5-flash",

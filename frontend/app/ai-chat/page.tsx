@@ -126,6 +126,27 @@ export default function ZapChatPage() {
     "diagram",
     "chart",
     "graph",
+    "workflow",
+    "flowchart"
+  ]
+
+  // Keywords that trigger smart contract workflow generation
+  const smartContractWorkflowKeywords = [
+    "smart contract",
+    "contract code",
+    "solidity",
+    "workflow",
+    "contract workflow",
+    "contract diagram",
+    "function flow",
+    "contract structure",
+    "contract functions",
+    "contract logic",
+    "show contract",
+    "explain contract",
+    "contract details",
+    "how does this contract work",
+    "contract flow"
   ]
 
   // Keywords that trigger IPFS storage functionality
@@ -144,7 +165,71 @@ export default function ZapChatPage() {
 
   const shouldGenerateImage = (text: string): boolean => {
     const lowerText = text.toLowerCase()
+    
+    // EXCEPTIONS: Don't generate images for payment link requests
+    const paymentLinkExceptions = [
+      'generate a payment link',
+      'create a payment link',
+      'make a payment link',
+      'payment link for',
+      'generate payment link',
+      'create payment link'
+    ]
+    
+    // Check for payment link exceptions first
+    const isPaymentLinkRequest = paymentLinkExceptions.some(exception => 
+      lowerText.includes(exception)
+    )
+    
+    if (isPaymentLinkRequest) {
+      return false // Don't generate images for payment links
+    }
+    
     return imageGenerationKeywords.some((keyword) => lowerText.includes(keyword))
+  }
+
+  const shouldGenerateWorkflowDiagram = (text: string, userInput: string, aiResponse: string): boolean => {
+    const lowerUserInput = userInput.toLowerCase()
+    const lowerAiResponse = aiResponse.toLowerCase()
+    
+    // EXCEPTIONS: Don't generate workflow diagrams for these specific requests
+    const paymentLinkExceptions = [
+      'generate a payment link',
+      'create a payment link',
+      'make a payment link',
+      'payment link for',
+      'generate payment link',
+      'create payment link'
+    ]
+    
+    // Check for payment link exceptions first
+    const isPaymentLinkRequest = paymentLinkExceptions.some(exception => 
+      lowerUserInput.includes(exception)
+    )
+    
+    if (isPaymentLinkRequest) {
+      return false // Don't generate workflow diagram for payment links
+    }
+    
+    // Check if user asked for contract-related information
+    const userAskedForContract = smartContractWorkflowKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
+    
+    // Check if AI response contains contract code (Solidity patterns)
+    const hasContractCode = (
+      lowerAiResponse.includes('pragma solidity') ||
+      lowerAiResponse.includes('contract ') ||
+      lowerAiResponse.includes('function ') ||
+      lowerAiResponse.includes('mapping(') ||
+      lowerAiResponse.includes('modifier ') ||
+      lowerAiResponse.includes('event ') ||
+      lowerAiResponse.includes('struct ') ||
+      lowerAiResponse.includes('enum ') ||
+      (lowerAiResponse.includes('{') && lowerAiResponse.includes('}') && lowerAiResponse.includes(';'))
+    )
+    
+    return userAskedForContract && hasContractCode
   }
 
   const shouldUseIPFSStorage = (text: string): boolean => {
@@ -266,6 +351,21 @@ export default function ZapChatPage() {
     if (isTransactionResponse) {
       return false // Don't show balance card for transaction responses
     }
+
+    // Check if user is asking about balance
+    const userBalanceKeywords = [
+      'balance',
+      'my wallet',
+      'show wallet',
+      'wallet balance',
+      'check balance',
+      'what do i have',
+      'how much do i have',
+    ]
+    
+    const userAskedForBalance = userBalanceKeywords.some(keyword => 
+      lowerUserInput.includes(keyword)
+    )
     
     // Check for specific balance response patterns
     const balanceKeywords = [
@@ -281,19 +381,25 @@ export default function ZapChatPage() {
       'core token balance',
       'show balance',
       'check balance',
-      'my balance'
+      'my balance',
+      'you have',
+      'your wallet contains',
+      'wallet shows',
+      'available balance',
+      'total balance'
     ]
     
     const hasBalanceKeyword = balanceKeywords.some(keyword => lowerText.includes(keyword))
     
-    // Only check for broader patterns if we have specific balance keywords
+    // Only check for broader patterns if we have specific balance keywords or user asked for balance
     // and it's not a transaction response
     const hasNumericValue = /[\d.]+/.test(text)
     
-    return hasBalanceKeyword && hasNumericValue
+    return (hasBalanceKeyword || userAskedForBalance) && hasNumericValue
   }
 
   const parseBalanceData = async (text: string, userInput?: string) => {
+    console.log('Parsing balance data for text:', text)
     // Try to extract balance information from the AI response
     const tokens: Array<{
       symbol: string
@@ -305,6 +411,14 @@ export default function ZapChatPage() {
     
     // Enhanced patterns for better balance extraction
     const patterns = [
+      // Pattern: "Your current wallet balance is: 1.9069453"
+      /your\s+current\s+wallet\s+balance\s+is:\s*([\d.,]+)/gi,
+      // Pattern: "Your wallet balance is: 1.9069453"
+      /your\s+wallet\s+balance\s+is:\s*([\d.,]+)/gi,
+      // Pattern: "Wallet balance is: 1.9069453"
+      /wallet\s+balance\s+is:\s*([\d.,]+)/gi,
+      // Pattern: "Current wallet balance is: 1.9069453"
+      /current\s+wallet\s+balance\s+is:\s*([\d.,]+)/gi,
       // Pattern: "Wallet Balance0.1" (exact concatenated format from backend)
       /^wallet\s*balance([\d.,]+)$/gi,
       // Pattern: "Your wallet balance is 0.609746632743044111"
@@ -386,11 +500,17 @@ export default function ZapChatPage() {
               tokenSymbol = 'ETH'
             } else {
               // For simple "Wallet Balance" or "Balance:" responses, default to tCORE2 since this is a Core project
-              if (patternIndex === 0 || patternIndex === 1 || patternIndex === 2 || 
-                  text.trim().startsWith('Balance:') || text.trim().startsWith('Wallet Balance')) {
+              // Also handle generic balance responses like "Your current wallet balance is: X"
+              if (patternIndex <= 5 || // First few patterns are wallet balance patterns
+                  text.trim().startsWith('Balance:') || 
+                  text.trim().startsWith('Wallet Balance') ||
+                  lowerText.includes('current wallet balance') ||
+                  lowerText.includes('wallet balance is') ||
+                  userInputLower.includes('balance') ||
+                  userInputLower.includes('wallet')) {
                 tokenSymbol = 'tCORE2'
               } else {
-                // Default fallback
+                // Default fallback for any balance-like response
                 tokenSymbol = 'tCORE2'
               }
             }
@@ -443,7 +563,8 @@ export default function ZapChatPage() {
     try {
       // Map token symbols to Coinbase API symbols
       const coinbaseSymbols: Record<string, string> = {
-        'tCORE2': 'CORE-USD', // Map tCORE2 to CORE price
+        'tCORE2': 'CORECHAIN-USD', // Map tCORE2 to CORE price
+        "CORE": 'CORECHAIN-USD',
         'DAI': 'DAI-USD',
         'ETH': 'ETH-USD',
         'EURC': 'EURC-USD',
@@ -1155,9 +1276,40 @@ export default function ZapChatPage() {
 }
 
       let generatedImage = null
-      if (needsImageGeneration && content) {
+      const needsWorkflowDiagram = shouldGenerateWorkflowDiagram(currentInput, currentInput, content)
+      
+      if ((needsImageGeneration && content) || needsWorkflowDiagram) {
         try {
-          const enhancedPrompt = `${content}\n\nBased on the above response, generate the workflow diagram or image or graph as suitable based on the given response.`
+          let enhancedPrompt = ""
+          
+          if (needsWorkflowDiagram) {
+            // Special prompt for smart contract workflow diagrams
+            enhancedPrompt = `You are a smart contract workflow diagram generator. Based on the following smart contract code, create a detailed mermaid flowchart that shows:
+
+1. Contract structure and inheritance
+2. Function flow and interactions
+3. State changes and events
+4. Access control and modifiers
+5. External contract calls
+6. User interactions
+
+Smart Contract Code:
+${content}
+
+Generate a comprehensive mermaid flowchart diagram that visualizes the complete workflow of this smart contract. Focus on:
+- Function execution flow
+- State variable changes
+- Event emissions
+- Access control checks
+- External interactions
+- Error handling
+
+The diagram should help developers understand how the contract works at a glance.`
+          } else {
+            // Regular image generation prompt
+            enhancedPrompt = `${content}\n\nBased on the above response, generate the workflow diagram or image or graph as suitable based on the given response.`
+          }
+          
           const imageResponse = await fetch("/api/generate-image", {
             method: "POST",
             headers: {
@@ -1165,6 +1317,8 @@ export default function ZapChatPage() {
             },
             body: JSON.stringify({
               prompt: enhancedPrompt,
+              type: needsWorkflowDiagram ? "workflow" : "general",
+              isSmartContractWorkflow: needsWorkflowDiagram
             }),
           })
 
@@ -1195,6 +1349,7 @@ export default function ZapChatPage() {
       // Check if this is a balance response and parse the data
       console.log('AI Response content:', content)
       const isBalance = isBalanceResponse(content, currentInput)
+      console.log('Balance detection:', { content, currentInput, isBalance, contentLower: content.toLowerCase() })
       console.log('Is balance response:', isBalance)
       
       const balanceData = isBalance ? await parseBalanceData(content, currentInput) : null
@@ -1394,44 +1549,51 @@ export default function ZapChatPage() {
 
                   {/* Show balance data for assistant messages */}
                   {message.role === "assistant" && message.balanceData && (
-                    <div className="mt-4 p-4 bg-gray-900 dark:bg-gray-900 rounded-lg border border-gray-700">
-                      <h3 className="text-sm font-medium text-white mb-3">Wallet Balance</h3>
-                      <div className="space-y-3">
+                    <div className="mt-4 p-4 bg-white dark:bg-black rounded-lg border border-gray-300 dark:border-gray-800 w-full max-w-2xl">
+                      <h3 className="text-sm font-medium text-black dark:text-white mb-4 flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-800 dark:bg-white flex items-center justify-center mr-3">
+                          <Wallet className="w-4 h-4 text-white dark:text-black" />
+                        </div>
+                        Wallet Balance
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 gap-4">
                         {message.balanceData.tokens.map((token, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-800 dark:bg-gray-800 rounded-lg border border-gray-700">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg">
-                                {token.icon && token.icon.startsWith('/') ? (
-                                  <img 
-                                    src={token.icon} 
-                                    alt={token.symbol} 
-                                    className="w-6 h-6"
-                                  />
-                                ) : (
-                                  <span className="text-white">{token.icon || '🪙'}</span>
+                          <div key={index} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 rounded-full bg-gray-800 dark:bg-white flex items-center justify-center">
+                                  {token.icon && token.icon.startsWith('/') ? (
+                                    <img 
+                                      src={token.icon} 
+                                      alt={token.symbol} 
+                                      className="w-6 h-6 rounded-full"
+                                    />
+                                  ) : (
+                                    <span className="text-white dark:text-black text-sm">{token.icon || '🪙'}</span>
+                                  )}
+                                </div>
+                                <div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">{token.name}</div>
+                                  <div className="text-black dark:text-white font-medium">{token.symbol}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-black dark:text-white font-medium">{token.balance}</div>
+                                {token.usdValue && (
+                                  <div className="text-xs text-gray-600 dark:text-gray-300">${token.usdValue}</div>
                                 )}
                               </div>
-                              <div>
-                                <div className="text-white font-medium">{token.symbol}</div>
-                                <div className="text-sm text-gray-300">{token.name}</div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-white font-medium">{token.balance}</div>
-                              {token.usdValue && (
-                                <div className="text-sm text-gray-300">${token.usdValue}</div>
-                              )}
-                            </div>
-                            <div className="ml-3">
                             </div>
                           </div>
                         ))}
                       </div>
+                      
                       {message.balanceData.totalUsdValue && (
-                        <div className="mt-3 pt-3 border-t border-gray-700">
+                        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-800">
                           <div className="flex justify-between items-center">
-                            <span className="text-gray-300">Total Value</span>
-                            <span className="text-white font-medium">${message.balanceData.totalUsdValue}</span>
+                            <div className="text-xs text-gray-600 dark:text-gray-300">Total Portfolio Value</div>
+                            <div className="text-black dark:text-white font-medium text-lg">${message.balanceData.totalUsdValue}</div>
                           </div>
                         </div>
                       )}
